@@ -1965,7 +1965,8 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
   display: grid;
   grid-template-columns: 180px 1fr 44px;
   align-items: center;
-  gap: 14px;
+  column-gap: 14px;
+  row-gap: 4px;
 }
 .pc-axis-lbl {
   font-family: var(--sans);
@@ -1994,6 +1995,14 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
   color: var(--ink);
   text-align: right;
   font-feature-settings: "tnum" 1;
+}
+.pc-axis-note {
+  grid-column: 1 / -1;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 /* Stress-test rétrospectif */
@@ -5592,7 +5601,7 @@ section[style*="padding:80px 0"] {
           <!-- Phrase comportementale, l'idée centrale -->
           <p class="pc-keyphrase" id="pc-keyphrase">Tu es le type qui vise 15-20 ans, mais qui vérifie son app trop souvent.</p>
 
-          <!-- Signature : 4 axes en barres animées -->
+          <!-- Signature : 3 axes calculés depuis les réponses (Feature 2) -->
           <div class="pc-signature">
             <div class="pc-signature-title">Ta signature</div>
             <div class="pc-axes">
@@ -5600,21 +5609,19 @@ section[style*="padding:80px 0"] {
                 <span class="pc-axis-lbl">Tolérance au risque</span>
                 <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-risque-fill" style="width:0%"></div></div>
                 <span class="pc-axis-pct" id="pc-axis-risque-pct">0%</span>
+                <span class="pc-axis-note" id="pc-axis-risque-note"></span>
               </div>
               <div class="pc-axis">
                 <span class="pc-axis-lbl">Horizon long terme</span>
                 <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-horizon-fill" style="width:0%"></div></div>
                 <span class="pc-axis-pct" id="pc-axis-horizon-pct">0%</span>
+                <span class="pc-axis-note" id="pc-axis-horizon-note"></span>
               </div>
               <div class="pc-axis">
-                <span class="pc-axis-lbl">Sang-froid requis</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-sangfroid-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-sangfroid-pct">0%</span>
-              </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Patience exigée</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-patience-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-patience-pct">0%</span>
+                <span class="pc-axis-lbl">Conviction</span>
+                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-conviction-fill" style="width:0%"></div></div>
+                <span class="pc-axis-pct" id="pc-axis-conviction-pct">0%</span>
+                <span class="pc-axis-note" id="pc-axis-conviction-note"></span>
               </div>
             </div>
           </div>
@@ -9021,6 +9028,59 @@ const PROFILE_AXES = {
   offensif:  { risque: 92, horizon: 92, sangfroid: 55, patience: 88 }
 };
 
+// ─── Feature 2 : signature calculée (3 axes) à partir des réponses individuelles ───
+// Tables calées sur le quiz réel (valeurs 1-4) :
+//   tolerance : 1 vends tout · 2 stoppe/attends · 3 continue · 4 rachète
+//   experience: 1 jamais/1re fois · 2 vendu en panique · 3 tenu sans paniquer · 4 routine
+//   horizon   : 1 <5 ans · 2 5-15 · 3 15-25 · 4 25+
+//   poids     : 1 presque tout · 2 grosse part · 3 part + matelas · 4 surplus
+const AXIS_TABLES = {
+  aversionBase:     { 1: 85, 2: 65, 3: 35, 4: 15 },   // tolerance → aversion (avant inversion)
+  aversionExpMod:   { 1: +5, 2: +10, 3: -5, 4: -10 }, // modulation par experience
+  horizon:          { 1: 20, 2: 50, 3: 80, 4: 95 },
+  convictionBase:   { 1: 30, 2: 55, 3: 70, 4: 85 },   // poids → conviction de base
+  convictionExpMod: { 1: 0,  2: -10, 3: +10, 4: +10 } // modulation par experience
+};
+const clamp100 = v => Math.max(0, Math.min(100, Math.round(v)));
+
+// Retourne { risque, horizon, conviction } en 0-100. Calcul depuis les réponses ;
+// fallback sur la signature par profil (cosmétique) si réponses incomplètes.
+function computeProfileAxes(answers, fallbackKey) {
+  const a = answers || {};
+  const complete = ['horizon', 'tolerance', 'poids', 'experience'].every(k => typeof a[k] === 'number');
+  if (!complete) {
+    const f = PROFILE_AXES[fallbackKey];
+    if (f) return { risque: f.risque, horizon: f.horizon, conviction: f.patience };
+    return { risque: 50, horizon: 50, conviction: 50 };
+  }
+  const aversion   = clamp100((AXIS_TABLES.aversionBase[a.tolerance] ?? 50) + (AXIS_TABLES.aversionExpMod[a.experience] ?? 0));
+  const risque     = clamp100(100 - aversion);  // on affiche la tolérance, pas l'aversion
+  const horizon    = clamp100(AXIS_TABLES.horizon[a.horizon] ?? 50);
+  const conviction = clamp100((AXIS_TABLES.convictionBase[a.poids] ?? 50) + (AXIS_TABLES.convictionExpMod[a.experience] ?? 0));
+  return { risque, horizon, conviction };
+}
+
+// Mini-commentaire interprétatif sous chaque barre (ton direct, tutoiement).
+function axisNote(axis, v) {
+  if (axis === 'risque') {
+    if (v < 30) return 'Tu te connais — tu sais que tu vendrais en panique.';
+    if (v < 55) return 'Tu encaisses les secousses, mais sans plaisir.';
+    if (v < 75) return 'Tu gardes la tête froide quand ça tangue.';
+    return 'Tu as les nerfs solides — une baisse ne te fait pas vendre.';
+  }
+  if (axis === 'horizon') {
+    if (v < 35) return 'Échéance proche : la Bourse devient un pari risqué.';
+    if (v < 65) return 'Quelques années devant toi, sans urgence.';
+    if (v < 85) return 'Le temps joue pour toi : les intérêts composés font le travail.';
+    return 'Très long terme — tu peux traverser plusieurs cycles sans broncher.';
+  }
+  // conviction
+  if (v < 35) return 'Cet argent compte trop pour toi : tenir sera dur.';
+  if (v < 60) return 'Tu tiendras, à condition de ne pas regarder tous les jours.';
+  if (v < 80) return 'Tu as de quoi encaisser — ta ligne devrait tenir.';
+  return 'Tu es armé pour garder le cap, même dans la tempête.';
+}
+
 // ─── Stress-test rétrospectif (réalité d'un événement passé, par profil)
 const PROFILE_STRESSTEST = {
   prudent:   { event: "Mars 2020 — COVID",   loss: 10, recovery: 4 },
@@ -9146,18 +9206,18 @@ function quizShowResult() {
   setText('pc-stat-drawdown', p.drawdown);
   setText('pc-stat-horizon', p.horizon);
 
-  // Signature : barres animées
-  const axes = PROFILE_AXES[det.key];
-  if (axes) {
-    ['risque','horizon','sangfroid','patience'].forEach(axis => {
-      const fill = document.getElementById('pc-axis-' + axis + '-fill');
-      const pct  = document.getElementById('pc-axis-' + axis + '-pct');
-      const v = axes[axis] || 0;
-      // Reset puis anime
-      if (fill) { fill.style.width = '0%'; requestAnimationFrame(() => { fill.style.width = v + '%'; }); }
-      if (pct)  pct.textContent = v + '%';
-    });
-  }
+  // Signature : 3 axes calculés depuis les réponses individuelles (Feature 2)
+  const sig = computeProfileAxes(STATE.investor.quiz.answers, det.key);
+  ['risque','horizon','conviction'].forEach(axis => {
+    const fill = document.getElementById('pc-axis-' + axis + '-fill');
+    const pct  = document.getElementById('pc-axis-' + axis + '-pct');
+    const note = document.getElementById('pc-axis-' + axis + '-note');
+    const v = sig[axis] || 0;
+    // Reset puis anime
+    if (fill) { fill.style.width = '0%'; requestAnimationFrame(() => { fill.style.width = v + '%'; }); }
+    if (pct)  pct.textContent = v + '%';
+    if (note) note.textContent = axisNote(axis, v);
+  });
 
   // Stress-test rétrospectif
   const stress = PROFILE_STRESSTEST[det.key];
