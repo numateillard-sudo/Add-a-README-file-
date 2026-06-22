@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instrument viager — estimation, aléa & fiscalité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,540;0,9..144,620;1,9..144,400&family=Inter:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b2a25; --ink-soft:#4b5a53; --ink-faint:#7c897f;
+    --paper:#f1ece0; --panel:#e8e0cf; --card:#fbf8f1; --line:#d7cdb9; --line-soft:#e3dccb;
+    --green:#2c5a4c; --green-deep:#1a352d; --green-tint:#e8efe9;
+    --brass:#a9772a; --brass-tint:#f0e4cd;
+    --clay:#a4502a; --clay-tint:#f1ddd0;
+    --sage:#7f8a62;
+    --buyer:#33566b; --buyer-tint:#e2eaef;
+    --plum:#6c4a73; --plum-deep:#3a2740; --plum-tint:#ece2ef;
+    --seg-duh:#869065; --seg-bouquet:#bd862f; --seg-rente:#34655579;
+    --seg-rente-solid:#346555;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif; font-size:16.5px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  .mono{font-family:"Spline Sans Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+  .wrap{max-width:1180px; margin:0 auto; padding:26px 20px 90px}
+
+  /* masthead */
+  .masthead{display:flex; flex-wrap:wrap; gap:18px 24px; justify-content:space-between; align-items:flex-end;
+    border-bottom:1.5px solid var(--ink); padding-bottom:18px; margin-bottom:24px}
+  .brandcol{min-width:min(100%,520px); flex:1}
+  .eyebrow{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--green); font-weight:600; margin:0 0 8px}
+  h1{font-family:"Fraunces",serif; font-weight:540; font-optical-sizing:auto; font-size:clamp(28px,4.6vw,42px);
+    line-height:1.03; letter-spacing:-.012em; margin:0}
+  h1 em{font-style:italic; color:var(--green)}
+  .sub{margin:11px 0 0; color:var(--ink-soft); max-width:62ch; font-size:15.5px}
+
+  .viewtoggle{display:flex; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:4px; gap:4px; flex:none}
+  .viewtoggle button{border:0; background:transparent; cursor:pointer; padding:10px 16px; border-radius:9px;
+    font-family:"Inter",sans-serif; font-size:14px; font-weight:600; color:var(--ink-soft); white-space:nowrap}
+  .viewtoggle button .t{display:block; font-size:11px; font-weight:500; color:var(--ink-faint); margin-top:1px}
+  body.vue-vendeur #bVendeur, body.vue-acheteur #bAcheteur{background:var(--green); color:#fff}
+  body.vue-vendeur #bVendeur .t, body.vue-acheteur #bAcheteur .t{color:#c4d6cd}
+  body.vue-alea #bAlea{background:var(--plum); color:#fff}
+  body.vue-alea #bAlea .t{color:#d9c9df}
+  .viewtoggle button:focus-visible{outline:2.5px solid var(--green); outline-offset:2px}
+
+  .grid{display:grid; grid-template-columns:minmax(0,0.92fr) minmax(0,1.08fr); gap:24px; align-items:start}
+  @media(max-width:900px){ .grid{grid-template-columns:1fr; gap:20px} }
+
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:20px 20px 22px}
+  .panel + .panel{margin-top:18px}
+  .panel h2{font-family:"Fraunces",serif; font-weight:540; font-size:18px; margin:0 0 15px; display:flex; align-items:baseline; gap:9px}
+  .panel h2 .n{font-family:"Spline Sans Mono",monospace; font-size:11px; color:var(--green);
+    border:1px solid var(--green); border-radius:4px; padding:1px 5px; font-weight:600; transform:translateY(-1px)}
+
+  label{display:block; font-size:13px; font-weight:500; color:var(--ink-soft); margin:0 0 6px}
+  .field{margin-bottom:16px} .field:last-child{margin-bottom:0}
+  input[type=number],input[type=text]{width:100%; font-family:"Spline Sans Mono",monospace; font-size:17px; color:var(--ink);
+    background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:10px 12px; -moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input:focus{outline:2.5px solid var(--green); outline-offset:1px; border-color:transparent}
+  .with-unit{position:relative}
+  .with-unit .unit{position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--ink-faint); font-size:13px; pointer-events:none}
+
+  .seg{display:flex; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:3px; gap:3px}
+  .seg button{flex:1; border:0; background:transparent; cursor:pointer; padding:9px 6px; font-family:"Inter",sans-serif;
+    font-size:13.5px; font-weight:500; color:var(--ink-soft); border-radius:7px}
+  .seg button[aria-pressed=true]{background:var(--green); color:#fff; font-weight:600}
+  .seg button:focus-visible{outline:2.5px solid var(--green); outline-offset:2px}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+  input[type=range]{width:100%; accent-color:var(--green); height:26px}
+  .slider-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px}
+  .slider-head .val{font-family:"Spline Sans Mono",monospace; font-weight:600; font-size:15px}
+  .hint{font-size:12px; color:var(--ink-faint); margin:6px 0 0; line-height:1.45}
+  .row-ev{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end}
+  .reset{background:none; border:0; color:var(--green); font-size:12px; cursor:pointer; text-decoration:underline; padding:0 0 11px}
+  .reset:disabled{color:var(--ink-faint); text-decoration:none; cursor:default}
+
+  .second-head{display:none} body.couple .second-head{display:block}
+  body.libre .occupe-only{display:none}
+
+  details.adv{margin-top:18px; border-top:1px solid var(--line-soft); padding-top:6px}
+  details.adv summary{cursor:pointer; font-size:13px; font-weight:600; color:var(--green); padding:8px 0; list-style:none; display:flex; align-items:center; gap:7px}
+  details.adv summary::-webkit-details-marker{display:none}
+  details.adv summary::before{content:"+"; font-family:"Spline Sans Mono",monospace; color:var(--green)}
+  details.adv[open] summary::before{content:"–"}
+  details.adv .inner{padding-top:6px}
+
+  /* results */
+  .results{position:sticky; top:16px}
+  @media(max-width:900px){ .results{position:static} }
+  .hgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:18px}
+  @media(max-width:520px){ .hgrid{grid-template-columns:1fr 1fr} }
+  .big{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 14px}
+  .big.hero{grid-column:1/-1; background:var(--green-deep); border-color:var(--green-deep)}
+  body.vue-acheteur .big.hero{background:#22323b; border-color:#22323b}
+  body.vue-alea .big.hero{background:var(--plum-deep); border-color:var(--plum-deep)}
+  .big .k{font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; margin:0}
+  .big.hero .k{color:#aec6bc}
+  body.vue-acheteur .big.hero .k{color:#a9c2d0}
+  body.vue-alea .big.hero .k{color:#cbb6d2}
+  .big .v{font-family:"Spline Sans Mono",monospace; font-weight:600; font-size:clamp(20px,3.5vw,26px); margin:5px 0 0; letter-spacing:-.01em}
+  .big.hero .v{color:#fff; font-size:clamp(26px,5vw,36px)}
+  .big .vsub{font-size:11.5px; color:var(--ink-faint); margin:3px 0 0}
+  .big.hero .vsub{color:#94b1a6}
+  body.vue-acheteur .big.hero .vsub{color:#8fabba}
+  body.vue-alea .big.hero .vsub{color:#b49bbc}
+
+  .show-vendeur{display:none} body.vue-vendeur .show-vendeur{display:block}
+  .show-acheteur{display:none} body.vue-acheteur .show-acheteur{display:block}
+  .show-alea{display:none} body.vue-alea .show-alea{display:block}
+  body.vue-vendeur .hide-vendeur{display:none}
+  body.vue-acheteur .hide-acheteur{display:none}
+  body.vue-alea .hide-alea{display:none}
+
+  /* chart */
+  .chartwrap{margin:2px 0 18px}
+  .chartwrap .cap{display:flex; justify-content:space-between; align-items:baseline; margin:0 0 10px; gap:12px}
+  .chartwrap .cap .t{font-family:"Fraunces",serif; font-size:16px; font-weight:540}
+  .chartwrap .cap .legend{display:flex; gap:13px; flex-wrap:wrap}
+  .chartwrap .cap .legend span{font-size:11.5px; color:var(--ink-soft); display:flex; align-items:center; gap:6px}
+  .chartwrap .cap .legend i{width:14px; height:3px; border-radius:2px; display:inline-block}
+  svg.chart{width:100%; height:auto; display:block; background:var(--paper); border:1px solid var(--line); border-radius:11px}
+  .chart .axis{stroke:var(--line); stroke-width:1}
+  .chart .grid-l{stroke:var(--line-soft); stroke-width:1}
+  .chart text{font-family:"Spline Sans Mono",monospace; fill:var(--ink-faint); font-size:10px}
+  .chart text.lab{font-family:"Inter",sans-serif; fill:var(--ink-soft); font-size:10.5px; font-weight:500}
+  .chart rect.bar{transition:opacity .2s}
+
+  /* repartition bar */
+  .repart{margin:0 0 18px}
+  .repart .cap{font-size:12.5px; font-weight:500; color:var(--ink-soft); margin:0 0 8px}
+  .bar{display:flex; height:40px; border-radius:9px; overflow:hidden; border:1px solid var(--line); background:var(--panel)}
+  .bar .sb{display:flex; align-items:center; justify-content:center; transition:flex-basis .45s cubic-bezier(.2,.7,.2,1); min-width:0}
+  .bar .sb span{font-family:"Spline Sans Mono",monospace; font-size:11px; font-weight:600; color:#fff; white-space:nowrap; padding:0 6px; overflow:hidden; text-overflow:ellipsis}
+  .s-duh{background:var(--seg-duh)} .s-bouquet{background:var(--seg-bouquet)} .s-rente{background:var(--seg-rente-solid)}
+  .legend2{display:flex; flex-wrap:wrap; gap:11px 16px; margin-top:11px}
+  .legend2 div{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-soft)}
+  .legend2 i{width:11px; height:11px; border-radius:3px; flex:none}
+
+  table.ledger{width:100%; border-collapse:collapse}
+  table.ledger td{padding:8px 0; border-top:1px solid var(--line-soft); font-size:14.5px; vertical-align:baseline}
+  table.ledger tr:first-child td{border-top:0}
+  table.ledger td.lab{color:var(--ink-soft)}
+  table.ledger td.num{text-align:right; font-family:"Spline Sans Mono",monospace; font-weight:500; white-space:nowrap}
+  table.ledger tr.total td{border-top:1.5px solid var(--ink); font-weight:600; padding-top:10px}
+  table.ledger tr.total td.lab{color:var(--ink)}
+  td .micro{display:block; font-size:11px; color:var(--ink-faint); font-family:"Inter",sans-serif; margin-top:1px}
+
+  /* scenarios */
+  table.scen{width:100%; border-collapse:collapse; margin-top:4px}
+  table.scen th{text-align:right; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; padding:0 0 8px}
+  table.scen th:first-child{text-align:left}
+  table.scen td{padding:8px 0; border-top:1px solid var(--line-soft); font-size:14px; text-align:right; font-family:"Spline Sans Mono",monospace}
+  table.scen td:first-child{text-align:left; font-family:"Inter",sans-serif; color:var(--ink-soft); font-weight:500}
+  table.scen tr.ref td{background:var(--green-tint)}
+  table.scen tr.tail td{color:var(--clay)}
+
+  /* alea distribution stats */
+  .distgrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:2px 0 16px}
+  .distcard{background:var(--paper); border:1px solid var(--line); border-radius:11px; padding:12px 13px}
+  .distcard .k{font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; margin:0}
+  .distcard .v{font-family:"Spline Sans Mono",monospace; font-weight:600; font-size:18px; margin:5px 0 0}
+  .distcard .vsub{font-size:11.5px; color:var(--ink-faint); margin:2px 0 0; line-height:1.4}
+  .gauge{height:9px; border-radius:6px; background:var(--clay-tint); overflow:hidden; margin-top:9px; position:relative}
+  .gauge .fill{height:100%; background:var(--green); border-radius:6px; transition:width .45s cubic-bezier(.2,.7,.2,1)}
+
+  .flag{margin-top:14px; border-radius:10px; padding:11px 13px; font-size:13px; line-height:1.5; display:none}
+  .flag.on{display:block}
+  .flag.warn{background:var(--clay-tint); border:1px solid #e0bda8; color:#7e3b1c}
+  .flag.info{background:var(--brass-tint); border:1px solid #e4d2a8; color:#7a5718}
+  .flag b{font-weight:600}
+
+  .check{margin-top:14px; background:var(--green-tint); border:1px solid #cfe0d4; border-radius:10px; padding:11px 13px; font-size:13px; color:var(--green-deep)}
+  .check b{font-family:"Spline Sans Mono",monospace}
+  .note{margin-top:18px; border-left:3px solid var(--brass); padding:2px 0 2px 13px; font-size:12.5px; color:var(--ink-soft); line-height:1.55}
+  .note strong{color:var(--ink)}
+  footer.fine{margin-top:30px; padding-top:14px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-faint); line-height:1.6}
+
+  .actions{margin-top:16px; display:flex; gap:10px; flex-wrap:wrap}
+  .printbtn{display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#fff; border:0; border-radius:9px; padding:11px 16px; font-family:"Inter",sans-serif; font-size:14px; font-weight:600; cursor:pointer}
+  .printbtn.ghost{background:transparent; color:var(--green); border:1px solid var(--line)}
+  .printbtn:focus-visible{outline:2.5px solid var(--ink); outline-offset:2px}
+
+  @media(prefers-reduced-motion:reduce){ .bar .sb,.gauge .fill{transition:none} }
+  @media print{
+    body{background:#fff} .wrap{padding:0}
+    section:first-child, .viewtoggle, .actions, details.adv{display:none !important}
+    .grid{display:block} .results{position:static}
+    .panel{border:1px solid #bbb; break-inside:avoid}
+  }
+</style>
+</head>
+<body class="vue-vendeur">
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="brandcol">
+      <p class="eyebrow">Instrument d'estimation viager</p>
+      <h1>Le même bien, <em>trois vérités</em> : le vendeur, l'acheteur, et le hasard.</h1>
+      <p class="sub">Un moteur actuariel unique — annuités sur table de survie, une ou deux têtes en dernier survivant. Chaque partie voit le chiffre qui la décide ; et une troisième vue traite la durée de vie comme ce qu'elle est vraiment : une loi de probabilité, dont on lit la distribution complète des issues.</p>
+    </div>
+    <div class="viewtoggle" role="group" aria-label="Point de vue">
+      <button id="bVendeur" type="button">Vendeur<span class="t">crédirentier</span></button>
+      <button id="bAcheteur" type="button">Acheteur<span class="t">débirentier</span></button>
+      <button id="bAlea" type="button">L'aléa<span class="t">distribution</span></button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== INPUTS ===== -->
+    <section>
+      <div class="panel">
+        <h2><span class="n">1</span> Le bien</h2>
+        <div class="field">
+          <label for="valeur">Valeur vénale (bien libre)</label>
+          <div class="with-unit"><input id="valeur" type="number" min="0" step="1000" value="300000" inputmode="numeric"><span class="unit">€</span></div>
+        </div>
+        <div class="field">
+          <label>Type de vente</label>
+          <div class="seg" role="group" aria-label="Type de vente">
+            <button type="button" id="occ" aria-pressed="true">Occupé</button>
+            <button type="button" id="libre" aria-pressed="false">Libre</button>
+          </div>
+        </div>
+        <div class="field occupe-only">
+          <label>Loyer mensuel de marché <span style="font-weight:400;color:var(--ink-faint)">(base du DUH)</span></label>
+          <div class="row2">
+            <div class="with-unit"><input id="loyer" type="number" min="0" step="50" value="1125" inputmode="numeric"><span class="unit">€/mois</span></div>
+            <div class="with-unit"><input id="rendement" type="number" min="0" step="0.1" value="4.5" inputmode="decimal"><span class="unit">% rdt</span></div>
+          </div>
+          <p class="hint">Le rendement déduit le loyer de la valeur, ou saisissez le loyer réel.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="n">2</span> Le vendeur</h2>
+        <div class="field">
+          <label>Têtes</label>
+          <div class="seg" role="group" aria-label="Nombre de vendeurs">
+            <button type="button" id="un" aria-pressed="true">Un vendeur</button>
+            <button type="button" id="deux" aria-pressed="false">Couple</button>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="age1">Âge</label><input id="age1" type="number" min="55" max="100" step="1" value="78" inputmode="numeric"></div>
+          <div class="field"><label>Sexe</label>
+            <div class="seg" role="group" aria-label="Sexe 1"><button type="button" id="f1" aria-pressed="true">Femme</button><button type="button" id="h1" aria-pressed="false">Homme</button></div>
+          </div>
+        </div>
+        <div class="second-head">
+          <div class="row2">
+            <div class="field"><label for="age2">Âge — 2ᵉ tête</label><input id="age2" type="number" min="55" max="100" step="1" value="80" inputmode="numeric"></div>
+            <div class="field"><label>Sexe — 2ᵉ tête</label>
+              <div class="seg" role="group" aria-label="Sexe 2"><button type="button" id="f2" aria-pressed="false">Femme</button><button type="button" id="h2" aria-pressed="true">Homme</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ev">Espérance de vie retenue <span style="font-weight:400;color:var(--ink-faint)">(modifiable)</span></label>
+          <div class="row-ev">
+            <div class="with-unit"><input id="ev" type="number" min="1" max="45" step="0.1" value="13.2" inputmode="decimal"><span class="unit">ans</span></div>
+            <button type="button" class="reset" id="evReset" disabled>↻ auto</button>
+          </div>
+          <p class="hint">Valeur indicative (ordre de grandeur INSEE), modifiable — saisissez l'espérance Daubry de votre réseau. La courbe de survie s'ajuste à votre valeur.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="n">3</span> Structure de la vente</h2>
+        <div class="field">
+          <div class="slider-head"><label for="bouquet" style="margin:0">Part en bouquet</label><span class="val" id="bouquetPctLbl">30 %</span></div>
+          <input id="bouquet" type="range" min="0" max="100" step="1" value="30">
+          <p class="hint">0 % = tout en rente · 100 % = nue-propriété (tout en bouquet, sans rente — le modèle des fonds).</p>
+        </div>
+
+        <details class="adv">
+          <summary>Hypothèses avancées</summary>
+          <div class="inner">
+            <div class="row2">
+              <div class="field"><label for="taux">Taux technique</label><div class="with-unit"><input id="taux" type="number" min="0" max="10" step="0.1" value="4.5" inputmode="decimal"><span class="unit">%</span></div></div>
+              <div class="field"><label for="indexation">Indexation rente</label><div class="with-unit"><input id="indexation" type="number" min="0" max="6" step="0.1" value="1.5" inputmode="decimal"><span class="unit">%/an</span></div></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="appr">Valorisation du bien</label><div class="with-unit"><input id="appr" type="number" min="-3" max="8" step="0.1" value="1.5" inputmode="decimal"><span class="unit">%/an</span></div></div>
+              <div class="field"><label for="tmi">TMI du vendeur</label><div class="with-unit"><input id="tmi" type="number" min="0" max="45" step="1" value="11" inputmode="numeric"><span class="unit">%</span></div></div>
+            </div>
+            <div class="field"><label for="frais">Frais d'acquisition acheteur</label><div class="with-unit" style="max-width:160px"><input id="frais" type="number" min="0" max="12" step="0.1" value="7.5" inputmode="decimal"><span class="unit">%</span></div>
+              <p class="hint">Droits + émoluments sur la valeur occupée. À ajuster selon le département.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ===== RESULTS ===== -->
+    <section class="results" aria-live="polite">
+      <div class="panel">
+        <h2><span class="n">→</span> <span class="show-vendeur">Pour le vendeur</span><span class="show-acheteur">Pour l'acheteur</span><span class="show-alea">L'aléa, quantifié</span></h2>
+
+        <!-- VENDEUR headline -->
+        <div class="hgrid show-vendeur">
+          <div class="big hero"><p class="k">Rente nette / mois</p><p class="v" id="vRenteNet">—</p><p class="vsub" id="vRenteNetSub">après impôt & prélèvements</p></div>
+          <div class="big"><p class="k">Bouquet</p><p class="v mono" id="vBouquet">—</p><p class="vsub">net, à la signature</p></div>
+          <div class="big"><p class="k">Vous restez chez vous</p><p class="v mono" id="vDuh">—</p><p class="vsub">valeur de l'occupation</p></div>
+        </div>
+        <!-- ACHETEUR headline -->
+        <div class="hgrid show-acheteur">
+          <div class="big hero"><p class="k">Prix payé (valeur occupée)</p><p class="v" id="aPrix">—</p><p class="vsub" id="aDecote">—</p></div>
+          <div class="big"><p class="k">Rendement espéré</p><p class="v mono" id="aTri">—</p><p class="vsub">TRI au décès à l'espérance</p></div>
+          <div class="big"><p class="k">Effort total espéré</p><p class="v mono" id="aCout">—</p><p class="vsub">bouquet + rentes + frais</p></div>
+        </div>
+        <!-- ALEA headline -->
+        <div class="hgrid show-alea">
+          <div class="big hero"><p class="k">Probabilité de gain — acheteur</p><p class="v" id="zProbGain">—</p><p class="vsub" id="zProbSub">la valeur du bien dépasse le coût total</p></div>
+          <div class="big"><p class="k">TRI médian acheteur</p><p class="v mono" id="zTriMed">—</p><p class="vsub">issue à 50/50</p></div>
+          <div class="big"><p class="k">Année-pivot</p><p class="v mono" id="zBreakeven">—</p><p class="vsub">le contrat bascule</p></div>
+        </div>
+
+        <!-- CHART -->
+        <div class="chartwrap">
+          <div class="cap">
+            <span class="t show-vendeur">Ce que vous percevez dans le temps</span>
+            <span class="t show-acheteur">L'aléa : coût d'acquisition contre valeur du bien</span>
+            <span class="t show-alea">Distribution des issues, pondérée par la survie</span>
+            <span class="legend" id="chartLegend"></span>
+          </div>
+          <svg class="chart" id="chart" viewBox="0 0 560 260" preserveAspectRatio="xMidYMid meet" role="img"></svg>
+        </div>
+
+        <!-- ALEA distribution stats -->
+        <div class="show-alea">
+          <div class="distgrid">
+            <div class="distcard">
+              <p class="k">TRI espéré (espérance complète)</p>
+              <p class="v" id="zTriEsp">—</p>
+              <p class="vsub" id="zTriBand">fourchette P10–P90 : —</p>
+            </div>
+            <div class="distcard">
+              <p class="k">Résultat acheteur médian</p>
+              <p class="v" id="zNetMed">—</p>
+              <p class="vsub" id="zNetBand">valeur du bien − coût total, au décès</p>
+            </div>
+            <div class="distcard">
+              <p class="k">Part de l'incertitude qui vient de l'aléa</p>
+              <p class="v" id="zSpread">—</p>
+              <div class="gauge"><div class="fill" id="zSpreadBar" style="width:0%"></div></div>
+              <p class="vsub">amplitude du TRI entre décès précoce et tardif</p>
+            </div>
+            <div class="distcard">
+              <p class="k">Demi-vie du contrat</p>
+              <p class="v" id="zMedianAge">—</p>
+              <p class="vsub" id="zMedianSub">50 % de chances que le terme soit atteint avant</p>
+            </div>
+          </div>
+          <table class="scen">
+            <thead><tr><th>Décile de durée</th><th>Le terme tombe…</th><th>TRI acheteur</th></tr></thead>
+            <tbody id="zDecBody"></tbody>
+          </table>
+          <p class="hint" id="zDecNote"></p>
+        </div>
+
+        <!-- repartition -->
+        <div class="repart hide-alea">
+          <p class="cap">Décomposition de la valeur vénale</p>
+          <div class="bar" id="bar" role="img" aria-label="Répartition de la valeur du bien">
+            <div class="sb s-duh" id="segDuh"><span></span></div>
+            <div class="sb s-bouquet" id="segBouquet"><span></span></div>
+            <div class="sb s-rente" id="segRente"><span></span></div>
+          </div>
+          <div class="legend2">
+            <div class="occupe-only"><i style="background:var(--seg-duh)"></i> DUH — occupation conservée</div>
+            <div><i style="background:var(--seg-bouquet)"></i> Bouquet</div>
+            <div><i style="background:var(--seg-rente-solid)"></i> Capital en rente</div>
+          </div>
+        </div>
+
+        <!-- VENDEUR ledger -->
+        <table class="ledger show-vendeur">
+          <tr><td class="lab">Bouquet</td><td class="num" id="lvBouquet">—</td></tr>
+          <tr><td class="lab">Rente brute</td><td class="num" id="lvRenteBrute">—</td></tr>
+          <tr><td class="lab">Fraction imposable<span class="micro" id="lvFraction"></span></td><td class="num" id="lvImpo">—</td></tr>
+          <tr><td class="lab">Impôt + prélèvements sociaux</td><td class="num" id="lvPrelev">—</td></tr>
+          <tr class="total"><td class="lab">Rente nette / mois</td><td class="num" id="lvRenteNet">—</td></tr>
+        </table>
+        <!-- ACHETEUR ledger -->
+        <table class="ledger show-acheteur">
+          <tr><td class="lab">Valeur vénale (libre)</td><td class="num" id="laVenale">—</td></tr>
+          <tr class="occupe-only"><td class="lab">DUH — décote d'occupation<span class="micro" id="laDecotePct"></span></td><td class="num" id="laDuh">—</td></tr>
+          <tr><td class="lab">Valeur occupée<span class="micro">prix d'achat</span></td><td class="num" id="laOccupee">—</td></tr>
+          <tr><td class="lab">Frais d'acquisition<span class="micro" id="laFraisPct"></span></td><td class="num" id="laFrais">—</td></tr>
+          <tr><td class="lab">Bouquet à la signature</td><td class="num" id="laBouquet">—</td></tr>
+          <tr><td class="lab">Rente versée / mois</td><td class="num" id="laRente">—</td></tr>
+          <tr class="total"><td class="lab">Décaissement initial</td><td class="num" id="laInit">—</td></tr>
+        </table>
+
+        <!-- scenarios (acheteur) -->
+        <div class="show-acheteur" style="margin-top:18px">
+          <table class="scen">
+            <thead><tr><th>Si le vendeur s'éteint…</th><th>Coût total</th><th>Rendement</th></tr></thead>
+            <tbody id="scenBody"></tbody>
+          </table>
+          <p class="hint" id="scenNote"></p>
+        </div>
+
+        <div class="flag warn" id="flagAlea"></div>
+        <div class="flag info" id="flagInfo"></div>
+        <div class="check hide-alea" id="check"></div>
+
+        <div class="note">
+          <strong>Estimation indicative.</strong> Ne remplace ni le barème Daubry ni le notaire. L'espérance de vie et les hypothèses pilotent tout : un chiffrage opposable se fonde sur une table reconnue et l'âge exact au jour de l'acte. Le viager exige un véritable aléa. Fiscalité 2026 indicative (art. 158-6° CGI, PS 17,2 %), hors situation personnelle du foyer.
+        </div>
+        <div class="actions">
+          <button class="printbtn" id="printBtn" type="button">Imprimer le dossier</button>
+          <button class="printbtn ghost" id="shareBtn" type="button">Copier le lien partageable</button>
+        </div>
+      </div>
+
+      <footer class="fine">
+        Moteur : valeur occupée = valeur vénale − DUH. DUH et rente = annuités viagères calculées sur une courbe de survie (une tête, ou dernier survivant pour un couple : ₜp = ₜp₁ + ₜp₂ − ₜp₁·ₜp₂), actualisées au taux technique et nettes d'indexation. Courbe de survie reconstruite à partir des espérances de vie résiduelles (ordres de grandeur INSEE), recalée sur la valeur que vous saisissez. Vue « aléa » : la courbe de survie est traitée comme une densité de durée (probabilité de décès chaque année), d'où sont tirés le TRI espéré, les déciles, la probabilité de gain acheteur et le résultat médian. TRI : flux bouquet + frais + rentes indexées contre la valeur du bien revalorisée, perçue au décès. Aucun barème officiel n'est imposé par la loi.
+      </footer>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var EV_H={60:23.0,61:22.2,62:21.4,63:20.6,64:19.8,65:19.0,66:18.2,67:17.4,68:16.7,69:15.9,70:15.2,71:14.5,72:13.8,73:13.1,74:12.4,75:11.8,76:11.1,77:10.5,78:9.9,79:9.3,80:8.8,81:8.2,82:7.7,83:7.2,84:6.7,85:6.3,86:5.8,87:5.4,88:5.0,89:4.7,90:4.3,91:4.0,92:3.7,93:3.4,94:3.2,95:2.9,96:2.7,97:2.5,98:2.3,99:2.1,100:2.0,101:1.8,102:1.7,103:1.5,104:1.4,105:1.3};
+  var EV_F={60:27.5,61:26.6,62:25.7,63:24.8,64:24.0,65:23.1,66:22.2,67:21.4,68:20.5,69:19.7,70:18.9,71:18.0,72:17.2,73:16.4,74:15.7,75:14.9,76:14.1,77:13.4,78:12.7,79:12.0,80:11.3,81:10.6,82:9.9,83:9.3,84:8.7,85:8.1,86:7.6,87:7.0,88:6.5,89:6.1,90:5.6,91:5.2,92:4.8,93:4.5,94:4.1,95:3.8,96:3.5,97:3.2,98:3.0,99:2.7,100:2.5,101:2.3,102:2.1,103:1.9,104:1.8,105:1.6};
+  var MAXAGE=106;
+  function px(tab){var p={}; for(var x=60;x<MAXAGE;x++){var ex=tab[x]||0.5, ex1=tab[x+1]||0.4; p[x]=Math.max(0,Math.min(0.999, ex/(1+ex1)));} return p;}
+  var P_H=px(EV_H), P_F=px(EV_F);
+  function survInt(age,sexe){var p=sexe==='H'?P_H:P_F; age=Math.round(age); if(age<60)age=60; if(age>105)age=105;
+    var arr=[1],cur=1; for(var k=0;k<MAXAGE-age;k++){cur*=(p[age+k]||0); arr.push(cur); if(cur<1e-6)break;} return arr;}
+  function jointLast(a,b){var n=Math.max(a.length,b.length),o=[]; for(var k=0;k<n;k++){var x=a[k]||0,y=b[k]||0; o.push(x+y-x*y);} return o;}
+  function modelEV(s){var t=0; for(var k=1;k<s.length;k++)t+=s[k]; return t+0.5;}
+  // time-scale a survival curve to hit target EV (uniform stretch)
+  function scaleCurve(base,targetEV){
+    var e0=modelEV(base); if(!targetEV||targetEV<=0||e0<=0) return base.slice();
+    var lam=targetEV/e0;
+    for(var it=0;it<3;it++){
+      var out=[]; var horizon=Math.ceil((base.length-1)*lam)+2;
+      for(var k=0;k<=horizon;k++){
+        var u=k/lam, i0=Math.floor(u), f=u-i0;
+        var s0=base[i0]!==undefined?base[i0]:0, s1=base[i0+1]!==undefined?base[i0+1]:0;
+        out.push(s0+(s1-s0)*f);
+      }
+      var en=modelEV(out); lam*= targetEV/en; if(Math.abs(en-targetEV)<0.05){return out;}
+      if(it===2) return out;
+    }
+    return base;
+  }
+  function annuityDue(s,i){var v=1/(1+i),t=0; for(var k=0;k<s.length;k++)t+=Math.pow(v,k)*s[k]; return t;}
+  // IRR with constant rente (legacy acheteur view)
+  function irr(bouquet,rente,T,propVal,appr){
+    function npv(r){var v=1/(1+r),n=-bouquet; for(var k=1;k<=T;k++)n-=rente*Math.pow(v,k); n+=propVal*Math.pow(1+appr,T)*Math.pow(v,T); return n;}
+    var lo=-0.6,hi=1.5; for(var it=0;it<90;it++){var m=(lo+hi)/2; if(npv(m)>0)lo=m; else hi=m;} return (lo+hi)/2;
+  }
+  // IRR with indexed rente (growing at g) — used by the aléa engine
+  function irrG(initial,rente,g,T,propVal,appr){
+    function npv(r){var n=-initial; for(var k=1;k<=T;k++)n-=rente*Math.pow(1+g,k-1)/Math.pow(1+r,k); n+=propVal*Math.pow(1+appr,T)/Math.pow(1+r,T); return n;}
+    var lo=-0.9,hi=2.0; for(var it=0;it<100;it++){var m=(lo+hi)/2; if(npv(m)>0)lo=m; else hi=m;} return (lo+hi)/2;
+  }
+  // nominal net result to buyer if death occurs at year T
+  function netAt(initial,rente,g,T,propVal,appr){
+    var paid=initial; for(var k=1;k<=T;k++)paid+=rente*Math.pow(1+g,k-1);
+    return propVal*Math.pow(1+appr,T)-paid;
+  }
+
+  var st={occupe:true,couple:false,s1:'F',s2:'H',evManual:false,view:'vendeur'};
+  var $=function(id){return document.getElementById(id);};
+  var f0=new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0});
+  var eur=function(n){return f0.format(Math.round(n))+' €';};
+  var eurSign=function(n){return (n<0?'− ':'+ ')+f0.format(Math.abs(Math.round(n)))+' €';};
+  var pc=function(n){return (Math.round(n*10)/10).toString().replace('.',',')+' %';};
+
+  function pair(aId,bId,onA,onB){var a=$(aId),b=$(bId);
+    a.addEventListener('click',function(){a.setAttribute('aria-pressed','true');b.setAttribute('aria-pressed','false');onA();compute();});
+    b.addEventListener('click',function(){b.setAttribute('aria-pressed','true');a.setAttribute('aria-pressed','false');onB();compute();});}
+  pair('occ','libre',function(){st.occupe=true;document.body.classList.remove('libre');},function(){st.occupe=false;document.body.classList.add('libre');});
+  pair('un','deux',function(){st.couple=false;document.body.classList.remove('couple');syncEV();},function(){st.couple=true;document.body.classList.add('couple');syncEV();});
+  pair('f1','h1',function(){st.s1='F';syncEV();},function(){st.s1='H';syncEV();});
+  pair('f2','h2',function(){st.s2='F';syncEV();},function(){st.s2='H';syncEV();});
+
+  function setView(v){st.view=v;
+    document.body.classList.remove('vue-vendeur','vue-acheteur','vue-alea');
+    document.body.classList.add('vue-'+v); compute();}
+  $('bVendeur').addEventListener('click',function(){setView('vendeur');});
+  $('bAcheteur').addEventListener('click',function(){setView('acheteur');});
+  $('bAlea').addEventListener('click',function(){setView('alea');});
+
+  function baseCurve(){
+    var a1=parseFloat($('age1').value)||78;
+    var s1=survInt(a1,st.s1);
+    if(st.couple){var a2=parseFloat($('age2').value)||80; return jointLast(s1,survInt(a2,st.s2));}
+    return s1;
+  }
+  function suggestedEV(){return Math.round(modelEV(baseCurve())*10)/10;}
+  function syncEV(){if(!st.evManual)$('ev').value=suggestedEV(); $('evReset').disabled=!st.evManual;}
+  $('ev').addEventListener('input',function(){st.evManual=true;$('evReset').disabled=false;compute();});
+  $('evReset').addEventListener('click',function(){st.evManual=false;syncEV();compute();});
+  $('age1').addEventListener('input',function(){syncEV();compute();});
+  $('age2').addEventListener('input',function(){syncEV();compute();});
+
+  var loyerEl=$('loyer'),rdtEl=$('rendement'),valEl=$('valeur');
+  function syncLoyerFromRdt(){var v=parseFloat(valEl.value)||0,r=parseFloat(rdtEl.value)||0;loyerEl.value=Math.round(v*r/100/12);}
+  rdtEl.addEventListener('input',function(){syncLoyerFromRdt();compute();});
+  valEl.addEventListener('input',function(){syncLoyerFromRdt();compute();});
+  loyerEl.addEventListener('input',function(){var v=parseFloat(valEl.value)||0,l=parseFloat(loyerEl.value)||0;if(v>0)rdtEl.value=Math.round(l*12/v*1000)/10;compute();});
+  var bq=$('bouquet');
+  bq.addEventListener('input',function(){$('bouquetPctLbl').textContent=bq.value+' %';compute();});
+  ['taux','indexation','appr','tmi','frais'].forEach(function(id){$(id).addEventListener('input',compute);});
+  $('printBtn').addEventListener('click',function(){window.print();});
+
+  function fraction(age){return age<50?0.70:age<60?0.50:age<70?0.40:0.30;}
+
+  // ===== the aléa engine: treat the survival curve as a death-time density =====
+  function aleaStats(curve, initial, renteAn, g, V, appr, i){
+    // death "in year T" between T-1 and T → mass = curve[T-1]-curve[T]
+    var rows=[], totP=0, n=curve.length;
+    for(var T=1;T<n;T++){
+      var p=(curve[T-1]||0)-(curve[T]||0); if(p<=1e-9) continue;
+      var tri=irrG(initial,renteAn,g,T,V,appr);
+      var net=netAt(initial,renteAn,g,T,V,appr);
+      rows.push({T:T,p:p,tri:tri,net:net}); totP+=p;
+    }
+    // residual tail mass → fold into the last computed year
+    if(rows.length){var tail=Math.max(0,1-totP); rows[rows.length-1].p+=tail; totP+=tail;}
+    if(!totP) return null;
+    rows.forEach(function(r){r.w=r.p/totP;});
+
+    // expected TRI & expected net (probability-weighted)
+    var eTri=0,eNet=0,probGain=0;
+    rows.forEach(function(r){eTri+=r.w*r.tri; eNet+=r.w*r.net; if(r.net>0)probGain+=r.w;});
+
+    // percentiles by death year (TRI decreases with T, net decreases with T)
+    function quantileT(q){var c=0; for(var k=0;k<rows.length;k++){c+=rows[k].w; if(c>=q)return rows[k].T;} return rows[rows.length-1].T;}
+    function pickByT(T){for(var k=0;k<rows.length;k++)if(rows[k].T===T)return rows[k]; return rows[rows.length-1];}
+    var medT=quantileT(0.5), p10=pickByT(quantileT(0.10)), p90=pickByT(quantileT(0.90)), med=pickByT(medT);
+
+    // break-even year: net crosses zero (early death → net>0 for buyer)
+    var be=null;
+    for(var k=1;k<rows.length;k++){var a=rows[k-1],b=rows[k];
+      if(a.net>0 && b.net<=0){var f=a.net/(a.net-b.net); be=a.T+f*(b.T-a.T); break;}}
+
+    return {rows:rows, eTri:eTri, eNet:eNet, probGain:probGain,
+            medT:medT, triMed:med.tri, netMed:med.net,
+            triLo:p90.tri, triHi:p10.tri, breakeven:be};
+  }
+
+  function compute(){
+    var V=parseFloat(valEl.value)||0;
+    var loyer=parseFloat(loyerEl.value)||0;
+    var i=(parseFloat($('taux').value)||0)/100;
+    var g=(parseFloat($('indexation').value)||0)/100;
+    var appr=(parseFloat($('appr').value)||0)/100;
+    var tmi=(parseFloat($('tmi').value)||0)/100;
+    var fraisPct=(parseFloat($('frais').value)||0)/100;
+    var PS=0.172;
+
+    var curve=scaleCurve(baseCurve(), parseFloat($('ev').value)||suggestedEV());
+    var EV=modelEV(curve);
+    var aDuh=annuityDue(curve,i);
+    var iNet=(1+i)/(1+g)-1;                    // taux réel pour la rente indexée
+    var aRente=annuityDue(curve, iNet);
+
+    var duh=st.occupe?loyer*12*aDuh:0; if(duh>V)duh=V;
+    var VO=V-duh;
+    var bPct=parseFloat(bq.value)/100;
+    var bouquet=VO*bPct;
+    var capital=VO-bouquet;
+    var renteAn=aRente>0?capital/aRente:0;
+    var renteMo=renteAn/12;
+
+    // age pour fraction fiscale = âge (le plus élevé si couple) à la signature
+    var ageFisc=parseFloat($('age1').value)||78;
+    if(st.couple) ageFisc=Math.max(ageFisc, parseFloat($('age2').value)||0);
+    var frac=fraction(ageFisc);
+    var renteImpoMo=renteMo*frac;
+    var prelevMo=renteImpoMo*(tmi+PS);
+    var renteNetMo=renteMo-prelevMo;
+
+    var frais=VO*fraisPct;
+    var initialAcheteur=bouquet+frais;
+    var coutEspere=bouquet+frais+renteMo*12*EV;
+
+    // ---------- VENDEUR fills ----------
+    $('vRenteNet').textContent = bPct>=0.999?'—':eur(renteNetMo);
+    $('vRenteNetSub').textContent = bPct>=0.999?'vente 100 % bouquet':'après impôt & prélèvements';
+    $('vBouquet').textContent=eur(bouquet);
+    $('vDuh').textContent=st.occupe?eur(duh):'—';
+    $('lvBouquet').textContent=eur(bouquet)+'  ·  non imposé';
+    $('lvRenteBrute').textContent = bPct>=0.999?'—':eur(renteMo)+' /mois';
+    $('lvFraction').textContent='à '+Math.round(ageFisc)+' ans : '+Math.round(frac*100)+' % imposable';
+    $('lvImpo').textContent = bPct>=0.999?'—':eur(renteImpoMo)+' /mois';
+    $('lvPrelev').textContent = bPct>=0.999?'—':'− '+eur(prelevMo)+' /mois';
+    $('lvRenteNet').textContent = bPct>=0.999?'—':eur(renteNetMo)+' /mois';
+
+    // ---------- ACHETEUR fills ----------
+    $('aPrix').textContent=eur(VO);
+    $('aDecote').textContent=st.occupe?('décote de '+pc(duh/V*100)):'viager libre — sans décote';
+    $('laVenale').textContent=eur(V);
+    $('laDuh').textContent='− '+eur(duh);
+    $('laDecotePct').textContent=V>0?'soit '+pc(duh/V*100):'';
+    $('laOccupee').textContent=eur(VO);
+    $('laFrais').textContent='+ '+eur(frais);
+    $('laFraisPct').textContent=pc(fraisPct*100)+' de la valeur occupée';
+    $('laBouquet').textContent=eur(bouquet);
+    $('laRente').textContent=bPct>=0.999?'— (pas de rente)':eur(renteMo)+' /mois';
+    $('laInit').textContent=eur(initialAcheteur)+'  (bouquet + frais)';
+    $('aCout').textContent=eur(coutEspere);
+
+    // TRI espéré (décès à EV) + scénarios
+    var triEsp=irr(bouquet+frais, renteAn, Math.max(1,Math.round(EV)), V, appr);
+    $('aTri').textContent=bPct>=0.999?'capital':pc(triEsp*100);
+    var scen=[['plus tôt',-5,'tail-up'],['à l’espérance',0,'ref'],['plus tard',5,''],['très tard',15,'tail']];
+    var html='';
+    scen.forEach(function(r){
+      var T=Math.max(1,Math.round(EV+r[1]));
+      var cout=bouquet+frais+renteMo*12*T;
+      var tri=irr(bouquet+frais,renteAn,T,V,appr);
+      var cls=r[2]==='ref'?' class="ref"':(r[2]==='tail'?' class="tail"':'');
+      html+='<tr'+cls+'><td>'+r[0]+' — '+(EV+r[1]>0?'+':'')+Math.round(EV+r[1])+' ans</td><td>'+eur(cout)+'</td><td>'+pc(tri*100)+'</td></tr>';
+    });
+    $('scenBody').innerHTML=html;
+    $('scenNote').textContent='À '+Math.round(EV)+' ans d’espérance, le rendement vise '+pc(triEsp*100)+'. Plus le vendeur vit, plus il s’érode : c’est l’aléa, au cœur du contrat.';
+
+    // ---------- ALÉA engine ----------
+    var alea=null;
+    if(bPct<0.999){
+      alea=aleaStats(curve, bouquet+frais, renteAn, g, V, appr, i);
+    }
+    if(alea){
+      var ageNow=ageFisc;
+      $('zProbGain').textContent=pc(alea.probGain*100);
+      $('zProbSub').textContent='la valeur du bien dépasse le coût total à l’extinction';
+      $('zTriMed').textContent=pc(alea.triMed*100);
+      $('zBreakeven').textContent=alea.breakeven!==null? ('an '+(Math.round(alea.breakeven*10)/10).toString().replace('.',',')) : '—';
+      $('zTriEsp').textContent=pc(alea.eTri*100);
+      $('zTriBand').textContent='fourchette P10–P90 : '+pc(alea.triLo*100)+' → '+pc(alea.triHi*100);
+      $('zNetMed').textContent=eurSign(alea.netMed);
+      $('zNetBand').textContent='espéré '+eurSign(alea.eNet)+' · valeur du bien − coût total';
+      var spread=Math.max(0,alea.triHi-alea.triLo);
+      $('zSpread').textContent='±'+pc(spread/2*100).replace(' %',' pts');
+      var spreadW=Math.max(4,Math.min(100, spread*100*6));
+      $('zSpreadBar').style.width=spreadW+'%';
+      $('zSpreadBar').style.background=alea.probGain>=0.5?'var(--green)':'var(--clay)';
+      $('zMedianAge').textContent=(Math.round((ageNow+alea.medT)))+' ans';
+      $('zMedianSub').textContent='terme atteint vers '+Math.round(ageNow+alea.medT)+' ans (à +'+alea.medT+' ans)';
+
+      // deciles table
+      var decH='';
+      var deciles=[['1ᵉʳ décile (court)',0.10],['1ᵉʳ quartile',0.25],['médiane',0.50],['3ᵉ quartile',0.75],['9ᵉ décile (long)',0.90]];
+      function qT(q){var c=0,rows=alea.rows; for(var k=0;k<rows.length;k++){c+=rows[k].w; if(c>=q)return rows[k];} return rows[rows.length-1];}
+      deciles.forEach(function(d){var r=qT(d[1]);
+        var cls=d[1]===0.5?' class="ref"':(d[1]>=0.9?' class="tail"':'');
+        decH+='<tr'+cls+'><td>'+d[0]+'</td><td>'+Math.round(ageNow+r.T)+' ans (+'+r.T+')</td><td>'+pc(r.tri*100)+'</td></tr>';});
+      $('zDecBody').innerHTML=decH;
+      $('zDecNote').textContent='Lecture : dans 1 cas sur 10, le vendeur s’éteint avant l’an '+qT(0.10).T+' — l’acheteur réalise alors '+pc(qT(0.10).tri*100)+'. Dans 1 cas sur 10, il vit au-delà de l’an '+qT(0.90).T+', et le rendement tombe à '+pc(qT(0.90).tri*100)+'. La probabilité de gain ('+pc(alea.probGain*100)+') intègre toute cette densité, pas un seul scénario.';
+    } else {
+      ['zProbGain','zTriMed','zBreakeven','zTriEsp','zNetMed','zSpread','zMedianAge'].forEach(function(id){$(id).textContent='—';});
+      $('zProbSub').textContent='vente en nue-propriété : sans rente, pas d’aléa de longévité';
+      $('zTriBand').textContent='—'; $('zNetBand').textContent='—'; $('zMedianSub').textContent='—';
+      $('zSpreadBar').style.width='0%';
+      $('zDecBody').innerHTML=''; $('zDecNote').textContent='Sans rente viagère, la durée de vie ne fait plus varier le coût : il n’y a pas de distribution à tracer.';
+    }
+
+    // ---------- répartition bar ----------
+    function seg(el,amt,lab){var p=V>0?amt/V*100:0; el.style.flexBasis=p+'%'; el.style.display=amt>0?'flex':'none'; el.querySelector('span').textContent=p>=11?lab:'';}
+    seg($('segDuh'), st.occupe?duh:0, 'DUH '+(V>0?Math.round(duh/V*100):0)+'%');
+    seg($('segBouquet'), bouquet, 'Bouquet '+(V>0?Math.round(bouquet/V*100):0)+'%');
+    seg($('segRente'), capital, 'Rente '+(V>0?Math.round(capital/V*100):0)+'%');
+
+    // ---------- check ----------
+    var recon=bouquet+capital+duh;
+    $('check').innerHTML='Vérification : bouquet + capital de rente'+(st.occupe?' + DUH':'')+' = <b>'+eur(recon)+'</b> — la valeur vénale est intégralement répartie.';
+
+    // ---------- flags ----------
+    var fa=$('flagAlea'), fi=$('flagInfo');
+    fa.classList.remove('on'); fi.classList.remove('on');
+    if(bPct>=0.999){ fi.innerHTML='<b>Modèle nue-propriété.</b> Sans rente, ce n’est pas un viager classique mais une vente en nue-propriété (le modèle des fonds). Aucun aléa de rente, mais l’occupation reste viagère.'; fi.classList.add('on'); }
+    else if(bPct>0.78){ fa.innerHTML='<b>Aléa à surveiller.</b> Le bouquet absorbe l’essentiel du prix et la rente devient symbolique. Une rente trop faible expose à la requalification (donation déguisée). Rééquilibrez vers la rente.'; fa.classList.add('on'); }
+    else if(st.occupe && ageFisc<70){ fi.innerHTML='<b>Vendeur jeune.</b> À '+Math.round(ageFisc)+' ans, la décote d’occupation est forte et la valeur occupée faible : l’aléa est long et le viager moins adapté. La nue-propriété peut convenir davantage.'; fi.classList.add('on'); }
+    else if(st.view==='alea' && alea && alea.probGain<0.4){ fa.innerHTML='<b>Pari défavorable à l’acheteur.</b> La probabilité de gain n’est que de '+pc(alea.probGain*100)+' : la structure protège fortement le vendeur. Un débirentier averti négociera le bouquet ou la rente à la baisse.'; fa.classList.add('on'); }
+    else if(st.view==='alea' && alea && alea.probGain>0.7){ fi.innerHTML='<b>Pari favorable à l’acheteur.</b> Avec '+pc(alea.probGain*100)+' de probabilité de gain, le déséquilibre joue contre le vendeur. Vérifiez l’espérance retenue et l’indexation avant de signer.'; fi.classList.add('on'); }
+
+    drawChart(V, bouquet, renteMo, EV, appr, curve, frais, alea, ageFisc);
+  }
+
+  // ---------- SVG chart ----------
+  function drawChart(V, bouquet, renteMo, EV, appr, curve, frais, alea, ageNow){
+    var W=560,H=260, m={l:46,r:14,t:16,b:30};
+    var iw=W-m.l-m.r, ih=H-m.t-m.b;
+    var legend=$('chartLegend');
+
+    if(st.view==='alea'){ drawAleaChart(W,H,m,iw,ih,curve,alea,ageNow); return; }
+
+    var horizon=Math.max(8, Math.ceil(EV*1.7)+1);
+    // series
+    var costPts=[], valuePts=[], incomePts=[];
+    var maxY=V;
+    for(var t=0;t<=horizon;t++){
+      var cost=bouquet+frais+renteMo*12*t;       // acheteur cumulative outlay (nominal)
+      var val=V*Math.pow(1+appr,t);              // property value
+      var income=bouquet+renteMo*12*t;           // vendeur cumulative cash received
+      costPts.push([t,cost]); valuePts.push([t,val]); incomePts.push([t,income]);
+      maxY=Math.max(maxY,cost,val,income);
+    }
+    maxY*=1.06;
+    function X(t){return m.l + t/horizon*iw;}
+    function Y(v){return m.t + ih - (v/maxY)*ih;}
+    function path(pts){return pts.map(function(p,idx){return (idx?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1);}).join(' ');}
+
+    var s='';
+    for(var gi=0;gi<=4;gi++){var gv=maxY*gi/4, gy=Y(gv);
+      s+='<line class="grid-l" x1="'+m.l+'" y1="'+gy.toFixed(1)+'" x2="'+(W-m.r)+'" y2="'+gy.toFixed(1)+'"/>';
+      s+='<text x="'+(m.l-6)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="end">'+Math.round(gv/1000)+'k</text>';}
+    var step=horizon>24?10:(horizon>12?5:2);
+    for(var xt=0;xt<=horizon;xt+=step){s+='<text x="'+X(xt).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">'+xt+'</text>';}
+    s+='<text class="lab" x="'+(m.l+iw/2)+'" y="'+(H-0.5)+'" text-anchor="middle">années depuis la vente</text>';
+    var evx=X(Math.min(EV,horizon));
+    s+='<line x1="'+evx.toFixed(1)+'" y1="'+m.t+'" x2="'+evx.toFixed(1)+'" y2="'+(m.t+ih)+'" stroke="#1b2a25" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>';
+    s+='<text class="lab" x="'+(evx+4).toFixed(1)+'" y="'+(m.t+11)+'">espérance ≈ '+Math.round(EV)+' ans</text>';
+
+    if(st.view==='acheteur'){
+      legend.innerHTML='<span><i style="background:var(--clay)"></i>Coût cumulé acheteur</span><span><i style="background:var(--green)"></i>Valeur du bien</span>';
+      var be=null;
+      for(var t2=1;t2<=horizon;t2++){var c0=costPts[t2-1][1],c1=costPts[t2][1],v0=valuePts[t2-1][1],v1=valuePts[t2][1];
+        if(c0<v0 && c1>=v1){var f=(v0-c0)/((c1-c0)-(v1-v0)); be=t2-1+f; break;}}
+      s+='<rect x="'+evx.toFixed(1)+'" y="'+m.t+'" width="'+(W-m.r-evx).toFixed(1)+'" height="'+ih+'" fill="#a4502a" opacity="0.05"/>';
+      s+='<path d="'+path(valuePts)+'" fill="none" stroke="var(--green)" stroke-width="2.4"/>';
+      s+='<path d="'+path(costPts)+'" fill="none" stroke="var(--clay)" stroke-width="2.4"/>';
+      if(be!==null && be<=horizon){var bx=X(be),by=Y(V*Math.pow(1+appr,be));
+        s+='<circle cx="'+bx.toFixed(1)+'" cy="'+by.toFixed(1)+'" r="4" fill="#fff" stroke="#1b2a25" stroke-width="1.6"/>';
+        s+='<text class="lab" x="'+bx.toFixed(1)+'" y="'+(by-9).toFixed(1)+'" text-anchor="middle">seuil ≈ '+ (Math.round(be*10)/10).toString().replace('.',',') +' ans</text>';}
+    } else {
+      legend.innerHTML='<span><i style="background:var(--green)"></i>Encaissé (bouquet + rentes)</span><span><i style="background:var(--sage)"></i>Valeur du bien</span>';
+      s+='<path d="'+path(valuePts)+'" fill="none" stroke="var(--sage)" stroke-width="2" stroke-dasharray="2 3" opacity="0.8"/>';
+      s+='<path d="'+path(incomePts)+' L'+X(horizon).toFixed(1)+' '+Y(0).toFixed(1)+' L'+X(0).toFixed(1)+' '+Y(0).toFixed(1)+' Z" fill="var(--green)" opacity="0.08"/>';
+      s+='<path d="'+path(incomePts)+'" fill="none" stroke="var(--green)" stroke-width="2.6"/>';
+      s+='<circle cx="'+X(0).toFixed(1)+'" cy="'+Y(bouquet).toFixed(1)+'" r="3.5" fill="var(--brass)"/>';
+    }
+    $('chart').innerHTML=s;
+  }
+
+  // ---------- ALÉA distribution chart: death-time density, split at break-even ----------
+  function drawAleaChart(W,H,m,iw,ih,curve,alea,ageNow){
+    var legend=$('chartLegend');
+    if(!alea){ legend.innerHTML=''; $('chart').innerHTML='<text class="lab" x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle">Sans rente : pas de distribution d’aléa.</text>'; return; }
+    legend.innerHTML='<span><i style="background:var(--green)"></i>Décès → gain acheteur</span><span><i style="background:var(--clay)"></i>Décès → perte acheteur</span><span><i style="background:var(--plum)"></i>survie</span>';
+
+    var rows=alea.rows;
+    var horizon=rows[rows.length-1].T;
+    horizon=Math.max(8,horizon);
+    var pmax=0; rows.forEach(function(r){if(r.p>pmax)pmax=r.p;});
+    pmax=pmax*1.12||1;
+
+    function X(t){return m.l + t/horizon*iw;}
+    function Yp(p){return m.t + ih - (p/pmax)*ih;}      // density axis (left)
+    function Ys(sv){return m.t + ih - sv*ih;}            // survival 0..1 (right)
+    var bw=Math.max(2, iw/(horizon)*0.78);
+
+    var s='';
+    // gridlines for survival (right axis, %)
+    for(var gi=0;gi<=4;gi++){var gy=m.t+ih-(gi/4)*ih;
+      s+='<line class="grid-l" x1="'+m.l+'" y1="'+gy.toFixed(1)+'" x2="'+(W-m.r)+'" y2="'+gy.toFixed(1)+'"/>';
+      s+='<text x="'+(W-m.r+2)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="start">'+(gi*25)+'</text>';}
+    s+='<text class="lab" x="'+(m.l-6)+'" y="'+(m.t-4)+'" text-anchor="start" transform="rotate(0)">prob. décès / an</text>';
+
+    // x ticks (years since sale → translated to age)
+    var step=horizon>24?10:(horizon>12?5:2);
+    for(var xt=0;xt<=horizon;xt+=step){
+      s+='<text x="'+X(xt).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle">'+xt+'</text>';}
+    s+='<text class="lab" x="'+(m.l+iw/2)+'" y="'+(H-0.5)+'" text-anchor="middle">années depuis la vente  ·  âge '+Math.round(ageNow)+' → '+Math.round(ageNow+horizon)+'</text>';
+
+    // density bars, colored by buyer outcome
+    rows.forEach(function(r){
+      var x=X(r.T)-bw/2, y=Yp(r.p), h=(m.t+ih)-y;
+      var col=r.net>0?'var(--green)':'var(--clay)';
+      var op=0.55+0.45*(r.p/pmax);
+      s+='<rect class="bar" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+'" rx="1.5" fill="'+col+'" opacity="'+op.toFixed(2)+'"/>';
+    });
+
+    // survival curve overlay (plum), on survival axis
+    var sp=''; for(var k=0;k<=horizon;k++){var sv=curve[k]!==undefined?curve[k]:0; sp+=(k?'L':'M')+X(k).toFixed(1)+' '+Ys(sv).toFixed(1)+' ';}
+    s+='<path d="'+sp+'" fill="none" stroke="var(--plum)" stroke-width="2" opacity="0.85"/>';
+
+    // break-even vertical
+    if(alea.breakeven!==null && alea.breakeven<=horizon){var bx=X(alea.breakeven);
+      s+='<line x1="'+bx.toFixed(1)+'" y1="'+m.t+'" x2="'+bx.toFixed(1)+'" y2="'+(m.t+ih)+'" stroke="#1b2a25" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.6"/>';
+      s+='<text class="lab" x="'+(bx+4).toFixed(1)+'" y="'+(m.t+11)+'">bascule ≈ '+(Math.round(alea.breakeven*10)/10).toString().replace('.',',')+' ans</text>';}
+    // median death marker
+    var mx=X(alea.medT);
+    s+='<line x1="'+mx.toFixed(1)+'" y1="'+(m.t+ih)+'" x2="'+mx.toFixed(1)+'" y2="'+(m.t+ih-7)+'" stroke="#1b2a25" stroke-width="1.4"/>';
+    s+='<text class="lab" x="'+mx.toFixed(1)+'" y="'+(m.t+ih-10)+'" text-anchor="middle">médiane</text>';
+
+    $('chart').innerHTML=s;
+  }
+
+  // ---------- shareable state in URL ----------
+  var FIELDS=['valeur','loyer','rendement','age1','age2','ev','bouquet','taux','indexation','appr','tmi','frais'];
+  function encodeState(){
+    var p=new URLSearchParams();
+    FIELDS.forEach(function(id){p.set(id,$(id).value);});
+    p.set('occ',st.occupe?1:0); p.set('cp',st.couple?1:0);
+    p.set('s1',st.s1); p.set('s2',st.s2); p.set('ev_m',st.evManual?1:0); p.set('view',st.view);
+    return p.toString();
+  }
+  function applyState(){
+    var p=new URLSearchParams(location.search); if(![].slice.call(p.keys()).length) return;
+    FIELDS.forEach(function(id){if(p.has(id))$(id).value=p.get(id);});
+    if(p.get('occ')==='0'){st.occupe=false;document.body.classList.add('libre');$('occ').setAttribute('aria-pressed','false');$('libre').setAttribute('aria-pressed','true');}
+    if(p.get('cp')==='1'){st.couple=true;document.body.classList.add('couple');$('un').setAttribute('aria-pressed','false');$('deux').setAttribute('aria-pressed','true');}
+    if(p.get('s1')==='H'){st.s1='H';$('f1').setAttribute('aria-pressed','false');$('h1').setAttribute('aria-pressed','true');}
+    if(p.get('s2')==='F'){st.s2='F';$('f2').setAttribute('aria-pressed','true');$('h2').setAttribute('aria-pressed','false');}
+    if(p.get('ev_m')==='1')st.evManual=true;
+    $('bouquetPctLbl').textContent=$('bouquet').value+' %';
+    var v=p.get('view'); if(v==='acheteur'||v==='alea'){document.body.classList.remove('vue-vendeur');document.body.classList.add('vue-'+v);st.view=v;}
+  }
+  $('shareBtn').addEventListener('click',function(){
+    var url=location.origin+location.pathname+'?'+encodeState();
+    var btn=$('shareBtn'); var old=btn.textContent;
+    function done(ok){btn.textContent=ok?'✓ Lien copié':'Lien : '+url.slice(0,30)+'…'; setTimeout(function(){btn.textContent=old;},1800);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){done(true);},function(){done(false);});}
+    else{try{history.replaceState(null,'',url);done(true);}catch(e){done(false);}}
+  });
+
+  // init
+  applyState();
+  syncEV();
+  compute();
+})();
+</script>
+</body>
+</html>
