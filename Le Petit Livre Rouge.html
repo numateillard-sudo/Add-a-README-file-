@@ -2010,6 +2010,9 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
 [data-adaptive].lvl-initie > [data-level="initie"] { display: block; }
 /* Anti-FOUC : tant que le JS n'a pas posé la classe, on affiche la version Novice */
 [data-adaptive]:not(.lvl-novice):not(.lvl-initie) > [data-level="novice"] { display: block; }
+/* ── Stress-test personnalisé : ligne d'intro avec le capital simulé (Feature 4) ── */
+.pc-stresstest-intro { font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.5; }
+.pc-stresstest-intro strong { font-family: var(--serif); font-weight: 700; color: var(--ink); font-style: italic; }
 
 /* Stress-test rétrospectif */
 .pc-stresstest {
@@ -5653,10 +5656,11 @@ section[style*="padding:80px 0"] {
               <span class="pc-stresstest-tag">L'épreuve de réalité</span>
               <span class="pc-stresstest-event" id="pc-stresstest-event">Mars 2020 — COVID</span>
             </div>
+            <p class="pc-stresstest-intro" id="pc-stresstest-intro">Si tu avais eu <strong>10 000 €</strong> investis…</p>
             <div class="pc-stresstest-body">
               <div class="pc-stresstest-stat">
-                <span class="pc-stresstest-stat-val" id="pc-stresstest-loss">-30 %</span>
-                <span class="pc-stresstest-stat-lbl">de baisse au pire</span>
+                <span class="pc-stresstest-stat-val" id="pc-stresstest-loss">−3 000 €</span>
+                <span class="pc-stresstest-stat-lbl" id="pc-stresstest-loss-lbl">au pire de la chute</span>
               </div>
               <div class="pc-stresstest-divider"></div>
               <div class="pc-stresstest-stat">
@@ -8640,6 +8644,11 @@ function budgetCompute() {
     cr, dr, sr, funR
   };
 
+  // Stress-test perso : si un profil existe déjà, on le réactualise avec le nouveau budget (Feature 4)
+  if (typeof renderStressTest === 'function' && STATE.investor && STATE.investor.profile) {
+    try { renderStressTest(); } catch(e) { /* silence */ }
+  }
+
   // Slider sync
   document.getElementById('b-fun-pct').textContent = Math.round(funP*100) + '%';
   document.getElementById('b-inv-pct').textContent = Math.round(invP*100) + '%';
@@ -9110,6 +9119,35 @@ const PROFILE_STRESSTEST = {
   offensif:  { event: "Mars 2020 — COVID",   loss: 35, recovery: 8 }
 };
 
+// ─── Feature 4 : stress-test personnalisé (capital simulé depuis le budget) ───
+// Capital de référence : à défaut 10 000 €. Si un montant d'épargne mensuel est
+// connu, on estime ce que 5 ans de versements (× 0,8 de sécurité) auraient pesé,
+// borné à [5 000 ; 100 000] €. Arrondis propres (capital au 100, perte au 50).
+function computeStressTest(profileKey) {
+  const st = PROFILE_STRESSTEST[profileKey] || PROFILE_STRESSTEST.equilibre;
+  let capital = 10000;
+  const monthly = (STATE.budget && (STATE.budget.invAmt || STATE.budget.libre)) || 0;
+  if (monthly > 0) {
+    capital = Math.round(monthly * 60 * 0.8);
+    capital = Math.max(5000, Math.min(100000, capital));
+  }
+  capital = Math.round(capital / 100) * 100;          // arrondi à la centaine
+  const loss = Math.round((capital * st.loss / 100) / 50) * 50;  // arrondi à 50 €
+  return { capital, loss, lossPct: st.loss, recovery: st.recovery, event: st.event };
+}
+
+// Met à jour le bloc "épreuve de réalité" avec les chiffres réels du user.
+function renderStressTest() {
+  const prof = STATE.investor && STATE.investor.profile;
+  if (!prof || !prof.key) return;
+  const s = computeStressTest(prof.key);
+  setText('pc-stresstest-event', s.event);
+  setHTML('pc-stresstest-intro', 'Si tu avais eu <strong>' + fmt(s.capital) + '</strong> investis…');
+  setText('pc-stresstest-loss', fmt(-s.loss));
+  setText('pc-stresstest-loss-lbl', 'au pire — soit −' + s.lossPct + ' %');
+  setText('pc-stresstest-recovery', s.recovery + ' mois');
+}
+
 // ─── Mention contextuelle (situe le profil)
 const PROFILE_MENTIONS = {
   prudent:   "Le profil de ceux qui ont vu 2008 de près",
@@ -9240,13 +9278,8 @@ function quizShowResult() {
     if (note) note.textContent = axisNote(axis, v);
   });
 
-  // Stress-test rétrospectif
-  const stress = PROFILE_STRESSTEST[det.key];
-  if (stress) {
-    setText('pc-stresstest-event', stress.event);
-    setText('pc-stresstest-loss', '-' + stress.loss + ' %');
-    setText('pc-stresstest-recovery', stress.recovery + ' mois');
-  }
+  // Stress-test rétrospectif personnalisé (Feature 4)
+  renderStressTest();
 
   // Compat anciens IDs (au cas où des références traînent ailleurs)
   setText('qsrd-name', p.name);
