@@ -2013,6 +2013,19 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
 /* ── Stress-test personnalisé : ligne d'intro avec le capital simulé (Feature 4) ── */
 .pc-stresstest-intro { font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.5; }
 .pc-stresstest-intro strong { font-family: var(--serif); font-weight: 700; color: var(--ink); font-style: italic; }
+/* ── Bilan : recommandations ciblées (Feature 5) ── */
+.reco-list { display: flex; flex-direction: column; gap: 12px; }
+.reco-card { display: grid; grid-template-columns: 20px 1fr; gap: 13px; align-items: start; padding: 14px 16px; border-radius: 10px; background: var(--paper-soft); border: 1px solid var(--border-soft); border-left: 3px solid var(--muted); }
+.reco-card.sev-critique { border-left-color: var(--red-book); }
+.reco-card.sev-forte    { border-left-color: var(--gold-dark); }
+.reco-card.sev-moderee  { border-left-color: var(--ink-soft); }
+.reco-icon { width: 13px; height: 13px; margin-top: 3px; border-radius: 50%; background: var(--muted); }
+.reco-card.sev-critique .reco-icon { background: var(--red-book); border-radius: 2px; transform: rotate(45deg); }
+.reco-card.sev-forte    .reco-icon { background: var(--gold-dark); }
+.reco-card.sev-moderee  .reco-icon { background: var(--ink-soft); }
+.reco-title { font-family: var(--sans); font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 3px; }
+.reco-msg { font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+.reco-empty { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--gold-dark); margin: 0; }
 
 /* Stress-test rétrospectif */
 .pc-stresstest {
@@ -8282,6 +8295,17 @@ section[style*="padding:80px 0"] {
   </div>
       </article>
 
+      <article class="bilan-block bilan-block-reco" id="bilan-block-reco">
+        <header class="block-header">
+          <div class="block-num plan-arrow">!</div>
+          <div class="block-meta">
+            <p class="block-eyebrow">Ce que tes réponses révèlent</p>
+            <h2 class="block-title">Tes prochaines actions</h2>
+          </div>
+        </header>
+        <div class="block-body" id="bilan-reco-body"></div>
+      </article>
+
       <!-- FOOTER -->
       <footer class="bilan-foot-block">
         <div class="bilan-foot-rule"></div>
@@ -11797,6 +11821,79 @@ function populateBilan(includeFisc) {
 
   // ─── Plan d'action ───
   populatePlanBody({ profile, dca, showFisc });
+
+  // ─── Tes prochaines actions (recommandations ciblées, Feature 5) ───
+  renderRecommendations();
+}
+
+// ─── Feature 5 : recommandations ciblées selon les données saisies ───
+// NB : adapté au state réel. La règle "épargne de précaution" (R1) n'est pas
+// mesurable (le budget ne capture pas le coussin Livret A) → R1 contrôle la
+// santé du budget. Le flag "PEA déjà ouvert" (R5) n'existe pas → conseil informatif.
+function computeRecommendations() {
+  const recos = [];
+  const b = STATE.budget || {};
+  const f = STATE.fisc || {};
+  const prof = STATE.investor && STATE.investor.profile;
+  const ans  = (STATE.investor && STATE.investor.quiz && STATE.investor.quiz.answers) || {};
+  const PER_PLAFOND = 37680;
+
+  // R1 (adapté) — Budget tendu : aucune capacité d'épargne dégagée
+  if ((b.incomeTotal || 0) > 0 && (b.libre || 0) <= 0) {
+    recos.push({ sev: 'critique', title: 'Ton budget ne dégage rien',
+      msg: 'Tes charges absorbent tout ton revenu : tu n’as encore rien à investir. Avant la Bourse, dégage une marge — même 50 € par mois — en taillant dans les charges supprimables. Sans oxygène, aucun plan ne tient.' });
+  }
+
+  // R2 — TMI élevée non optimisée (pas de PER)
+  if ((f.tmi || 0) >= 30 && (f.per || 0) === 0) {
+    recos.push({ sev: 'forte', title: 'Ton PER dort, ton impôt non',
+      msg: 'Avec une TMI à ' + f.tmi + ' %, chaque euro versé sur un PER te fait économiser ' + f.tmi + ' centimes d’impôt. Tu as droit à ' + fmt(PER_PLAFOND) + ' de plafond cette année — c’est probablement ton levier numéro un.' });
+  }
+
+  // R3 — Profil Prudent mais horizon long (≥ 15 ans)
+  if (prof && prof.key === 'prudent' && (ans.horizon || 0) >= 3) {
+    recos.push({ sev: 'moderee', title: 'Prudent, mais tout le temps devant toi',
+      msg: 'Tu as un horizon long (15 ans et plus) avec un profil Prudent. À cet horizon, tu peux probablement supporter plus de volatilité — et le rendement supplémentaire compense largement les secousses. À reconsidérer.' });
+  }
+
+  // R4 — Profil agressif mais horizon court (< 5 ans)
+  if (prof && (prof.key === 'dynamique' || prof.key === 'offensif') && ans.horizon === 1) {
+    recos.push({ sev: 'critique', title: 'Horizon court, profil musclé',
+      msg: 'Ton profil est ' + prof.name + ' mais ton horizon est inférieur à 5 ans. Risque réel de devoir vendre en bas en cas de chute. Sécurise au moins une partie en fonds euro ou obligations le temps que l’échéance approche.' });
+  }
+
+  // R5 — Investisseur avec TMI > 0 : penser au PEA (on ignore s'il en a déjà un)
+  if ((f.tmi || 0) > 0 && prof) {
+    recos.push({ sev: 'forte', title: 'Le PEA avant le compte-titres',
+      msg: 'Hors PEA, tes gains en Bourse sont taxés à 31,4 % (PFU). Dans un PEA de plus de 5 ans, tu tombes à 18,6 % (prélèvements sociaux seuls). L’ouverture est gratuite et couvre l’essentiel de ce qu’achète un débutant. Si ce n’est pas déjà fait, commence par là.' });
+  }
+
+  // R6 — Épargne libre élevée sans profil défini
+  if ((b.invAmt || 0) > 500 && !prof) {
+    const monthly = Math.round(b.invAmt);
+    recos.push({ sev: 'moderee', title: 'De l’épargne qui dort',
+      msg: 'Tu dégages ' + fmt(monthly) + ' par mois sans destination claire. Sur 10 ans, c’est ' + fmt(monthly * 12 * 10) + ' qui restent à 1,5 % sur un Livret A. Fais le questionnaire profil pour voir ce que cette somme deviendrait investie.' });
+  }
+
+  const rank = { critique: 0, forte: 1, moderee: 2 };
+  recos.sort((a, b) => rank[a.sev] - rank[b.sev]);
+  return recos.slice(0, 5);  // 5 max, les plus critiques d'abord
+}
+
+function renderRecommendations() {
+  const body = document.getElementById('bilan-reco-body');
+  if (!body) return;
+  const recos = computeRecommendations();
+  if (recos.length === 0) {
+    body.innerHTML = '<p class="reco-empty">Ton plan tient debout. Reviens dans 6 mois pour réviser — ou plus tôt si ta situation change (salaire, projet, enfant).</p>';
+    return;
+  }
+  body.innerHTML = '<div class="reco-list">' + recos.map(r =>
+    '<div class="reco-card sev-' + r.sev + '">' +
+      '<span class="reco-icon" aria-hidden="true"></span>' +
+      '<div class="reco-text"><div class="reco-title">' + r.title + '</div><p class="reco-msg">' + r.msg + '</p></div>' +
+    '</div>'
+  ).join('') + '</div>';
 }
 
 /* ─── Sous-fonctions ─── */
