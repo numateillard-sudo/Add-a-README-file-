@@ -8379,7 +8379,7 @@ section[style*="padding:80px 0"] {
       <strong style="color:rgba(255,255,255,.6)">Avertissement :</strong> ce site est un outil pédagogique d’information. Les calculs sont des estimations basées sur le barème officiel français 2026 et des hypothèses de marché (rendements long terme). Ils ne constituent ni un conseil fiscal, ni un conseil en investissement personnalisé. Avant toute décision importante, consulte un professionnel agréé (expert-comptable, conseiller en investissements financiers, notaire). Les performances passées ne préjugent pas des performances futures. Tout placement comporte un risque de perte en capital.
     </div>
     <div class="footer-bottom">
-      <div class="footer-bottom-text">Le Petit Livre Rouge de l’investisseur · Édition 2026 · Données à jour au 23 mai 2026 · <span class="footer-reset-link" onclick="resetEverything()">Tout réinitialiser</span></div>
+      <div class="footer-bottom-text">Le Petit Livre Rouge de l’investisseur · Édition 2026 · Données à jour au 23 mai 2026 · <span class="footer-reset-link" onclick="restartGuided()">Reprendre le parcours guidé</span> · <span class="footer-reset-link" onclick="resetEverything()">Tout réinitialiser</span></div>
       <div class="footer-bottom-text" style="font-family:var(--serif);font-style:italic">p. ∞ / ∞</div>
     </div>
   </div>
@@ -8414,10 +8414,84 @@ section[style*="padding:80px 0"] {
   }
   .footer-reset-link:hover{ color:rgba(255,255,255,.75); text-decoration:underline; }
   @media(max-width:560px){ .return-toast{ left:12px; right:12px; bottom:12px; } }
+
+  /* ── Onboarding inversé (Feature 6) ── */
+  .onb-overlay{
+    position:fixed; inset:0; z-index:10000;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(26,22,18,.55); backdrop-filter:blur(3px);
+  }
+  .onb-overlay[hidden]{ display:none; }
+  .onb-card{
+    background:var(--paper-soft); border:1px solid var(--gold-pale); border-radius:14px;
+    max-width:480px; width:100%; padding:32px 30px;
+    box-shadow:0 20px 60px rgba(26,22,18,.3); text-align:center;
+  }
+  .onb-eyebrow{ font-family:var(--sans); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-dark); font-weight:700; margin-bottom:10px; }
+  .onb-title{ font-family:var(--serif); font-style:italic; font-size:26px; color:var(--ink); margin:0 0 8px; line-height:1.2; }
+  .onb-sub{ font-family:var(--sans); font-size:14px; color:var(--muted); margin:0 0 24px; }
+  .onb-choices{ display:flex; flex-direction:column; gap:12px; }
+  .onb-choice{
+    cursor:pointer; text-align:left; background:var(--paper); border:1px solid var(--gold-pale);
+    border-radius:10px; padding:16px 18px; transition:border-color .2s ease, transform .1s ease;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .onb-choice:hover{ border-color:var(--gold); transform:translateY(-1px); }
+  .onb-choice-title{ font-family:var(--sans); font-weight:700; font-size:15px; color:var(--ink); }
+  .onb-choice-desc{ font-family:var(--sans); font-size:13px; color:var(--ink-soft); line-height:1.45; }
+  .onb-progress{
+    position:fixed; left:50%; transform:translateX(-50%); top:auto; bottom:20px; z-index:9998;
+    display:flex; align-items:center; gap:12px;
+    background:var(--ink); color:var(--paper-soft); border-radius:999px; padding:8px 10px 8px 18px;
+    box-shadow:0 8px 30px rgba(26,22,18,.28); font-family:var(--sans); font-size:13px;
+  }
+  .onb-progress[hidden]{ display:none; }
+  .onb-progress-label{ white-space:nowrap; }
+  .onb-progress-steps{ display:flex; gap:6px; }
+  .onb-step{
+    width:24px; height:24px; border-radius:50%; cursor:pointer;
+    border:1px solid rgba(247,241,227,.3); background:transparent; color:var(--paper-soft);
+    font-size:12px; font-weight:600; line-height:1; transition:background .2s ease;
+  }
+  .onb-step.current{ background:var(--gold); border-color:var(--gold); color:var(--ink); }
+  .onb-step.done{ background:rgba(184,137,59,.35); border-color:transparent; }
+  .onb-progress-next{ cursor:pointer; background:var(--gold); color:var(--ink); border:none; border-radius:999px; padding:6px 14px; font-size:13px; font-weight:700; font-family:var(--sans); }
+  .onb-progress-close{ cursor:pointer; background:transparent; border:none; color:rgba(247,241,227,.6); font-size:18px; line-height:1; padding:0 4px; }
+  .onb-progress-close:hover{ color:var(--paper-soft); }
+  @media(max-width:560px){ .onb-progress{ left:12px; right:12px; transform:none; flex-wrap:wrap; justify-content:center; border-radius:14px; } .onb-progress-label{ white-space:normal; } }
 </style>
 <div class="return-toast" id="return-toast" role="status" aria-live="polite">
   <span class="return-toast-dot"></span>
   <span class="return-toast-text">Bon retour — tes données sont restaurées.</span>
+</div>
+
+<!-- ══ Onboarding inversé (Feature 6) — overlay masqué par défaut ══ -->
+<div class="onb-overlay" id="onb-overlay" role="dialog" aria-modal="true" aria-labelledby="onb-title" hidden>
+  <div class="onb-card">
+    <div class="onb-eyebrow">Avant de commencer</div>
+    <h2 class="onb-title" id="onb-title">Tu débarques, ou tu connais déjà&nbsp;?</h2>
+    <p class="onb-sub">Deux façons de lire ce livre — tu pourras changer d'avis à tout moment.</p>
+    <div class="onb-choices">
+      <button class="onb-choice" type="button" onclick="chooseOnboarding('guided')">
+        <span class="onb-choice-title">Je débarque</span>
+        <span class="onb-choice-desc">Guide-moi pas à pas : budget, puis portefeuille, puis impôts.</span>
+      </button>
+      <button class="onb-choice" type="button" onclick="chooseOnboarding('free')">
+        <span class="onb-choice-title">Je suis à l'aise</span>
+        <span class="onb-choice-desc">Laisse-moi naviguer librement, je sais où je vais.</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="onb-progress" id="onb-progress" hidden>
+  <span class="onb-progress-label" id="onb-progress-label">Parcours guidé · Étape 1/3 — Budget</span>
+  <div class="onb-progress-steps">
+    <button class="onb-step" type="button" onclick="onbGoTo(0)" aria-label="Aller au chapitre Budget">1</button>
+    <button class="onb-step" type="button" onclick="onbGoTo(1)" aria-label="Aller au chapitre Portefeuille">2</button>
+    <button class="onb-step" type="button" onclick="onbGoTo(2)" aria-label="Aller au chapitre Fiscalité">3</button>
+  </div>
+  <button class="onb-progress-next" type="button" onclick="onbNext()">Suivant ›</button>
+  <button class="onb-progress-close" type="button" onclick="onbExitGuided()" title="Quitter le parcours guidé" aria-label="Quitter le parcours guidé">×</button>
 </div>
 
 <script>
@@ -8430,6 +8504,7 @@ section[style*="padding:80px 0"] {
 
 const STATE = {
   schemaVersion: 1,
+  onboarding: { completed: false, mode: null },  // mode: 'guided' | 'free' (Feature 6)
   budget: {
     incomeTotal: 0,
     fixedTotal: 0,
@@ -8496,6 +8571,7 @@ function saveState() {
     const { priorities, ...investorSer } = STATE.investor;
     const ser = {
       schemaVersion: SCHEMA_VERSION,
+      onboarding: STATE.onboarding,
       investor: investorSer
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ser));
@@ -8517,6 +8593,7 @@ function loadState() {
       localStorage.removeItem(STORAGE_KEY);
       return false;
     }
+    if (s.onboarding) Object.assign(STATE.onboarding, s.onboarding);
     if (s.investor) {
       const { priorities, ...rest } = s.investor;  // priorities (Set) : jamais persisté
       Object.assign(STATE.investor, rest);
@@ -11536,6 +11613,9 @@ function init() {
     if (portfolioEmpty && !STATE.investor.profile) portfolioEmpty.style.display = 'block';
   } catch(e) { console.error('[init] force-clean investor state:', e); }
 
+  // Onboarding inversé (Feature 6) : overlay à la 1re visite, sinon indicateur si mode guidé.
+  try { initOnboarding(); } catch(e) { console.error('[init] initOnboarding:', e); }
+
   // Bon retour : si un état a été restauré, afficher un toast discret (auto-masqué à 5 s).
   if (_restored) { try { showReturnToast(); } catch(e) { console.error('[init] showReturnToast:', e); } }
 
@@ -11555,6 +11635,73 @@ function resetEverything() {
     ['lplr-v1', 'lplr-v2', 'lplr-v3', STORAGE_KEY].forEach(k => localStorage.removeItem(k));
   } catch(e) { /* silence */ }
   location.reload();
+}
+
+// ─── Feature 6 : onboarding inversé (première visite) ───
+const ONB_STEPS = [
+  { anchor: 'chap1-cover', label: 'Budget' },
+  { anchor: 'chap2-cover', label: 'Portefeuille' },
+  { anchor: 'chap3-cover', label: 'Fiscalité' }
+];
+let __onbStep = 0;
+
+// Au load : overlay seulement à la 1re visite ; sinon réaffiche l'indicateur si mode guidé.
+function initOnboarding() {
+  if (!STATE.onboarding) STATE.onboarding = { completed: false, mode: null };
+  if (STATE.onboarding.completed) {
+    if (STATE.onboarding.mode === 'guided') showGuidedProgress();
+    return;
+  }
+  const ov = document.getElementById('onb-overlay');
+  if (ov) ov.hidden = false;
+}
+
+function chooseOnboarding(mode) {
+  STATE.onboarding = { completed: true, mode: mode };
+  saveState();
+  const ov = document.getElementById('onb-overlay');
+  if (ov) ov.hidden = true;
+  if (mode === 'guided') { showGuidedProgress(); onbGoTo(0); }
+}
+
+function showGuidedProgress() {
+  const el = document.getElementById('onb-progress');
+  if (el) el.hidden = false;
+  onbSetStep(0);
+}
+
+function onbSetStep(i) {
+  __onbStep = Math.max(0, Math.min(ONB_STEPS.length - 1, i));
+  const lbl = document.getElementById('onb-progress-label');
+  if (lbl) lbl.textContent = 'Parcours guidé · Étape ' + (__onbStep + 1) + '/3 — ' + ONB_STEPS[__onbStep].label;
+  document.querySelectorAll('#onb-progress .onb-step').forEach((btn, idx) => {
+    btn.classList.toggle('done', idx < __onbStep);
+    btn.classList.toggle('current', idx === __onbStep);
+  });
+}
+
+function onbGoTo(i) {
+  onbSetStep(i);
+  navTo(ONB_STEPS[__onbStep].anchor);
+}
+
+function onbNext() {
+  if (__onbStep >= ONB_STEPS.length - 1) { onbExitGuided(); return; }  // fin du parcours
+  onbGoTo(__onbStep + 1);
+}
+
+function onbExitGuided() {
+  const el = document.getElementById('onb-progress');
+  if (el) el.hidden = true;
+  if (STATE.onboarding) { STATE.onboarding.mode = 'free'; saveState(); }
+}
+
+// Relance depuis le footer (le parcours reste une suggestion, jamais une prison).
+function restartGuided() {
+  STATE.onboarding = { completed: true, mode: 'guided' };
+  saveState();
+  showGuidedProgress();
+  onbGoTo(0);
 }
 
 // Stub : initFeedbackForm conservée en no-op (le formulaire a été retiré, mais init() appelle encore cette fonction)
