@@ -11201,13 +11201,20 @@ function bindGlobalNav() {
 }
 
 function restoreUIFromState() {
+  // ── LIMITE CONNUE (reportée) : le budget n'est PAS réinjecté dans les inputs ici.
+  // STATE.budget (totaux uniquement) est bien persisté, mais budgetCompute() relit les
+  // inputs vides au load et écrase les totaux restaurés. Restaurer le budget visuellement
+  // nécessite soit d'injecter les totaux dans un champ par liste (lossy), soit de persister
+  // chaque ligne (changement de schéma). Décision produit : traité dans une tâche dédiée.
   // ── Investisseur : restaurer le quiz (réponses + step) ──
   const q = STATE.investor.quiz;
   if (q && q.answers) {
     const keys = Object.keys(q.answers);
-    // Si on détecte un ancien format (5 questions : filet/concentration/experience),
-    // on reset proprement — incompatible avec le quiz 3 questions actuel
-    const hasLegacy = keys.some(k => ['filet', 'concentration', 'experience'].includes(k));
+    // Si on détecte un ancien format, on reset proprement — incompatible avec le quiz actuel.
+    // NB : marqueurs = clés EXCLUSIVES à l'ancien quiz (filet/concentration). 'experience' a été
+    // retiré de cette liste : c'est aussi une clé du quiz actuel (horizon/poids/tolerance/experience),
+    // donc l'y laisser réinitialisait à tort tout quiz complété au rechargement.
+    const hasLegacy = keys.some(k => ['filet', 'concentration'].includes(k));
     if (hasLegacy) {
       STATE.investor.quiz = { currentStep: 1, answers: {}, stopped: null, completed: false };
       STATE.investor.answers = {};
