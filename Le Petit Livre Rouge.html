@@ -2004,6 +2004,12 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
   color: var(--muted);
   line-height: 1.4;
 }
+/* ── Textes adaptatifs selon le baromètre de connaissance (Feature 3) ── */
+[data-adaptive] > [data-level] { display: none; }
+[data-adaptive].lvl-novice > [data-level="novice"],
+[data-adaptive].lvl-initie > [data-level="initie"] { display: block; }
+/* Anti-FOUC : tant que le JS n'a pas posé la classe, on affiche la version Novice */
+[data-adaptive]:not(.lvl-novice):not(.lvl-initie) > [data-level="novice"] { display: block; }
 
 /* Stress-test rétrospectif */
 .pc-stresstest {
@@ -5228,7 +5234,10 @@ section[style*="padding:80px 0"] {
           <div class="notion-arrow">›</div>
         </div>
         <div class="notion-body">
-          <p>Chaque année, l’argent que tu places te rapporte un certain pourcentage. L’année suivante, ce pourcentage s’applique <strong>non seulement à ton capital de départ, mais aussi à tous les gains que tu as déjà accumulés</strong>. Tes gains génèrent leurs propres gains. C’est ça, les intérêts composés.</p>
+          <div data-adaptive>
+            <p data-level="novice">Chaque année, l’argent que tu places te rapporte un certain pourcentage. L’année suivante, ce pourcentage s’applique <strong>non seulement à ton capital de départ, mais aussi à tous les gains que tu as déjà accumulés</strong>. Tes gains génèrent leurs propres gains. C’est l’effet boule de neige : minuscule au départ, énorme avec le temps.</p>
+            <p data-level="initie">Capitalisation : les gains réinvestis produisent à leur tour des gains, d’où une croissance <strong>exponentielle, pas linéaire</strong>. À 7 %/an, le capital double tous les ~10 ans (règle des 72 : 72 ÷ taux ≈ années pour doubler). Le facteur dominant n’est pas le montant versé, c’est <strong>la durée de capitalisation</strong>.</p>
+          </div>
           <p>Chiffres concrets : <strong>10 000 €</strong> placés à 7 % par an deviennent 19 700 € au bout de 10 ans, 38 700 € au bout de 20 ans, et <strong>76 100 € au bout de 30 ans</strong> — sans avoir ajouté un seul euro supplémentaire entre-temps.</p>
           <p>L’ingrédient principal n’est pas le montant que tu places, c’est <strong>le temps que tu laisses tourner</strong>. Un euro placé à 25 ans pèsera, à 65 ans, davantage que dix euros placés à 45 ans. Commencer tôt vaut bien plus que placer beaucoup plus tard.</p>
         </div>
@@ -5244,7 +5253,10 @@ section[style*="padding:80px 0"] {
           <div class="notion-arrow">›</div>
         </div>
         <div class="notion-body">
-          <p>Imagine que tu places 100 % de ton argent dans les actions d’une seule entreprise. Si elle fait faillite — comme <strong>Lehman Brothers en 2008</strong>, Kodak avant elle, ou Wirecard plus récemment — tu perds tout. Définitivement, sans recours.</p>
+          <div data-adaptive>
+            <p data-level="novice">Imagine que tu places 100 % de ton argent dans les actions d’une seule entreprise. Si elle fait faillite — comme <strong>Lehman Brothers en 2008</strong>, Kodak avant elle, ou Wirecard plus récemment — tu perds tout. Définitivement, sans recours. C’est le « ne mets pas tous tes œufs dans le même panier », version portefeuille.</p>
+            <p data-level="initie">Répartir sur des centaines de lignes élimine le <strong>risque spécifique</strong> (idiosyncratique) sans réduire le rendement espéré : une position qui pèse 0,05 % d’un indice large ne peut pas faire dérailler l’ensemble. Ce qui reste est le <strong>risque de marché</strong> (systématique), lui non diversifiable. C’est un repas gratuit rare en finance.</p>
+          </div>
           <p>Avec un ETF MSCI World, tu détiens <strong>1 500 entreprises en même temps</strong>. Si l’une d’elles disparaît, tu ne le sens même pas passer : elle représentait au mieux 0,05 % de ton portefeuille. Les 1 499 autres continuent de tourner.</p>
           <p>La diversification ne fait pas disparaître le risque — elle le rend <strong>supportable et statistiquement gagnant</strong>. Sur 15 ans glissants, le MSCI World n’a jamais perdu d’argent depuis sa création en 1969. Pas une seule fois. C’est la véritable assurance contre les coups durs.</p>
         </div>
@@ -5260,7 +5272,10 @@ section[style*="padding:80px 0"] {
           <div class="notion-arrow">›</div>
         </div>
         <div class="notion-body">
-          <p>Un <strong>ETF</strong> (en français, un « fonds indiciel ») est un panier d’actions prêt à l’emploi. Au lieu d’acheter Apple + Microsoft + LVMH + Nestlé + 1 500 autres une par une, tu achètes <strong>une seule chose</strong> — l’ETF — et tu deviens automatiquement propriétaire d’une mini-part de chacune des 1 500 entreprises qu’il contient.</p>
+          <div data-adaptive>
+            <p data-level="novice">Un <strong>ETF</strong> (en français, un « fonds indiciel ») est un panier d’actions prêt à l’emploi. Au lieu d’acheter Apple + Microsoft + LVMH + Nestlé + 1 500 autres une par une, tu achètes <strong>une seule chose</strong> — l’ETF — et tu deviens automatiquement propriétaire d’une mini-part de chacune. C’est le caddie déjà rempli, au lieu de courir après chaque produit du rayon.</p>
+            <p data-level="initie"><strong>ETF</strong> (fonds indiciel coté) : il réplique un indice — le MSCI World, ~1 500 grandes capitalisations de 23 pays développés — pour ~0,2 %/an de frais, contre ~2 % pour un fonds géré. Tu détiens chaque ligne au prorata de sa capitalisation, sans gérant ni arbitrage discrétionnaire. Vise un <strong>ETF UCITS capitalisant</strong>, et éligible PEA quand c’est possible.</p>
+          </div>
           <p>Le plus connu, le <strong>MSCI World</strong>, contient les 1 500 plus grandes entreprises de 23 pays développés. En achetant une seule part (environ <strong>5 €</strong>), tu possèdes un morceau d’Apple, de Microsoft, de L’Oréal, de Toyota, de Nestlé, en proportions automatiques.</p>
           <p>Avantage caché mais énorme : <strong>les frais sont 10 fois inférieurs</strong> à ceux d’un fonds géré par une banque (~0,2 % par an contre ~2 %). Sur 30 ans, cet écart vaut souvent <strong>plusieurs centaines de milliers d’euros</strong>. Les ETF ont rendu l’investissement enfin accessible — et enfin rentable — pour tout le monde.</p>
         </div>
@@ -5276,7 +5291,10 @@ section[style*="padding:80px 0"] {
           <div class="notion-arrow">›</div>
         </div>
         <div class="notion-body">
-          <p><strong>DCA</strong> signifie <em>Dollar Cost Averaging</em> — investir un montant fixe à intervalle régulier. En pratique : tu programmes un virement automatique de, disons, 200 € le 5 de chaque mois, vers ton portefeuille. Et c’est tout. Tu ne touches plus à rien.</p>
+          <div data-adaptive>
+            <p data-level="novice"><strong>DCA</strong> signifie <em>Dollar Cost Averaging</em> — investir un montant fixe à intervalle régulier. En pratique : tu programmes un virement automatique de, disons, 200 € le 5 de chaque mois, vers ton portefeuille. Et c’est tout. Quand les prix montent tu achètes un peu moins, quand ils baissent un peu plus — sans jamais avoir à deviner le bon moment.</p>
+            <p data-level="initie"><strong>DCA</strong> (<em>Dollar Cost Averaging</em>) : versements périodiques à montant constant. Mécaniquement, ton <strong>prix de revient moyen est lissé</strong> et tu supprimes le risque de timing (entrer au plus haut). Face à un investissement en une fois (<em>lump sum</em>), il y a un coût d’opportunité en marché haussier, mais le DCA neutralise surtout le <strong>risque comportemental</strong> — le tien.</p>
+          </div>
           <p>Pourquoi ça marche : quand la Bourse est haute, tes 200 € achètent peu de parts ; quand elle baisse, ils en achètent beaucoup plus. Sur 20 ans, ton prix d’achat moyen se lisse tout seul, et tu n’as <strong>plus jamais à te demander « est-ce le bon moment ? »</strong> — la réponse est invariablement : « maintenant, comme tous les mois ».</p>
           <p>Le vrai bénéfice est psychologique. <strong>L’automatisation te protège de toi-même</strong> : de la tentation de vendre quand ça baisse, d’attendre quand ça monte, d’arrêter quand t’as la flemme. Programme-le le jour du salaire — ce que tu ne vois pas passer, tu ne le dépenses pas.</p>
         </div>
@@ -5291,7 +5309,10 @@ section[style*="padding:80px 0"] {
   <div class="container">
     <div class="envelopes-intro">
       <h3 class="envelopes-intro-title">Où mettre ton argent — <em>les 3 enveloppes fiscales</em></h3>
-      <p class="envelopes-intro-text">L’enveloppe, c’est le « contenant fiscal » qui détermine combien d’impôts tu paieras sur tes gains. Le choix est aussi important que le placement lui-même.</p>
+      <div data-adaptive>
+        <p class="envelopes-intro-text" data-level="novice">L’enveloppe, c’est le « contenant fiscal » qui détermine combien d’impôts tu paieras sur tes gains. Le même ETF rapporte beaucoup plus dans un <strong>PEA</strong> (Plan d’Épargne en Actions) que sur un compte ordinaire, juste à cause de la fiscalité. Le choix de l’enveloppe est aussi important que le placement lui-même.</p>
+        <p class="envelopes-intro-text" data-level="initie">L’enveloppe est le régime fiscal qui encadre tes placements. À gain identique, le net après impôt varie fortement : <strong>PEA</strong> &gt; 5 ans → 0 % d’IR (seulement 18,6 % de PS), <strong>AV</strong> &gt; 8 ans → ~26,1 %, <strong>CTO</strong> → PFU 31,4 %. Choisir l’enveloppe avant le support, c’est optimiser le rendement net sans prendre un euro de risque en plus.</p>
+      </div>
     </div>
     <div class="envelopes-grid">
       <!-- PEA -->
@@ -11497,6 +11518,21 @@ const FP_LABELS = {
   10: 'Au top, tu peux l\u2019enseigner'
 };
 
+// ─── Feature 3 : textes adaptatifs selon le baromètre (Novice 0-5 / Initié 6-10) ───
+function adaptiveLevelFromKnowledge(k) {
+  const v = (typeof k === 'number') ? k
+          : (typeof STATE !== 'undefined' && STATE.investor ? STATE.investor.financeKnowledge : undefined);
+  return (typeof v === 'number' && v >= 6) ? 'initie' : 'novice';
+}
+// Affiche la variante du niveau voulu pour chaque [data-adaptive] (cache l'autre).
+function applyAdaptiveTexts(level) {
+  const lvl = (level === 'initie' || level === 'novice') ? level : adaptiveLevelFromKnowledge();
+  document.querySelectorAll('[data-adaptive]').forEach(el => {
+    el.classList.remove('lvl-novice', 'lvl-initie');
+    el.classList.add('lvl-' + lvl);
+  });
+}
+
 function initFearPrelude() {
   const input = document.getElementById('fp-input');
   const numEl = document.getElementById('fp-num');
@@ -11520,6 +11556,8 @@ function initFearPrelude() {
       STATE.investor.financeKnowledge = safe;
       if (typeof saveState === 'function') saveState();
     }
+    // Re-render des textes adaptatifs (Feature 3) : seuil 0-5 Novice / 6-10 Initié
+    applyAdaptiveTexts(safe >= 6 ? 'initie' : 'novice');
   }
 
   // Restaure depuis le state si déjà rempli (compat : ancien nom financeAnxiety ignoré, c'était une autre dimension)
