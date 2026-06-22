@@ -8433,13 +8433,13 @@ function saveState() {
   // sauvegarderait l'état par défaut et écraserait les vraies données avant leur restauration.
   if (!window.__bootstrapped) return;
   try {
-    // Persistés : budget + chapitre 2 (questionnaire/profil/portefeuille/simulateurs).
-    // NON persistée : la fiscalité (STATE.fisc) — décision produit, saisie fraîche à chaque session.
+    // Persisté : UNIQUEMENT le chapitre 2 (questionnaire/profil/baromètre/portefeuille/simulateurs).
+    // NON persistés (décision produit) : le budget (STATE.budget) ET la fiscalité (STATE.fisc)
+    // — saisie fraîche à chaque session.
     // priorities est un Set (non sérialisable) et n'est pas mémorisé.
     const { priorities, ...investorSer } = STATE.investor;
     const ser = {
       schemaVersion: SCHEMA_VERSION,
-      budget: STATE.budget,
       investor: investorSer
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ser));
@@ -8461,12 +8461,11 @@ function loadState() {
       localStorage.removeItem(STORAGE_KEY);
       return false;
     }
-    if (s.budget) Object.assign(STATE.budget, s.budget);
     if (s.investor) {
       const { priorities, ...rest } = s.investor;  // priorities (Set) : jamais persisté
       Object.assign(STATE.investor, rest);
     }
-    // STATE.fisc : volontairement non restauré (jamais persisté).
+    // STATE.budget et STATE.fisc : volontairement non restaurés (jamais persistés).
     return true;
   } catch(e) { /* silence */ return false; }
 }
@@ -11201,11 +11200,6 @@ function bindGlobalNav() {
 }
 
 function restoreUIFromState() {
-  // ── LIMITE CONNUE (reportée) : le budget n'est PAS réinjecté dans les inputs ici.
-  // STATE.budget (totaux uniquement) est bien persisté, mais budgetCompute() relit les
-  // inputs vides au load et écrase les totaux restaurés. Restaurer le budget visuellement
-  // nécessite soit d'injecter les totaux dans un champ par liste (lossy), soit de persister
-  // chaque ligne (changement de schéma). Décision produit : traité dans une tâche dédiée.
   // ── Investisseur : restaurer le quiz (réponses + step) ──
   const q = STATE.investor.quiz;
   if (q && q.answers) {
