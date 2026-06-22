@@ -2004,6 +2004,22 @@ section { padding: 72px 0; scroll-margin-top: 130px; }
   color: var(--muted);
   line-height: 1.4;
 }
+/* ── Profil v2 : lecture capacité × tempérament ── */
+.pc-signature-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.pc-signature-head .pc-signature-title { margin-bottom: 0; }
+.pc-coherence { font-family: var(--sans); font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pc-coherence.coh-high { background: rgba(58,84,24,0.12); color: #3A5418; }
+.pc-coherence.coh-mid  { background: var(--gold-pale); color: var(--gold-dark); }
+.pc-coherence.coh-low  { background: var(--red-bg); color: var(--red-text); }
+.pc-dualaxes { display: flex; flex-direction: column; gap: 11px; }
+.pc-axis.pc-dual .pc-axis-lbl em { font-style: italic; color: var(--muted); font-weight: 400; }
+.pc-axis.pc-dual.binding .pc-axis-fill { background: linear-gradient(90deg, var(--red-book) 0%, var(--red-book-deep) 100%); }
+.pc-axis.pc-dual.binding .pc-axis-lbl { color: var(--ink); font-weight: 700; }
+.pc-reading { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.pc-binding { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--red-text); }
+.pc-binding.is-aligned { color: #3A5418; }
+.pc-leaning { font-family: var(--sans); font-size: 13px; font-style: italic; color: var(--muted); }
+.pc-reading-note { font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--border-soft); }
 /* ── Textes adaptatifs selon le baromètre de connaissance (Feature 3) ── */
 [data-adaptive] > [data-level] { display: none; }
 [data-adaptive].lvl-novice > [data-level="novice"],
@@ -5448,8 +5464,8 @@ section[style*="padding:80px 0"] {
   <div class="container">
     <div class="section-head reveal visible">
       <p class="section-eyebrow">Étape 2</p>
-      <h2 class="section-title">Ton <em>profil</em> en quatre questions</h2>
-      <p class="section-sub">Quatre questions, une à la fois. Sois honnête : un mauvais auto-diagnostic ici mène à des décisions qu’on regrette en cas de coup dur. Le bon profil n’est pas le plus ambitieux — c’est celui dont tu ne sortiras pas le jour où ça tangue.</p>
+      <h2 class="section-title">Ton <em>profil</em>, pour de vrai</h2>
+      <p class="section-sub">On mesure deux choses séparément : <strong>ce que tu peux te permettre</strong> (ton horizon, ta situation) et <strong>ce que tu supportes</strong> (ton cran face à une chute). Le profil retenu est le plus prudent des deux — la règle des vrais conseillers. Sois honnête : le bon profil n’est pas le plus ambitieux, c’est celui dont tu ne sortiras pas le jour où ça tangue.</p>
     </div>
 
     <div class="fear-prelude reveal visible">
@@ -5476,13 +5492,14 @@ section[style*="padding:80px 0"] {
           <span class="qsp-dot" data-step="2"></span>
           <span class="qsp-dot" data-step="3"></span>
           <span class="qsp-dot" data-step="4"></span>
+          <span class="qsp-dot" data-step="5"></span>
         </div>
       </div>
 
       <!-- ── Q1 : HORIZON ── -->
       <div class="qs-question active" data-quiz-step="1" data-quiz-key="horizon">
         <div class="qq-numeral">I</div>
-        <div class="qq-eyebrow">Question 1 sur 4 · L’engagement</div>
+        <div class="qq-eyebrow">Question 1 · L’horizon — ta capacité</div>
         <h3 class="qq-title">Combien d’années tu peux le laisser travailler ?</h3>
         <p class="qq-context">L’argent placé en Bourse doit pouvoir <strong>dormir sans drame</strong>. Un marché peut tanguer 18 à 24 mois en crise — il faut pouvoir attendre la remontée sans devoir vendre. <em>Sois réaliste, pas optimiste.</em></p>
         <div class="qq-options">
@@ -5520,7 +5537,7 @@ section[style*="padding:80px 0"] {
       <!-- ── Q2 : TOLÉRANCE ── -->
       <div class="qs-question" data-quiz-step="2" data-quiz-key="tolerance">
         <div class="qq-numeral">II</div>
-        <div class="qq-eyebrow">Question 2 sur 4 · Le test de vérité</div>
+        <div class="qq-eyebrow">Question 2 · Le test de vérité — ton tempérament</div>
         <h3 class="qq-title">Tu réagis comment, vraiment ?</h3>
         <p class="qq-context"><strong>Imagine.</strong> Tu as suivi ton plan pendant 6 mois. Un matin tu ouvres ton appli bancaire : tu avais mis <strong>5 000 €</strong>, il en reste <strong>3 500 €</strong>. <strong>–30 % en 6 mois.</strong> Sincèrement — pas ce que tu penses qu’il faudrait faire, mais ce que tu <strong>ferais vraiment</strong> — tu fais quoi ?</p>
         <div class="qq-options">
@@ -5558,7 +5575,7 @@ section[style*="padding:80px 0"] {
       <!-- ── Q3 : POIDS DANS L'ÉPARGNE ── -->
       <div class="qs-question" data-quiz-step="3" data-quiz-key="poids">
         <div class="qq-numeral">III</div>
-        <div class="qq-eyebrow">Question 3 sur 4 · Le poids</div>
+        <div class="qq-eyebrow">Question 3 · Le poids — ta capacité</div>
         <h3 class="qq-title">Ça représente quoi pour toi ?</h3>
         <p class="qq-context">Cet argent que tu veux placer, par rapport à <strong>tout ton patrimoine</strong> (hors résidence principale), c’est…</p>
         <div class="qq-options">
@@ -5596,7 +5613,7 @@ section[style*="padding:80px 0"] {
       <!-- ── Q4 : EXPÉRIENCE PASSÉE ── -->
       <div class="qs-question" data-quiz-step="4" data-quiz-key="experience">
         <div class="qq-numeral">IV</div>
-        <div class="qq-eyebrow">Question 4 sur 4 · L’expérience</div>
+        <div class="qq-eyebrow">Question 4 · L’expérience — ton tempérament</div>
         <h3 class="qq-title">T’as déjà eu de l’argent qui pouvait perdre ?</h3>
         <p class="qq-context">Bourse, crypto, actions individuelles, métaux précieux… <strong>L’expérience passée est très prédictive</strong> de comment tu vas vivre les chutes du marché. Si t’es jamais passé par là, pas grave — c’est juste utile à savoir.</p>
         <div class="qq-options">
@@ -5631,6 +5648,75 @@ section[style*="padding:80px 0"] {
         </div>
       </div>
 
+      <!-- ── Q5 : COUSSIN DE PRÉCAUTION (capacité) ── -->
+      <div class="qs-question" data-quiz-step="5" data-quiz-key="precaution">
+        <div class="qq-numeral">V</div>
+        <div class="qq-eyebrow">Question 5 · Le filet de sécurité — ta capacité</div>
+        <h3 class="qq-title">Si un gros imprévu tombe demain, t’as de quoi voir venir&nbsp;?</h3>
+        <p class="qq-context">Perte d’emploi, gros pépin, voiture qui lâche… <strong>l’argent investi doit pouvoir rester investi.</strong> Si tu dois le retirer en catastrophe au pire moment, tu transformes une baisse passagère en perte définitive. As-tu un <strong>coussin de précaution</strong> (Livret A) <em>à côté</em> de cet argent&nbsp;?</p>
+        <div class="qq-options">
+          <button class="qq-opt" data-val="1" type="button">
+            <span class="qqo-letter">A</span>
+            <span class="qqo-body">
+              <strong>Non, rien de vraiment de côté</strong>
+              <em>cet argent, c’est aussi mon filet en cas de coup dur</em>
+            </span>
+          </button>
+          <button class="qq-opt" data-val="2" type="button">
+            <span class="qqo-letter">B</span>
+            <span class="qqo-body">
+              <strong>Un petit peu — moins d’un mois de dépenses</strong>
+              <em>de quoi encaisser une tuile, pas une vraie galère</em>
+            </span>
+          </button>
+          <button class="qq-opt" data-val="3" type="button">
+            <span class="qqo-letter">C</span>
+            <span class="qqo-body">
+              <strong>Oui, 3 à 6 mois de dépenses de côté</strong>
+              <em>le matelas conseillé, sur un Livret A séparé</em>
+            </span>
+          </button>
+          <button class="qq-opt" data-val="4" type="button">
+            <span class="qqo-letter">D</span>
+            <span class="qqo-body">
+              <strong>Oui, largement plus de 6 mois</strong>
+              <em>je suis large, cet argent est vraiment du surplus</em>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Q6 : DÉPARTAGE ADAPTATIF (n'apparaît que si capacité ≠ tempérament) ── -->
+      <div class="qs-question" data-quiz-step="6" data-quiz-key="arbitrage">
+        <div class="qq-numeral">VI</div>
+        <div class="qq-eyebrow">Une dernière — pour trancher juste</div>
+        <h3 class="qq-title">Tes réponses tirent dans deux directions. Au fond, qu’est-ce qui prime&nbsp;?</h3>
+        <p class="qq-context">Ce que tu <strong>peux</strong> te permettre et ce que tu <strong>supportes</strong> ne disent pas tout à fait la même chose — c’est fréquent, et ce n’est pas un défaut. Pour trancher au plus juste, dis-nous ce qui compte le plus pour <em>toi</em>, maintenant.</p>
+        <div class="qq-options">
+          <button class="qq-opt" data-val="1" type="button">
+            <span class="qqo-letter">A</span>
+            <span class="qqo-body">
+              <strong>Surtout ne pas voir ce capital fondre</strong>
+              <em>je dors mieux en sécurité, même si ça rapporte moins</em>
+            </span>
+          </button>
+          <button class="qq-opt" data-val="2" type="button">
+            <span class="qqo-letter">B</span>
+            <span class="qqo-body">
+              <strong>Un équilibre entre les deux</strong>
+              <em>grandir, mais sans montagnes russes</em>
+            </span>
+          </button>
+          <button class="qq-opt" data-val="3" type="button">
+            <span class="qqo-letter">C</span>
+            <span class="qqo-body">
+              <strong>Le faire vraiment croître</strong>
+              <em>j’accepte les baisses si le rendement est au rendez-vous</em>
+            </span>
+          </button>
+        </div>
+      </div>
+
       <!-- ── ÉCRAN RÉSULTAT — Carte d'identité d'investisseur ── -->
       <div class="qs-result" id="qs-result" hidden>
         <div class="profile-card">
@@ -5647,29 +5733,29 @@ section[style*="padding:80px 0"] {
           <!-- Phrase comportementale, l'idée centrale -->
           <p class="pc-keyphrase" id="pc-keyphrase">Tu es le type qui vise 15-20 ans, mais qui vérifie son app trop souvent.</p>
 
-          <!-- Signature : 3 axes calculés depuis les réponses (Feature 2) -->
+          <!-- Lecture capacité × tempérament (Profil v2) -->
           <div class="pc-signature">
-            <div class="pc-signature-title">Ta signature</div>
-            <div class="pc-axes">
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Tolérance au risque</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-risque-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-risque-pct">0%</span>
-                <span class="pc-axis-note" id="pc-axis-risque-note"></span>
+            <div class="pc-signature-head">
+              <div class="pc-signature-title">Ta lecture — capacité contre tempérament</div>
+              <span class="pc-coherence coh-mid" id="pc-coherence">Lecture nuancée</span>
+            </div>
+            <div class="pc-dualaxes">
+              <div class="pc-axis pc-dual" id="pc-cap-axis">
+                <span class="pc-axis-lbl">Ce que tu peux te permettre <em>· capacité</em></span>
+                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-cap-fill" style="width:0%"></div></div>
+                <span class="pc-axis-pct" id="pc-cap-pct">0%</span>
               </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Horizon long terme</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-horizon-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-horizon-pct">0%</span>
-                <span class="pc-axis-note" id="pc-axis-horizon-note"></span>
-              </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Conviction</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-conviction-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-conviction-pct">0%</span>
-                <span class="pc-axis-note" id="pc-axis-conviction-note"></span>
+              <div class="pc-axis pc-dual" id="pc-temp-axis">
+                <span class="pc-axis-lbl">Ce que tu supportes <em>· tempérament</em></span>
+                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-temp-fill" style="width:0%"></div></div>
+                <span class="pc-axis-pct" id="pc-temp-pct">0%</span>
               </div>
             </div>
+            <div class="pc-reading">
+              <span class="pc-binding" id="pc-binding-label"></span>
+              <span class="pc-leaning" id="pc-leaning"></span>
+            </div>
+            <p class="pc-reading-note" id="pc-reading-note"></p>
           </div>
 
           <!-- Stress-test rétrospectif — l'épreuve de réalité -->
@@ -8549,9 +8635,10 @@ const STATE = {
   investor: {
     // ── Quiz step-by-step (Étape 2) ──
     quiz: {
-      currentStep: 1,             // 1..5
-      answers: {},                // { horizon: 1..4, filet: 1..4, concentration: 1..4, tolerance: 1..4, experience: 1..4 }
-      stopped: null,              // 'horizon' | 'filet' | null
+      currentStep: 1,             // 1..6
+      totalSteps: 5,              // 5 de base, 6 si départage adaptatif déclenché
+      answers: {},                // { horizon, tolerance, poids, experience, precaution, arbitrage? } : 1..4
+      stopped: null,
       completed: false
     },
     // ── Legacy compat ──
@@ -9164,7 +9251,7 @@ let investorDonut = null;
 //  Plus de jauge spectrum, plus de STOPs : caps internes dans le scoring.
 // ═══════════════════════════════════════════════════════════════════════
 
-const QUIZ_KEYS = ['horizon', 'tolerance', 'poids', 'experience'];
+const QUIZ_KEYS = ['horizon', 'tolerance', 'poids', 'experience', 'precaution'];
 
 const PROFILE_TAGLINES_Q = {
   prudent:   "Préserver d'abord. Croissance modérée, sommeil tranquille.",
@@ -9304,52 +9391,145 @@ const PROFILE_ALLOCATION_Q = {
 
 const PROFILE_RATE_Q = { prudent: 0.041, equilibre: 0.062, dynamique: 0.076, offensif: 0.086 };
 
-// ─── Détermination du profil après 4 réponses ───
-function quizDetermineProfile(answers) {
-  // Score asymétrique : la tolérance pèse le plus, c'est la plus prédictive.
-  // L'expérience modère sans dominer (poids modéré pour ne pas écraser les autres).
-  const horizonMap    = { 1: -2, 2:  1, 3:  3, 4:  4 };
-  const toleranceMap  = { 1: -5, 2: -1, 3:  3, 4:  5 };
-  const poidsMap      = { 1: -3, 2:  0, 3:  2, 4:  3 };
-  const experienceMap = { 1: -1, 2: -3, 3:  1, 4:  2 };
+// ═══════════════════════════════════════════════════════════════════════
+// PROFIL v2 — deux axes indépendants : CAPACITÉ (objectif) × TEMPÉRAMENT (psy).
+// Règle d'or du conseil patrimonial : on ne prend jamais plus de risque que
+// le MINIMUM des deux. Le score ainsi obtenu est projeté sur les 4 allocations
+// calibrées (PRESETS) — qui, elles, ne changent pas.
+// ═══════════════════════════════════════════════════════════════════════
+const HORIZON_CAP = { 1: 15, 2: 50, 3: 82, 4: 95 };   // horizon = colonne vertébrale de la capacité
+const POIDS_CAP   = { 1: -35, 2: -15, 3: 0, 4: 10 };  // part du patrimoine que ça représente
+const PREC_CAP    = { 1: -30, 2: -15, 3: 0, 4: 8 };   // coussin de précaution (filet anti-vente forcée)
+const TOL_TEMP    = { 1: 12, 2: 38, 3: 68, 4: 88 };   // réaction au scénario -30 %
+const EXP_TEMP    = { 1: -5, 2: -18, 3: 10, 4: 15 };  // comportement passé révélé > intentions
 
-  const score =
-    (horizonMap[answers.horizon]       || 0) +
-    (toleranceMap[answers.tolerance]   || 0) +
-    (poidsMap[answers.poids]           || 0) +
-    (experienceMap[answers.experience] || 0);
+const clampScore = v => Math.max(0, Math.min(100, Math.round(v)));
 
-  // Range réel : -13 (tout en 1 sauf tolérance=panique) à +14 (tout en 4)
-  let key;
-  if (score <= -4)      key = 'prudent';
-  else if (score <= 6)  key = 'equilibre';
-  else if (score <= 11) key = 'dynamique';
-  else                  key = 'offensif';
+// Capacité objective à encaisser le risque (0-100). Horizon porteur, freiné par
+// la sur-concentration et l'absence de coussin (qui créent un risque de vente forcée).
+function computeCapacity(a) {
+  const h  = HORIZON_CAP[a.horizon] ?? 50;
+  const p  = POIDS_CAP[a.poids] ?? 0;
+  const pr = (a.precaution != null) ? (PREC_CAP[a.precaution] ?? 0) : 0;
+  return clampScore(h + p + pr);
+}
 
-  // Garde-fous (caps) : on dégrade mais on n'arrête jamais le user
-  const order = ['prudent', 'equilibre', 'dynamique', 'offensif'];
-  let reason = null;
-  function cap(maxKey, r) {
-    if (order.indexOf(key) > order.indexOf(maxKey)) {
-      key = maxKey;
-      if (!reason) reason = r;
-    }
+// Tempérament psychologique / volonté de risque (0-100).
+function computeTemperament(a) {
+  let t = (TOL_TEMP[a.tolerance] ?? 50) + (EXP_TEMP[a.experience] ?? 0);
+  // Sur-confiance du débutant : jamais investi mais prétend racheter à -30 % → on plafonne.
+  if (a.experience === 1 && a.tolerance === 4) t = Math.min(t, 68);
+  // Départage (q6) : affine le tempérament quand il est incertain.
+  if (a.arbitrage === 3) t += 14;        // « faire croître »
+  else if (a.arbitrage === 1) t -= 12;   // « ne pas voir baisser »
+  return clampScore(t);
+}
+
+const RISK_BANDS = [
+  { key: 'prudent',   min: 0,  max: 30 },
+  { key: 'equilibre', min: 30, max: 54 },
+  { key: 'dynamique', min: 54, max: 80 },
+  { key: 'offensif',  min: 80, max: 101 }   // l'Offensif (~90% actions) se mérite
+];
+const RISK_ORDER = ['prudent', 'equilibre', 'dynamique', 'offensif'];
+function bandForScore(s) { return (RISK_BANDS.find(b => s >= b.min && s < b.max) || RISK_BANDS[0]); }
+
+// Cœur de la détermination : min(capacité, tempérament) → profil + lecture riche.
+function determineProfileV2(a) {
+  const capacity    = computeCapacity(a);
+  const temperament = computeTemperament(a);
+  const score       = Math.min(capacity, temperament);   // la règle d'or
+  const band        = bandForScore(score);
+  const key         = band.key;
+  const binding     = (capacity <= temperament) ? 'capacity' : 'temperament';
+  const gap         = Math.abs(capacity - temperament);
+  const coherence   = gap <= 15 ? 'aligné' : (gap <= 35 ? 'nuancé' : 'contrasté');
+
+  // Nuance : position dans la bande → penche vers le voisin
+  const idx  = RISK_ORDER.indexOf(key);
+  const span = band.max - band.min;
+  const pos  = span > 0 ? (score - band.min) / span : 0.5;
+  let leaning = null;
+  if (pos > 0.72 && idx < 3) leaning = RISK_ORDER[idx + 1];
+  else if (pos < 0.28 && idx > 0) leaning = RISK_ORDER[idx - 1];
+
+  const overconfident   = (a.experience === 1 && a.tolerance === 4);
+  // Départage utile seulement quand c'est le TEMPÉRAMENT qui bride (capacité objective dispo) :
+  // clarifier la volonté peut alors légitimement faire bouger le curseur. Si la capacité plafonne,
+  // c'est objectif et non négociable → pas de question inutile.
+  const needsTiebreaker = gap > 30 && temperament < capacity && (a.arbitrage == null);
+
+  // Compat : forced/reason conservés pour tout ancien appelant.
+  return { key, capacity, temperament, score, binding, gap, coherence, leaning,
+           overconfident, needsTiebreaker, forced: false, reason: null };
+}
+
+// Note explicative dynamique (remplace les 5 notes figées) : dit CE QUI te limite.
+function profileNote(d, a) {
+  if (d.overconfident) return "Premier pas en investissement, et tu te vois déjà racheter à −30 % : possible, mais c'est le piège classique du débutant trop sûr. On tempère tant que tu ne l'as pas vécu pour de vrai.";
+  if (d.binding === 'capacity') {
+    if (a.precaution === 1) return "Tu aurais le cran pour viser plus haut — mais tu n'as pas de coussin de sécurité à côté. Sans filet, un imprévu t'obligerait à vendre au pire moment. On construit d'abord le matelas, le risque viendra après.";
+    if (a.poids === 1)      return "Le tempérament suivrait, mais cet argent est presque tout ce que tu as. Trop lourd pour jouer gros : on protège d'abord, on accélère quand tu auras un matelas séparé.";
+    if (a.horizon === 1)    return "Le frein, c'est l'horizon : sous 5 ans, la Bourse peut te coincer au mauvais moment. Ton cran suivrait, mais le temps n'est pas là.";
+    return "C'est ta capacité objective qui fixe la limite, pas ton cran. Le jour où un frein se desserre (horizon, coussin, concentration), tu pourras monter.";
   }
+  // binding === 'temperament'
+  if (a.experience === 2) return "Tu pourrais te le permettre, mais tu as déjà vendu en panique. On écoute le comportement, pas les intentions : un cran en dessous, c'est celui que tu tiendras vraiment.";
+  if (a.tolerance === 1)  return "Objectivement tu pourrais viser plus haut, mais à −30 % tu vendrais. Le bon profil n'est pas le plus ambitieux : c'est celui dont tu ne sors pas en pleine tempête.";
+  if (d.coherence === 'aligné') return "Capacité et tempérament concordent : ton profil est net. Tu peux avancer sans te poser de question.";
+  return "Tu encaisserais plus de risque que tu n'en veux : c'est ton tempérament qui mène, et c'est sain — mieux vaut tenir un profil modeste que craquer sur un profil trop ambitieux.";
+}
 
-  if (answers.tolerance === 1)                          { cap('prudent',   'panic_full');     }
-  if (answers.horizon === 1)                            { cap('equilibre', 'short_horizon'); }
-  if (answers.poids === 1)                              { cap('equilibre', 'concentration'); }
-  if (answers.experience === 2)                         { cap('equilibre', 'past_panic');    }
-  // Garde-fou sur-confiance : jamais investi + prétend racheter à -30 % → cap Dynamique
-  if (answers.experience === 1 && answers.tolerance === 4) { cap('dynamique', 'overconfidence'); }
+// ─── Compat : ancienne signature, désormais adossée au moteur v2 ───
+function quizDetermineProfile(answers) {
+  return determineProfileV2(answers);
+}
 
-  return { key: key, forced: (reason !== null), reason: reason };
+// ─── Rendu de la lecture capacité × tempérament dans la carte profil ───
+function renderProfileReading(d) {
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  // Quand les deux axes concordent (aligné), aucune contrainte ne « bride » : pas de rouge.
+  const showBinding = (d.coherence !== 'aligné');
+  [['cap', d.capacity, 'capacity'], ['temp', d.temperament, 'temperament']].forEach(([k, val, bindKey]) => {
+    const fill = document.getElementById('pc-' + k + '-fill');
+    const pct  = document.getElementById('pc-' + k + '-pct');
+    const axis = document.getElementById('pc-' + k + '-axis');
+    if (fill) { fill.style.width = '0%'; requestAnimationFrame(() => { fill.style.width = val + '%'; }); }
+    if (pct)  pct.textContent = val + '%';
+    if (axis) axis.classList.toggle('binding', showBinding && d.binding === bindKey);
+  });
+  const COH_FEM = { 'aligné': 'alignée', 'nuancé': 'nuancée', 'contrasté': 'contrastée' };
+  setTxt('pc-binding-label', !showBinding
+    ? 'Capacité et tempérament concordent'
+    : (d.binding === 'capacity' ? 'Ce qui te limite : ta capacité' : 'Ce qui te limite : ton tempérament'));
+  const bindEl = document.getElementById('pc-binding-label');
+  if (bindEl) bindEl.classList.toggle('is-aligned', !showBinding);
+  const chip = document.getElementById('pc-coherence');
+  if (chip) {
+    chip.textContent = 'Lecture ' + (COH_FEM[d.coherence] || d.coherence);
+    chip.className = 'pc-coherence coh-' + (d.coherence === 'aligné' ? 'high' : d.coherence === 'nuancé' ? 'mid' : 'low');
+  }
+  setTxt('pc-leaning', d.leaning && PROFILES[d.leaning] ? ('penche vers ' + PROFILES[d.leaning].name) : '');
+  setTxt('pc-reading-note', profileNote(d, STATE.investor.quiz.answers));
 }
 
 // ─── Met à jour les dots de progression ───
 function quizUpdateProgress() {
+  const total = STATE.investor.quiz.totalSteps || 5;
   const current = STATE.investor.quiz.currentStep;
-  document.querySelectorAll('.qsp-dot').forEach(dot => {
+  const wrap = document.querySelector('.qs-progress');
+  if (!wrap) return;
+  // (Re)construit les dots si le total a changé (ex : ajout du départage adaptatif)
+  if (wrap.querySelectorAll('.qsp-dot').length !== total) {
+    wrap.innerHTML = '';
+    for (let i = 1; i <= total; i++) {
+      const d = document.createElement('span');
+      d.className = 'qsp-dot';
+      d.dataset.step = i;
+      wrap.appendChild(d);
+    }
+  }
+  wrap.querySelectorAll('.qsp-dot').forEach(dot => {
     const step = parseInt(dot.dataset.step, 10);
     dot.classList.toggle('active', step === current);
     dot.classList.toggle('done', step < current);
@@ -9396,18 +9576,8 @@ function quizShowResult() {
   setText('pc-stat-drawdown', p.drawdown);
   setText('pc-stat-horizon', p.horizon);
 
-  // Signature : 3 axes calculés depuis les réponses individuelles (Feature 2)
-  const sig = computeProfileAxes(STATE.investor.quiz.answers, det.key);
-  ['risque','horizon','conviction'].forEach(axis => {
-    const fill = document.getElementById('pc-axis-' + axis + '-fill');
-    const pct  = document.getElementById('pc-axis-' + axis + '-pct');
-    const note = document.getElementById('pc-axis-' + axis + '-note');
-    const v = sig[axis] || 0;
-    // Reset puis anime
-    if (fill) { fill.style.width = '0%'; requestAnimationFrame(() => { fill.style.width = v + '%'; }); }
-    if (pct)  pct.textContent = v + '%';
-    if (note) note.textContent = axisNote(axis, v);
-  });
+  // Lecture capacité × tempérament (Profil v2)
+  renderProfileReading(det);
 
   // Stress-test rétrospectif personnalisé (Feature 4)
   renderStressTest();
@@ -9477,20 +9647,36 @@ function quizAnswer(key, value) {
     }
   }
 
-  // Avance à la question suivante (ou au résultat)
-  const currentStep = STATE.investor.quiz.currentStep;
-  if (currentStep < 4) {
-    setTimeout(() => quizShowStep(currentStep + 1), 450);
-  } else {
-    setTimeout(() => quizShowResult(), 450);
-  }
+  // Avance (logique adaptative)
+  setTimeout(() => quizAdvance(), 450);
 
   saveState();
 }
 
+// ─── Décide de la suite : question suivante, départage adaptatif, ou résultat ───
+function quizAdvance() {
+  const a = STATE.investor.quiz.answers;
+  const step = STATE.investor.quiz.currentStep;
+  if (step < 5) { quizShowStep(step + 1); return; }
+  if (step === 5) {
+    const d = determineProfileV2(a);
+    if (d.needsTiebreaker) {            // capacité et tempérament divergent fort → on tranche
+      STATE.investor.quiz.totalSteps = 6;
+      quizShowStep(6);
+    } else {
+      STATE.investor.quiz.totalSteps = 5;
+      quizShowResult();
+    }
+    saveState();
+    return;
+  }
+  // step === 6 (départage répondu)
+  quizShowResult();
+}
+
 // ─── Reset complet du quiz ───
 function quizReset() {
-  STATE.investor.quiz = { currentStep: 1, answers: {}, stopped: null, completed: false };
+  STATE.investor.quiz = { currentStep: 1, totalSteps: 5, answers: {}, stopped: null, completed: false };
   STATE.investor.answers = {};
   STATE.investor.profile = null;
   document.querySelectorAll('.qq-opt.selected').forEach(o => o.classList.remove('selected'));
@@ -11455,7 +11641,7 @@ function restoreUIFromState() {
     // donc l'y laisser réinitialisait à tort tout quiz complété au rechargement.
     const hasLegacy = keys.some(k => ['filet', 'concentration'].includes(k));
     if (hasLegacy) {
-      STATE.investor.quiz = { currentStep: 1, answers: {}, stopped: null, completed: false };
+      STATE.investor.quiz = { currentStep: 1, totalSteps: 5, answers: {}, stopped: null, completed: false };
       STATE.investor.answers = {};
       STATE.investor.profile = null;
       saveState();
@@ -11638,7 +11824,7 @@ function init() {
     STATE.investor.answers = {};
     STATE.investor.priorities = new Set();
     // Le quiz n'est PAS reset ici — sa persistance est gérée par localStorage normalement
-    if (!STATE.investor.quiz) STATE.investor.quiz = { currentStep: 1, answers: {}, stopped: null, completed: false };
+    if (!STATE.investor.quiz) STATE.investor.quiz = { currentStep: 1, totalSteps: 5, answers: {}, stopped: null, completed: false };
     const portfolioEmpty = document.getElementById('i-portfolio-empty');
     if (portfolioEmpty && !STATE.investor.profile) portfolioEmpty.style.display = 'block';
   } catch(e) { console.error('[init] force-clean investor state:', e); }
