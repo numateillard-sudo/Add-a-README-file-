@@ -406,6 +406,21 @@ try {
   if (/2023-03-15/.test(prev)) ok('date sérielle Excel convertie en 2023-03-15'); else bad('date xlsx non convertie : ' + prev.slice(0, 140));
   await page.screenshot({ path: join(HERE, 'screen-xlsx.png') });
 
+  /* ---------- Sécurité : résistance XSS (échappement de bout en bout) ---------- */
+  console.log('\n\x1b[1m7f. Sécurité — résistance XSS (titre malveillant)\x1b[0m');
+  await goTo('Mots de passe');
+  await page.click('#cl-new');
+  await page.waitForSelector('#ce-title', { state: 'visible' });
+  await page.fill('#ce-title', '<img src=x onerror="window.__xss=1">');
+  await page.fill('#ce-fields .secret-row input', 'azerty');   // faible → apparaît aussi dans l'audit
+  await page.click('#ce-save');
+  await page.waitForSelector('#cl-list', { state: 'visible' });
+  await page.waitForTimeout(150);
+  const xssFired = await page.evaluate(() => window.__xss);
+  if (!xssFired) ok('charge XSS dans un titre : aucun script exécuté'); else bad('XSS EXÉCUTÉ — faille critique !');
+  const shown = await page.$$eval('#cl-list .nm, #cl-header .pwa-row .t', els => els.map(e => e.textContent).join(' '));
+  if (shown.includes('<img')) ok('le titre s’affiche comme texte littéral (échappé partout)'); else bad('titre non rendu littéralement : ' + shown.slice(0, 60));
+
   /* ---------- CSP & erreurs ---------- */
   console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
