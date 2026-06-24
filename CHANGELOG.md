@@ -2,6 +2,15 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 6 — Documents : copier un numéro, appeler un téléphone
+
+- Chaque « info clé » d'un document a un **bouton Copier** — copier un numéro
+  (sécurité sociale, fiscal, contrat) **d'un geste** (Administratif & Identité).
+- Quand la valeur est un **téléphone**, un **bouton Appeler** (`tel:`) apparaît —
+  un tap appelle l'assistance (Assurances). Détection live à la saisie.
+- `aria-label` sur ces boutons-icônes. Vérifié en e2e (téléphone → appeler,
+  valeur quelconque → pas d'appel, copier toujours présent).
+
 ## Lot 5 — Santé : carte d’urgence imprimable + README
 
 - **Carte d’urgence imprimable** : bouton « Imprimer » qui génère une feuille

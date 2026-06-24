@@ -2530,14 +2530,23 @@ function updateSections(){
   const rk=$('#reveal-kv'); if(rk) rk.onclick=()=>{ editDraft.fields.push({k:'',v:''}); renderKV(); updateSections(); };
   const rd=$('#reveal-dates'); if(rd) rd.onclick=()=>{ editDraft.dates.push({label:'',date:'',lead:30,annual:false}); renderDates(); updateSections(); };
 }
+function isPhoneLike(v){ const d=(v||'').replace(/[^\d+]/g,''); return /^\+?\d{8,15}$/.test(d); }
 function renderKV(){
   const box=$('#f-kv'); box.innerHTML='';
   editDraft.fields.forEach((kv,idx)=>{
     const row=document.createElement('div'); row.className='kv-row';
-    row.innerHTML='<input class="k" placeholder="Libell\u00e9 (ex. Num\u00e9ro)" value="'+escapeAttr(kv.k)+'"><input class="v" placeholder="Valeur" value="'+escapeAttr(kv.v)+'"><button class="row-del" title="Retirer">\u2715</button>';
+    row.innerHTML='<input class="k" placeholder="Libell\u00e9 (ex. Num\u00e9ro)" value="'+escapeAttr(kv.k)+'"><input class="v" placeholder="Valeur" value="'+escapeAttr(kv.v)+'">'+
+      '<button class="row-copy" data-act="call" title="Appeler ce num\u00e9ro" aria-label="Appeler ce num\u00e9ro"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg></button>'+
+      '<button class="row-copy" data-act="copy" title="Copier la valeur" aria-label="Copier la valeur"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>'+
+      '<button class="row-del" title="Retirer">\u2715</button>';
     const ins=row.querySelectorAll('input');
+    const callBtn=row.querySelector('[data-act=call]');
+    const syncCall=()=>{ callBtn.style.display = isPhoneLike(ins[1].value) ? '' : 'none'; };
     ins[0].oninput=e=>{ editDraft.fields[idx].k=e.target.value; };
-    ins[1].oninput=e=>{ editDraft.fields[idx].v=e.target.value; };
+    ins[1].oninput=e=>{ editDraft.fields[idx].v=e.target.value; syncCall(); };
+    syncCall();
+    row.querySelector('[data-act=copy]').onclick=()=> copyText(ins[1].value, 'Copi\u00e9');
+    callBtn.onclick=()=>{ const d=(ins[1].value||'').replace(/[^\d+]/g,''); const a=document.createElement('a'); a.href='tel:'+d; a.click(); };
     row.querySelector('.row-del').onclick=()=>{ editDraft.fields.splice(idx,1); renderKV(); };
     box.appendChild(row);
   });

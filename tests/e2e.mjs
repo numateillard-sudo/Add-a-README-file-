@@ -245,15 +245,31 @@ try {
   await printPage.close();
   await page.screenshot({ path: join(HERE, 'screen-emergency.png') });
 
+  /* ---------- Documents : copier / appeler un numéro ---------- */
+  console.log('\n\x1b[1m7. Documents — copier un numéro, appeler un téléphone\x1b[0m');
+  await goTo('Mes documents');
+  await page.waitForSelector('#docs-new-btn', { state: 'visible' });
+  await page.click('#docs-new-btn');
+  await page.waitForSelector('#f-title', { state: 'visible' });
+  await page.fill('#f-title', 'Assurance auto');
+  await page.click('#reveal-kv');
+  await page.waitForSelector('#f-kv .kv-row .v', { state: 'visible' });
+  await page.fill('#f-kv .kv-row .k', 'Assistance');
+  await page.fill('#f-kv .kv-row .v', '0800 123 456');
+  if (await page.isVisible('#f-kv .kv-row [data-act=call]')) ok('téléphone détecté → bouton « Appeler » proposé'); else bad('bouton appeler manquant pour un téléphone');
+  if (await page.$('#f-kv .kv-row [data-act=copy]')) ok('bouton « Copier » présent sur chaque info (copier un numéro d’un geste)'); else bad('bouton copier manquant');
+  await page.fill('#f-kv .kv-row .v', 'REF-ABC-2024');
+  if (await page.isHidden('#f-kv .kv-row [data-act=call]')) ok('valeur non-téléphone → pas de bouton appeler'); else bad('bouton appeler affiché à tort');
+
   /* ---------- CSP & erreurs ---------- */
-  console.log('\n\x1b[1m7. CSP stricte & propreté console\x1b[0m');
+  console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');
   if (consoleErrors.length) consoleErrors.forEach(e => bad('console.error : ' + e)); else ok('aucune console.error');
 
   /* ---------- persistance multi-modules après reload ---------- */
-  console.log('\n\x1b[1m8. Zéro perte — persistance multi-modules après reload\x1b[0m');
+  console.log('\n\x1b[1m9. Zéro perte — persistance multi-modules après reload\x1b[0m');
   await page.waitForTimeout(500);                 // laisse la dernière écriture se vider
   await page.goto(PAGE);
   await page.waitForSelector('#s-location.active');
