@@ -78,6 +78,10 @@ try {
   const vaultPath = join(vaultDir, 'coffre.vault.json');
   await saved.saveAs(vaultPath);
   ok('coffre créé et écrit (fichier chiffré « ' + saved.suggestedFilename() +' »)');
+  // À partir d'ici, on garde une copie de CHAQUE écriture chiffrée : la dernière
+  // servira au test de persistance multi-modules en fin de parcours.
+  let latestVault = vaultPath, dlN = 0;
+  page.on('download', async d => { try { const p = join(vaultDir, 'v' + (++dlN) + '.json'); await d.saveAs(p); latestVault = p; } catch (e) {} });
 
   const mods = await page.$$eval('#soon-modules .mod', els => els.length);
   if (mods < 4) bad('modules attendus sur l\'accueil, obtenu ' + mods); else ok(mods + ' modules rendus sur l\'accueil');
@@ -247,6 +251,26 @@ try {
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');
   if (consoleErrors.length) consoleErrors.forEach(e => bad('console.error : ' + e)); else ok('aucune console.error');
+
+  /* ---------- persistance multi-modules après reload ---------- */
+  console.log('\n\x1b[1m8. Zéro perte — persistance multi-modules après reload\x1b[0m');
+  await page.waitForTimeout(500);                 // laisse la dernière écriture se vider
+  await page.goto(PAGE);
+  await page.waitForSelector('#s-location.active');
+  await page.setInputFiles('#file-open', latestVault);
+  await page.waitForSelector('#s-locked.active');
+  await page.fill('#unlock-pw', PW);
+  await page.click('#unlock-btn');
+  await page.waitForSelector('#app-view', { state: 'visible', timeout: 8000 });
+  ok('dernier coffre rechargé et rouvert');
+  await goTo('Mots de passe');
+  await page.waitForSelector('#cl-list', { state: 'visible' });
+  const pwRows = await page.$$eval('#cl-list .frow', els => els.length);
+  if (pwRows >= 3) ok('Mots de passe : ' + pwRows + ' accès intacts après reload'); else bad('Mots de passe : ' + pwRows + ' accès (attendu ≥ 3)');
+  await goTo('Santé');
+  await page.waitForSelector('#emerg-card', { state: 'visible' });
+  const blood = await page.textContent('#emerg-card');
+  if (/O\+/.test(blood) && /Marie/.test(blood)) ok('Santé : carte d’urgence intacte (groupe + contact)'); else bad('Santé : carte d’urgence perdue après reload');
 
 } catch (e) {
   bad('parcours interrompu : ' + (e && e.message || e));
