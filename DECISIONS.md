@@ -76,6 +76,21 @@ que ce dont on a besoin (feuille + chaînes partagées + formats de date).
 est absent ou pour l'ancien `.xls` (OLE). Testé avec un vrai .xlsx généré dans la
 suite (ZIP + deflate + dates sérielles).
 
+## D9 — WebAuthn / passkey : reporté, pas bâclé
+**Choix.** Ne **pas** livrer le déverrouillage par passkey dans ces lots ; le
+documenter comme à faire, proprement.
+**Pourquoi.** Bien fait, il exige l'extension **PRF** de WebAuthn pour dériver un
+secret stable qui emballe la DEK (une 3ᵉ enveloppe, en complément du mot de passe
+et des 12 mots — jamais en remplacement). Or PRF est inégalement supporté et **ne
+peut pas être testé de façon fiable en Chromium headless** (l'authentificateur
+virtuel ne couvre pas PRF). Livrer une sécurité non vérifiée violerait deux règles
+du cahier des charges : « ne livre jamais du non vérifié » et l'intégrité du modèle
+de menace. Un « passkey » qui ne ferait que masquer l'UI sans crypto serait du
+théâtre de sécurité — exclu.
+**Plan.** Lot dédié : enveloppe DEK supplémentaire dérivée du secret PRF, ajout/retrait
+de la passkey dans l'écran Sécurité, repli toujours possible par mot de passe ou
+12 mots, tests via authentificateur virtuel CDP quand le support PRF sera fiable.
+
 ## D7 — Tester la crypto sans la dupliquer (marqueurs d'extraction)
 **Choix.** Le bloc crypto est délimité par des marqueurs `crypto` dans `coffre.html` ;
 `tests/run.mjs` l'extrait et l'exécute réellement dans Node (WebCrypto natif).
