@@ -1,0 +1,20 @@
+{
+  "name": "ecrin-finance-integration",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fold the two TAME finance tools (Comptes & Budget, Investissement) into the Écrin socle as native domains, in a single self-extracting offline HTML file.",
+  "type": "module",
+  "scripts": {
+    "debundle": "node tools/debundle.mjs",
+    "modules": "node tools/build.mjs",
+    "assemble": "node tools/assemble.mjs",
+    "rebundle": "node tools/rebundle.mjs src/Tout_au_meme_endroit.html build/staged build/Ecrin.html",
+    "build": "npm run debundle && npm run modules && npm run assemble && npm run rebundle && npm run verify",
+    "verify": "node tools/verify-bundle.mjs build/Ecrin.html",
+    "test": "node tools/smoke.mjs && node tools/nonreg.mjs && node tools/test-jsdom.mjs && node tools/test-fullflow.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "postcss": "^8.4.47"
+  }
+}
