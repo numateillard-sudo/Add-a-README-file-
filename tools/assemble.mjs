@@ -140,6 +140,17 @@ for (const [uuid, info] of Object.entries(meta.assets)) {
   if (newAssets.some(([u]) => u === uuid)) continue;
   fs.copyFileSync(path.join(DEC, info.file), path.join(STAGE_ASSETS, path.basename(info.file)));
 }
+// Patch the runtime: its boot() does a fire-and-forget fetch(location.href) for
+// the editor/streaming bridge, which logs a console error on file:// (scheme not
+// supported). Skip it on file:// → clean console, behavior unchanged on http(s).
+{
+  const rt = meta.assets[RUNTIME_UUID];
+  let src = fs.readFileSync(path.join(DEC, rt.file), 'utf8');
+  const before = src;
+  src = src.replace('fetch(location.href).then(', '(location.protocol==="file:"?Promise.reject(new Error("skip-file-fetch")):fetch(location.href)).then(');
+  if (src === before) throw new Error('assemble: runtime fetch anchor not found (boot patch)');
+  fs.writeFileSync(path.join(STAGE_ASSETS, path.basename(rt.file)), src);
+}
 fs.writeFileSync(path.join(STAGE, 'manifest.json'), JSON.stringify(meta, null, 2));
 
 // ── 4. Patch the template ─────────────────────────────────────────

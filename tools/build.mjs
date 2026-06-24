@@ -289,7 +289,9 @@ ${code}
   function __ecrinMount(el){
     try{
       __injectCss();
-      el.innerHTML = __MARKUP;
+      // Wrap the tool markup in its CSS scope root (#${key}-root) so the scoped
+      // stylesheet actually matches. el (the socle host) stays React-owned.
+      el.innerHTML = '<div id="${key}-root">' + __MARKUP + '</div>';
 ${indent(mountCalls, 6)}
     }catch(e){ console.error('${api} mount:', e); }
   }

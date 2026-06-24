@@ -78,8 +78,19 @@ function visibleText() {
   return clone.textContent || '';
 }
 
-// Click the button whose trimmed text best matches `target` (shortest match =
-// the nav entry, not the longer home tile that also includes a description).
+// CSS-application proof without a renderer: a scoped stylesheet only styles the
+// UI if its selectors actually match elements in the DOM. Parse the injected
+// stylesheet and count how many distinct scoped selectors match real elements.
+function scopedCoverage(key) {
+  const styleEl = document.querySelector('style[data-ecrin="' + key + '"]');
+  if (!styleEl) return { injected: false, matched: 0, total: 0 };
+  const css = styleEl.textContent || '';
+  const re = new RegExp('#' + key + '-root[^{,}]*(?=[,{])', 'g');
+  const sels = [...new Set((css.match(re) || []).map((s) => s.trim()).filter((s) => s && !s.includes('@') && !s.includes('%')))];
+  let matched = 0, total = 0;
+  for (const s of sels) { try { total++; if (document.querySelectorAll(s).length > 0) matched++; } catch (e) {} }
+  return { injected: true, matched, total };
+}
 function clickByText(target) {
   const want = target.toLowerCase();
   const cands = [...document.querySelectorAll('button')]
@@ -137,6 +148,12 @@ async function main() {
   check('#cb-host exists in DOM', !!cbHost);
   check('#cb-host populated by module (tabs)', !!cbHost && /Aperçu|Transactions|Budget/.test(cbHost.textContent || ''));
   check('Comptes panels present (#overview)', !!document.getElementById('overview'));
+  // CSS actually applies (scope root exists + scoped selectors match elements)
+  check('CB scope root #cb-root exists', !!document.getElementById('cb-root'));
+  const cbCov = scopedCoverage('cb');
+  check('CB stylesheet injected in <head>', cbCov.injected);
+  check(`CB scoped CSS matches real elements (${cbCov.matched}/${cbCov.total})`, cbCov.matched > 20);
+  check('CB cards styled (#cb-root .card matches)', document.querySelectorAll('#cb-root .card').length > 0);
 
   console.log('\n[4] Navigate → Investissement mounts module');
   // back home then to inv (nav button always present in sidebar)
@@ -146,6 +163,10 @@ async function main() {
   const invHost = document.getElementById('inv-host');
   check('#inv-host exists in DOM', !!invHost);
   check('#inv-host populated by module', !!invHost && (invHost.textContent || '').length > 200);
+  check('INV scope root #inv-root exists', !!document.getElementById('inv-root'));
+  const invCov = scopedCoverage('inv');
+  check('INV stylesheet injected in <head>', invCov.injected);
+  check(`INV scoped CSS matches real elements (${invCov.matched}/${invCov.total})`, invCov.matched > 50);
 
   console.log('\n[5] Back to documents (no regression)');
   clickByText('Accueil');

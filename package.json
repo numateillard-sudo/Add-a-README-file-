@@ -11,7 +11,8 @@
     "rebundle": "node tools/rebundle.mjs src/Tout_au_meme_endroit.html build/staged build/Ecrin.html",
     "build": "npm run debundle && npm run modules && npm run assemble && npm run rebundle && npm run verify",
     "verify": "node tools/verify-bundle.mjs build/Ecrin.html",
-    "test": "node tools/smoke.mjs && node tools/nonreg.mjs && node tools/test-jsdom.mjs && node tools/test-fullflow.mjs"
+    "test": "node tools/smoke.mjs && node tools/nonreg.mjs && node tools/test-jsdom.mjs && node tools/test-fullflow.mjs && node tools/screenshot.mjs",
+    "screenshot": "node tools/screenshot.mjs"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",

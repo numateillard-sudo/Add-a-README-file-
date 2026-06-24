@@ -38,6 +38,13 @@ Un seul module est monté à la fois. React ne rend **aucun enfant** dans
 `#cb-host`/`#inv-host`, donc il laisse intact le DOM injecté par le module
 (échappatoire React classique pour héberger du DOM non-React).
 
+`mount(el)` injecte le markup **enveloppé dans l'élément racine du scope**
+(`<div id="cb-root">…</div>` / `<div id="inv-root">…</div>`) : c'est
+indispensable pour que la feuille de style scopée (`#cb-root …`) matche réellement
+les éléments. (Sans cette racine, le CSS ne s'applique pas — bug corrigé,
+désormais couvert par un test qui vérifie que les sélecteurs scopés matchent le
+DOM rendu, et par un rendu Chromium réel.)
+
 ---
 
 ## 2. Décisions (paramètres §7 du prompt)
@@ -188,11 +195,18 @@ l'environnement, la validation se fait sans Chromium mais reste rigoureuse) :
 4. **`tools/test-jsdom.mjs`** — monte le socle intégré **réel** (runtime + React +
    modules) dans jsdom : marque Écrin, nav finance, signaux agrégés à l'accueil,
    clics qui montent chaque module (`#cb-host` → onglets Comptes + `#overview`,
-   `#inv-host`), documents intacts, **aucune erreur console**. **23/23.**
-5. **`tools/test-fullflow.mjs`** — viserait le chemin auto-extractible complet,
-   mais jsdom n'implémente pas `URL.createObjectURL` / l'exécution de
-   `<script src=blob:>` : **skip** honnête (chemin couvert par 1 + la *loop
-   closure* ci-dessous).
+   `#inv-host`), documents intacts, **aucune erreur console**, et **le CSS
+   s'applique** (racine de scope présente + sélecteurs scopés qui matchent le DOM :
+   220/362 pour Comptes, 884/1373 pour Investissement). **30/30.**
+5. **`tools/screenshot.mjs`** — rend le **vrai `Ecrin.html` auto-extractible dans
+   Chromium headless** (binaire `/opt/pw-browsers`) : déballe le bundle, saisit un
+   prénom, navigue dans les deux domaines, **capture des screenshots** et vérifie
+   les **styles calculés** (`#cb-root .card` → fond blanc, rayon 16px, police
+   Geist) + **0 erreur console**. **5/5.** C'est la validation visuelle + chemin
+   auto-extractible complet (la seule couture que jsdom ne couvrait pas).
+6. **`tools/test-fullflow.mjs`** — variante jsdom du chemin auto-extractible :
+   **skip** (jsdom n'a ni `URL.createObjectURL` ni `<script src=blob:>` ; couvert
+   par 1, 5 et la *loop closure*).
 
 **Loop closure** : `Ecrin.html` re-décompressé redonne un `template.html`
 **byte-identique** au `staged` et les 5 nouveaux assets (react, react-dom, chart,
