@@ -152,6 +152,29 @@ await section('4. Force & audit des mots de passe (extraits de coffre.html)', ()
   ok('audit : 1 faible repéré, doublon « reseau123 » (Forum+Boutique) détecté');
 });
 
+/* ---------- 5. CONTRASTE (WCAG 2.2 AA) sur le design system ---------- */
+await section('5. Contraste des couleurs (WCAG 2.2 AA)', () => {
+  const tok = (name) => { const m = html.match(new RegExp('--'+name+':\\s*(#[0-9A-Fa-f]{6})')); assert.ok(m, 'token --'+name+' introuvable'); return m[1]; };
+  const rgb = (h) => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+  const lin = (v) => { v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+  const lum = (h) => { const c = rgb(h).map(lin); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; };
+  const ratio = (a,b) => { const la=lum(a), lb=lum(b); const hi=Math.max(la,lb), lo=Math.min(la,lb); return (hi+0.05)/(lo+0.05); };
+  const base = '#0A0F13', card = '#16222B';                 // fonds réels de l'app
+  const text = tok('text'), muted = tok('muted'), muted2 = tok('muted-2');
+  const check = (label, fg, bg, min) => { const r = ratio(fg,bg); if (r >= min) ok(label+' : '+r.toFixed(2)+':1 (≥ '+min+')'); else bad(label+' : '+r.toFixed(2)+':1 < '+min); };
+  // texte normal : seuil AA 4.5:1, sur les deux fonds principaux
+  check('texte principal / fond',  text,   base, 4.5);
+  check('texte principal / carte', text,   card, 4.5);
+  check('texte discret / fond',    muted,  base, 4.5);
+  check('texte discret / carte',   muted,  card, 4.5);
+  check('méta (muted-2) / fond',   muted2, base, 4.5);
+  check('méta (muted-2) / carte',  muted2, card, 4.5);
+  // accents (texte large / éléments d'UI) : seuil AA 3:1
+  check('laiton vif / carte',      tok('brass-bright'), card, 3);
+  check('danger / carte',          tok('danger'),       card, 3);
+  check('succès / carte',          tok('ok'),           card, 3);
+});
+
 /* ---------- bilan ---------- */
 console.log('');
 if(failures){ console.log('\x1b[31m\x1b[1m' + failures + ' test(s) en échec.\x1b[0m'); process.exit(1); }

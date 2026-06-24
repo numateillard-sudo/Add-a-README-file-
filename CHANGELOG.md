@@ -2,6 +2,16 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 4 — Accessibilité (WCAG 2.2 AA)
+
+- **Noms accessibles** sur tous les contrôles visibles (boutons, champs, options) —
+  ajout d'`aria-label` aux champs de recherche et aux zones de note. Vérifié par
+  un scan e2e sur 6 vues + l'éditeur (critère WCAG 4.1.2).
+- **Contraste AA** : `--muted-2` relevé de `#6C808B` (3,93:1 sur carte, sous le
+  seuil) à `#808F9A` (≥ 4,86:1 partout). Vérification automatisée des ratios de
+  contraste du design system dans `tests/run.mjs` (texte 4,5:1, accents 3:1).
+- (Rappel Lot 3 : palette accessible, focus restitué, `prefers-reduced-motion`.)
+
 ## Lot 3 — Recherche globale ⌘K & navigation clavier
 
 - **Palette de commandes** (Ctrl/⌘ K, plus un bouton « Rechercher » visible dans

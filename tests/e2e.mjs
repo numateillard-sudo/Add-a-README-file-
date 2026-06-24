@@ -155,8 +155,64 @@ try {
   const navTitle = await page.inputValue('#ce-title');
   if (navTitle === 'Banque') ok('Entrée → ouverture directe de l’accès « Banque »'); else bad('navigation palette inattendue : ' + navTitle);
 
+  /* ---------- accessibilité : noms accessibles sur les contrôles visibles ---------- */
+  console.log('\n\x1b[1m5. Accessibilité — noms accessibles (WCAG 4.1.2)\x1b[0m');
+  const scanNames = async (where) => page.evaluate(() => {
+    const visible = el => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'; };
+    const name = el => {
+      const a = el.getAttribute('aria-label'); if (a && a.trim()) return a.trim();
+      const lb = el.getAttribute('aria-labelledby'); if (lb) { const t = lb.split(/\s+/).map(id => (document.getElementById(id)||{}).textContent||'').join(' ').trim(); if (t) return t; }
+      const wrap = el.closest('label'); if (wrap) { const t = wrap.textContent.replace(el.value||'', '').trim(); if (t) return t; }
+      if (el.id) { const l = document.querySelector('label[for="'+CSS.escape(el.id)+'"]'); if (l && l.textContent.trim()) return l.textContent.trim(); }
+      const txt = (el.textContent||'').trim(); if (txt) return txt;
+      const ti = el.getAttribute('title'); if (ti && ti.trim()) return ti.trim();
+      // NB : le placeholder seul ne compte PAS comme nom accessible (WCAG).
+      return '';
+    };
+    const sel = 'button, a[href], input:not([type=hidden]), select, textarea, [role=button], [role=option]';
+    return [...document.querySelectorAll(sel)].filter(visible).filter(el => !name(el))
+      .map(el => (el.tagName.toLowerCase() + (el.id ? '#'+el.id : '') + (el.className ? '.'+String(el.className).split(' ')[0] : '')));
+  });
+  // navigation par la palette (« Aller à … »)
+  const goTo = async (label) => {
+    await page.keyboard.press('Control+K');
+    await page.waitForSelector('#cmdk-back.show');
+    await page.fill('#cmdk-input', label);
+    await page.waitForFunction(l => [...document.querySelectorAll('#cmdk-results .ci-t')].some(e => e.textContent.trim() === l), label, { timeout: 4000 });
+    await page.click(`#cmdk-results .cmdk-item:has(.ci-t:text-is("${label}"))`);
+  };
+  // revenir à l'accueil depuis l'éditeur ouvert en section 4
+  await page.click('#ce-cancel');
+  await page.waitForSelector('#cl-back', { state: 'visible' });
+  await page.click('#cl-back');
+  await page.waitForSelector('#mod-files', { state: 'visible' });
+
+  const views = [
+    ['accueil', null],
+    ['Mes documents', '#docs-search'],
+    ['Mes finances', '#fin-new-account'],
+    ['Sécurité & sauvegarde', '#do-export'],
+    ['Échéances & rappels', '#dl-back'],
+    ['Mots de passe', '#cl-new'],
+  ];
+  let nameless = await scanNames('accueil');
+  for (const [label, anchor] of views.slice(1)) {
+    await goTo(label);
+    if (anchor) await page.waitForSelector(anchor, { state: 'visible', timeout: 6000 });
+    const found = await scanNames(label);
+    nameless = [...new Set([...nameless, ...found])];
+  }
+  // éditeur d'accès (boutons icônes : révéler/copier/générer)
+  await page.click('#cl-new');
+  await page.waitForSelector('#ce-fields .secret-row', { state: 'visible' });
+  nameless = [...new Set([...nameless, ...await scanNames('éditeur')])];
+
+  if (nameless.length) bad('contrôles sans nom accessible : ' + nameless.join(', '));
+  else ok('tous les contrôles visibles ont un nom accessible (6 vues + éditeur)');
+
   /* ---------- CSP & erreurs ---------- */
-  console.log('\n\x1b[1m5. CSP stricte & propreté console\x1b[0m');
+  console.log('\n\x1b[1m6. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');

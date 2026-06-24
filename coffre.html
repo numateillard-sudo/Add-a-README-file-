@@ -14,7 +14,7 @@
 :root{
   --ink:#0E1519; --ink-2:#142028; --ink-3:#1A2A34; --ink-4:#21333E;
   --line:#2A3D48; --line-soft:#22323C;
-  --text:#EAEFF1; --muted:#92A4AE; --muted-2:#6C808B;
+  --text:#EAEFF1; --muted:#92A4AE; --muted-2:#808F9A;
   --brass:#C9A24B; --brass-bright:#E6C878; --brass-deep:#9A7B2E;
   --danger:#E0735C; --ok:#83BE8E;
   --bone:#F4EFE6;
@@ -752,7 +752,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
       <div class="files-toolbar">
         <div class="search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="docs-search" placeholder="Rechercher (nom, numéro, info…)" autocomplete="off">
+          <input type="text" id="docs-search" placeholder="Rechercher (nom, numéro, info…)" aria-label="Rechercher un document" autocomplete="off">
         </div>
       </div>
       <div class="cats" id="docs-cats" style="margin-bottom:16px"></div>
@@ -810,7 +810,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
 
       <div class="ed-block">
         <h4>Note</h4>
-        <textarea class="ed-note" id="f-note" placeholder="Tout ce que tu veux te rappeler…"></textarea>
+        <textarea class="ed-note" id="f-note" aria-label="Note du document" placeholder="Tout ce que tu veux te rappeler…"></textarea>
       </div>
 
       <div class="error" id="f-err"></div>
@@ -981,7 +981,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
 
       <div class="ed-block">
         <h4>Note</h4>
-        <textarea class="ed-note" id="m-note" placeholder="Tout ce que tu veux te rappeler…"></textarea>
+        <textarea class="ed-note" id="m-note" aria-label="Note" placeholder="Tout ce que tu veux te rappeler…"></textarea>
       </div>
 
       <div class="error" id="m-err"></div>
@@ -1067,7 +1067,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
       <div class="files-toolbar">
         <div class="search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="tx-search" placeholder="Rechercher un mouvement…" autocomplete="off">
+          <input type="text" id="tx-search" placeholder="Rechercher un mouvement…" aria-label="Rechercher un mouvement" autocomplete="off">
         </div>
         <button class="btn btn-ghost" id="tx-import" style="width:auto">Importer un relevé</button>
       </div>
@@ -1090,7 +1090,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
       <div class="files-toolbar">
         <div class="search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="cl-search" placeholder="Rechercher…" autocomplete="off">
+          <input type="text" id="cl-search" placeholder="Rechercher…" aria-label="Rechercher dans ce module" autocomplete="off">
         </div>
       </div>
       <div class="cats" id="cl-cats"></div>
@@ -1129,7 +1129,7 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
       </div>
       <div class="ed-block" id="ce-note-block">
         <h4>Note</h4>
-        <textarea class="ed-note" id="ce-note" placeholder="Tout ce que tu veux te rappeler…"></textarea>
+        <textarea class="ed-note" id="ce-note" aria-label="Note" placeholder="Tout ce que tu veux te rappeler…"></textarea>
       </div>
       <div class="error" id="ce-err"></div>
       <div class="btn-row">
