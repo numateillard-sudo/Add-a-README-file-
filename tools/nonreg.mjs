@@ -51,9 +51,12 @@ vm.runInContext(cbJs + '\n;globalThis.__A = (typeof DATA!=="undefined")?DATA.ana
 const before = ctxBefore.__A || {};
 const beforeVals = { opening: before.opening, endBalance: before.endBalance, odDaysTotal: before.odDaysTotal, avgIncome: before.avgIncome, monthEndBalances: (before.monthEndBalances || []).join(',') };
 
-// AFTER: built module getSignals().analytics.
+// AFTER: built module. It now starts EMPTY (onboarding "import first"), so load
+// the example (= the same baked statements) to compare like-for-like.
 const ctxAfter = vm.createContext(shimSandbox());
 vm.runInContext(R('build/modules/ecrin-cb.js'), ctxAfter, { filename: 'ecrin-cb.js' });
+check('Comptes starts empty (ready=false) before import', ctxAfter.window.ECRIN_CB.getSignals().ready === false);
+ctxAfter.window.ECRIN_CB.loadExample();
 const after = ctxAfter.window.ECRIN_CB.getSignals().analytics;
 
 for (const k of ['opening', 'endBalance', 'odDaysTotal', 'avgIncome']) {

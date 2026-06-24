@@ -66,7 +66,10 @@ class Component extends DCLogic {
   syncFinance(){
     const v=this.state.view;
     try{
-      if(v==='cb'){ const el=document.getElementById('cb-host'); if(el && window.ECRIN_CB && this._cbNode!==el){ this._cbNode=el; window.ECRIN_CB.mount(el); } }
+      // Comptes ne se monte qu'une fois un relevé importé (ou l'exemple chargé) ;
+      // sinon le socle affiche l'onboarding "accueil → import".
+      const cbReady=!!(window.ECRIN_CB && window.ECRIN_CB.isReady && window.ECRIN_CB.isReady());
+      if(v==='cb' && cbReady){ const el=document.getElementById('cb-host'); if(el && window.ECRIN_CB && this._cbNode!==el){ this._cbNode=el; window.ECRIN_CB.mount(el); } }
       else if(this._cbNode){ if(window.ECRIN_CB) window.ECRIN_CB.unmount(); this._cbNode=null; }
     }catch(e){ console.error('cb mount/unmount',e); }
     try{
@@ -123,6 +126,18 @@ class Component extends DCLogic {
   openFin(id){ this.go(id,{collId:null,docId:null}); }
   settings(){ this.go('settings'); }
 
+  // ECRIN: onboarding Comptes — import d'un relevé bancaire, ou exemple.
+  cbImportFile(e){
+    const f=e.target&&e.target.files&&e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ const ok=window.ECRIN_CB && window.ECRIN_CB.importText(String(r.result||'')); this.toastMsg(ok?'Relevé importé':'Format de relevé non reconnu'); this.setState({finTick:Date.now()}); };
+    r.onerror=()=>{ this.toastMsg('Lecture du fichier impossible'); };
+    try{ r.readAsText(f); }catch(err){ this.toastMsg('Lecture du fichier impossible'); }
+    e.target.value='';
+  }
+  cbLoadExample(){ try{ if(window.ECRIN_CB) window.ECRIN_CB.loadExample(); }catch(err){} this.toastMsg('Exemple chargé'); this.setState({finTick:Date.now()}); }
+  cbReset(){ try{ if(this._cbNode && window.ECRIN_CB) window.ECRIN_CB.unmount(); }catch(err){} this._cbNode=null; try{ if(window.ECRIN_CB) window.ECRIN_CB.reset(); }catch(err){} this.toastMsg('Comptes réinitialisés'); this.setState({finTick:Date.now()}); }
+
   toastMsg(m){ this.setState({toast:m}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2400); }
 
   startAdd(){ this.setState({form:{mode:'add', type:null}}); }
@@ -150,7 +165,9 @@ class Component extends DCLogic {
     const self=this, raw=[]; let cb=null, inv=null;
     try{ if(window.ECRIN_CB) cb=window.ECRIN_CB.getSignals(); }catch(e){}
     try{ if(window.ECRIN_INV) inv=window.ECRIN_INV.getSignals(); }catch(e){}
-    if(cb){
+    if(cb && cb.ready===false){
+      raw.push({label:'Comptes & Budget', value:'Importe tes relevés', sub:'Pour voir ton solde et ton budget', tone:'#b9810f', accent:'#1f8a5b', icon:'wallet', open:()=>this.openFin('cb')});
+    } else if(cb){
       raw.push({label:'Solde du mois', value:this.eur2(cb.soldeMois), tone:(cb.soldeMois>=0?'#1f8a5b':'#d2553c'), accent:'#1f8a5b', icon:'wallet', open:()=>this.openFin('cb')});
       raw.push({label:'Budget variable restant', value:this.eur(cb.budgetRestant), tone:(cb.budgetRestant>=0?'#211d17':'#d2553c'), accent:'#1f8a5b', icon:'check', open:()=>this.openFin('cb')});
       if(cb.prochainPrelevement){ const p=cb.prochainPrelevement; raw.push({label:'Prochain prélèvement', value:this.eur(Math.abs(p.amount)), sub:(p.label||'')+' · '+this.fmtDateShort(p.date), tone:'#b9810f', accent:'#b9810f', icon:'clock', open:()=>this.openFin('cb')}); }
@@ -214,6 +231,7 @@ class Component extends DCLogic {
 
     // ECRIN: signaux finance agrégés pour l'accueil.
     const finSig=self.finSignals();
+    const cbReady=!!(window.ECRIN_CB && window.ECRIN_CB.isReady && window.ECRIN_CB.isReady());
 
     const q=(S.q||'').trim().toLowerCase();
     const searching=q.length>0;
@@ -260,6 +278,8 @@ class Component extends DCLogic {
       isHome:S.view==='home'&&!searching, isSearch:searching,
       isColl:S.view==='coll'&&!searching, isDoc:S.view==='doc'&&!searching, isSettings:S.view==='settings'&&!searching,
       isCB:S.view==='cb'&&!searching, isInv:S.view==='inv'&&!searching, finMeta,
+      cbReady, cbNotReady:!cbReady,
+      cbImportFile:(e)=>self.cbImportFile(e), cbLoadExample:()=>self.cbLoadExample(), cbReset:()=>self.cbReset(),
       searching, searchResults, searchEmpty:searching&&searchResults.length===0, searchCount:searchResults.length+' résultat'+(searchResults.length>1?'s':''),
       greeting:greet+(name?', '+name:''), todayLabel, homeSub,
       hasReminders:reminders.length>0, reminders, reminderCount:reminders.length+(reminders.length>1?' éléments':' élément'),

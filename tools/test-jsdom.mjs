@@ -124,7 +124,15 @@ async function main() {
   console.log('\n[1] Modules defined');
   check('window.ECRIN_CB present', !!window.ECRIN_CB && typeof window.ECRIN_CB.mount === 'function');
   check('window.ECRIN_INV present', !!window.ECRIN_INV && typeof window.ECRIN_INV.mount === 'function');
-  check('ECRIN_CB.getSignals returns soldeMois 1521.21', (() => { try { return Math.abs(window.ECRIN_CB.getSignals().soldeMois - 1521.21) < 0.005; } catch { return false; } })());
+  check('ECRIN_CB import API: empty → loadExample → soldeMois 1521.21 → reset', (() => {
+    try {
+      const empty = window.ECRIN_CB.getSignals().ready === false;
+      window.ECRIN_CB.loadExample();
+      const ok = Math.abs(window.ECRIN_CB.getSignals().soldeMois - 1521.21) < 0.005;
+      window.ECRIN_CB.reset(); // back to onboarding for the UI flow below
+      return empty && ok;
+    } catch { return false; }
+  })());
 
   console.log('\n[2] Socle mounted with finance integrated');
   const txt = visibleText;
@@ -133,19 +141,25 @@ async function main() {
   check('Finance nav: "Comptes & Budget"', /Comptes & Budget/.test(txt()));
   check('Finance nav: "Investissement"', /Investissement/.test(txt()));
   check('Home aggregates finance signals ("Tes finances")', /Tes finances/.test(txt()));
-  check('Signal "Solde du mois" present', /Solde du mois/.test(txt()));
+  check('Comptes signal is import CTA (not a fake solde)', /Importe tes relevés/.test(txt()) && !/Solde du mois/.test(txt()));
   check('Signal "Profil investisseur" present', /Profil investisseur/.test(txt()));
   check('Signal "Allocation cible" present', /Allocation cible/.test(txt()));
   check('Documents intact (Camille persona)', /Camille/.test(txt()));
   check('No "Repère" brand remnant', !/Repère/.test(txt()));
   check('No "Julien" persona remnant in DOM', !/Julien/.test(txt()));
 
-  console.log('\n[3] Navigate → Comptes & Budget mounts module');
+  console.log('\n[3] Comptes & Budget → onboarding (import-first), then example → dashboard');
   const clickedCB = clickByText('Comptes & Budget');
   check('clicked Comptes & Budget nav', clickedCB);
-  await sleep(60); await sleep(60);
+  await sleep(80); await sleep(80);
+  // No pre-filled dashboard: onboarding appears first.
+  check('onboarding shown (import prompt)', /Pars de tes relevés|Importer un relevé/.test(visibleText()));
+  check('dashboard NOT auto-mounted (no #overview yet)', !document.getElementById('overview'));
+  // Load the example → dashboard mounts.
+  check('clicked "découvrir avec un relevé d’exemple"', clickByText('découvrir'));
+  await sleep(120); await sleep(120);
   const cbHost = document.getElementById('cb-host');
-  check('#cb-host exists in DOM', !!cbHost);
+  check('#cb-host exists in DOM (dashboard mounted after example)', !!cbHost);
   check('#cb-host populated by module (tabs)', !!cbHost && /Aperçu|Transactions|Budget/.test(cbHost.textContent || ''));
   check('Comptes panels present (#overview)', !!document.getElementById('overview'));
   // CSS actually applies (scope root exists + scoped selectors match elements)

@@ -100,7 +100,31 @@ const FIN_VIEW = (flag, host) => `      <sc-if value="{{ ${flag} }}" hint-placeh
         </div>
       </sc-if>`;
 
-const FIN_VIEWS = FIN_VIEW('isCB', 'cb-host') + '\n' + FIN_VIEW('isInv', 'inv-host');
+// Comptes & Budget : parcours accueil → import → tableau de bord.
+const FIN_VIEW_CB = `      <sc-if value="{{ isCB }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1180px;margin:0 auto;padding:26px 26px 80px;animation:ecrRise .36s ease both">
+          <button onclick="{{ gotoHome }}" style="display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:#6e675b;cursor:pointer;font-size:13.5px;padding:0;margin-bottom:16px" style-hover="color:#211d17">{{ backIcon }}Accueil</button>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
+            <div style="width:50px;height:50px;border-radius:14px;display:grid;place-items:center;flex:none;background:{{ finMeta.soft }}">{{ finMeta.iconEl }}</div>
+            <div style="flex:1;min-width:0"><div style="font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1.05">{{ finMeta.label }}</div><div style="color:#6e675b;font-size:14px;margin-top:2px">{{ finMeta.desc }}</div></div>
+            <sc-if value="{{ cbReady }}" hint-placeholder-val="{{ false }}"><button onclick="{{ cbReset }}" style="flex:none;background:#f4efe7;border:1px solid rgba(30,26,18,.14);color:#211d17;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer" style-hover="border-color:rgba(179,137,47,.45)">Changer de relevé</button></sc-if>
+          </div>
+          <sc-if value="{{ cbReady }}" hint-placeholder-val="{{ false }}">
+            <div id="cb-host"></div>
+          </sc-if>
+          <sc-if value="{{ cbNotReady }}" hint-placeholder-val="{{ true }}">
+            <div style="max-width:660px;margin:8px auto;text-align:center;padding:34px 24px;background:#ffffff;border:1px solid rgba(30,26,18,.1);border-radius:16px">
+              <div style="width:54px;height:54px;border-radius:16px;display:grid;place-items:center;margin:0 auto 16px;background:rgba(31,138,91,.14)">{{ walletIcon }}</div>
+              <div style="font-size:21px;font-weight:800;letter-spacing:-.02em">Pars de tes relevés</div>
+              <div style="color:#6e675b;font-size:14.5px;line-height:1.6;margin:8px auto 22px;max-width:470px">Importe un relevé bancaire au format CSV — Écrin en tire ton solde, tes catégories et ton budget. Rien n'est envoyé en ligne, tout reste sur cet appareil.</div>
+              <label style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(180deg,#262019,#15120d);color:#f4f1ea;border:0;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:600;cursor:pointer" style-hover="filter:brightness(1.06)">{{ addIcon }}Importer un relevé (CSV)<input type="file" accept=".csv,text/csv" onchange="{{ cbImportFile }}" style="display:none"></label>
+              <div style="margin-top:15px"><button onclick="{{ cbLoadExample }}" style="background:none;border:0;color:#1f8a5b;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;padding:6px" style-hover="color:#15110a">Ou découvrir avec un relevé d'exemple</button></div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>`;
+
+const FIN_VIEWS = FIN_VIEW_CB + '\n' + FIN_VIEW('isInv', 'inv-host');
 
 // A) sidebar finance nav
 xdc = must(xdc, '    <div style="margin-top:auto">', FIN_NAV + '    <div style="margin-top:auto">', 'sidebar margin-top:auto');

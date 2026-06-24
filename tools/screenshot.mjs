@@ -45,16 +45,22 @@ check('app rendered: finance domains in nav (Comptes & Budget + Investissement)'
 check('home aggregates finance signals', /Tes finances/.test(bodyText));
 await page.screenshot({ path: path.join(shots, '1-accueil.png'), fullPage: false });
 
-// → Comptes & Budget
+// → Comptes & Budget : onboarding (import-first), pas de relevé pré-établi
 await page.evaluate(() => { const b = [...document.querySelectorAll('button')].filter(x => x.textContent.trim() === 'Comptes & Budget').sort((a, c) => a.textContent.length - c.textContent.length)[0]; b && b.click(); });
-await page.waitForTimeout(900);
+await page.waitForTimeout(700);
+const onboard = await page.evaluate(() => /Pars de tes relevés|Importer un relevé/.test(document.body.innerText) && !document.getElementById('overview'));
+check('Comptes: onboarding "import d’abord" affiché (pas de relevé pré-établi)', onboard);
+await page.screenshot({ path: path.join(shots, '2a-comptes-onboarding.png'), fullPage: false });
+// charge l'exemple → le tableau de bord se monte
+await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find(x => /découvrir/i.test(x.textContent)); b && b.click(); });
+await page.waitForTimeout(1000);
 const cbStyled = await page.evaluate(() => {
   const card = document.querySelector('#cb-root .card');
   if (!card) return { ok: false };
   const cs = getComputedStyle(card);
   return { ok: true, bg: cs.backgroundColor, radius: cs.borderRadius, font: cs.fontFamily, pad: cs.padding };
 });
-check('Comptes: #cb-root .card is actually styled (bg/radius/font applied)', cbStyled.ok && cbStyled.radius !== '0px' && /Geist/i.test(cbStyled.font));
+check('Comptes: tableau de bord stylé après import (#cb-root .card)', cbStyled.ok && cbStyled.radius !== '0px' && /Geist/i.test(cbStyled.font));
 console.log('     card →', JSON.stringify(cbStyled));
 await page.screenshot({ path: path.join(shots, '2-comptes.png'), fullPage: false });
 

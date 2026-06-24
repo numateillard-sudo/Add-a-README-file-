@@ -79,14 +79,40 @@ function buildComptes() {
   if (idx < 0) throw new Error('Comptes: bootstrap IIFE anchor not found');
   const before = code.slice(0, idx);
   const CB_BOOT_REPLACEMENT = `
-/* ===== ECRIN: prep once at define (no DOM needed) ===== */
-(function(){
-  try{ loadStoredStatements(); }catch(e){ console.error('load imports:',e); }
+/* ===== ECRIN: parcours "accueil -> import du relevé -> tableau de bord" =====
+   Le tableau de bord démarre VIERGE ; le relevé démo de l'outil devient un
+   "exemple" disponible d'un clic. (MONTHS === DATA.monthOrder, donc on mute les
+   tableaux en place pour rester cohérent ; applyParsed reconstruit monthOrder.) */
+var __CB_ENTKEY = 'jl-fin:entered';
+var __CB_EXAMPLE = { monthOrder: DATA.monthOrder.slice(), months: JSON.parse(JSON.stringify(DATA.months)) };
+function __cbEmpty(){
+  DATA.monthOrder.length = 0;
+  Object.keys(DATA.months).forEach(function(k){ delete DATA.months[k]; });
+  if (DATA.savingsByMonth) Object.keys(DATA.savingsByMonth).forEach(function(k){ delete DATA.savingsByMonth[k]; });
+}
+function __cbRecompute(){
   try{ allTxns().forEach(function(x){ KEY2DEF[keyOf(x.m,x.t)]=x.t.category; }); }catch(e){}
   try{ computeSavings(); }catch(e){}
   try{ recomputeAnalytics(); }catch(e){}
   try{ applyGoalsOverride(); }catch(e){}
+}
+function __cbHasStored(){ try{ return getStored().length > 0; }catch(e){ return false; } }
+function __cbIsReady(){ try{ return localStorage.getItem(__CB_ENTKEY) === '1' || __cbHasStored(); }catch(e){ return false; } }
+function __cbSetExample(){
+  __cbEmpty();
+  __CB_EXAMPLE.monthOrder.forEach(function(m){ DATA.months[m] = JSON.parse(JSON.stringify(__CB_EXAMPLE.months[m])); DATA.monthOrder.push(m); });
+  try{ normalizeTxns(); }catch(e){}
+}
+/* prep once at define — VIERGE par défaut */
+(function(){
+  if (__cbHasStored()) { __cbEmpty(); try{ loadStoredStatements(); }catch(e){ console.error('CB load imports:', e); } }
+  else if (__cbIsReady()) { /* exemple choisi → DATA déjà chargé */ }
+  else { __cbEmpty(); }
+  __cbRecompute();
 })();
+function __cbLoadExample(){ try{ __cbSetExample(); localStorage.setItem(__CB_ENTKEY, '1'); ls_set('jlm:statements', []); }catch(e){ console.error('CB example:', e); } __cbRecompute(); }
+function __cbImportText(text){ try{ if (!__cbHasStored()) __cbEmpty(); applyParsed(parseStatementCSV(text)); persistStatement(text); localStorage.setItem(__CB_ENTKEY, '1'); __cbRecompute(); return true; }catch(e){ console.error('CB import:', e); return false; } }
+function __cbReset(){ try{ localStorage.removeItem(__CB_ENTKEY); ls_set('jlm:statements', []); }catch(e){} __cbEmpty(); __cbRecompute(); }
 /* ===== ECRIN: render + wire on every mount ===== */
 function __cbRender(){
   const fns=[
@@ -108,6 +134,7 @@ function __cbCleanup(){
   code = before + CB_BOOT_REPLACEMENT;
 
   const CB_SIGNALS = `
+  if(!__cbIsReady()) return { ready:false };
   function eur2(n){ return Math.round(n*100)/100; }
   try{ recomputeAnalytics(); }catch(e){}
   var cm = currentMonth;
@@ -154,6 +181,7 @@ function __cbCleanup(){
   }catch(e){}
   var A = DATA.analytics || {};
   return {
+    ready: true,
     soldeMois: soldeMois,
     decouvertJours: decouvertJours,
     trough: trough,
@@ -169,7 +197,12 @@ function __cbCleanup(){
     mountCalls: `__cbRender();`,
     cleanup: `try{ __cbCleanup(); }catch(e){}`,
     signals: CB_SIGNALS,
-    extraExports: '',
+    extraExports: [
+      '  try{ ECRIN_CB.isReady = __cbIsReady; }catch(e){}',
+      '  try{ ECRIN_CB.loadExample = __cbLoadExample; }catch(e){}',
+      '  try{ ECRIN_CB.importText = __cbImportText; }catch(e){}',
+      '  try{ ECRIN_CB.reset = __cbReset; }catch(e){}',
+    ].join('\n'),
   });
   fs.writeFileSync(path.join(OUT, 'ecrin-cb.js'), module);
   return { bytesCss: scoped.length, bytesMarkup: markup.length, bytesJs: code.length, bytesModule: module.length };

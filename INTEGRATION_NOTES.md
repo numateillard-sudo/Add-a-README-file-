@@ -52,7 +52,7 @@ DOM rendu, et par un rendu Chromium réel.)
 | # | Décision | Choix appliqué |
 |---|----------|----------------|
 | **D1** | Profondeur | **Intégration native.** Logique de calcul **réutilisée verbatim** (modules isolés) ; seule la présentation a été re-tokenisée. **Aucune iframe.** |
-| **D2** | Identité / données | **Une seule persona de démo : « Camille ».** « Julien » (Comptes) supprimé du DOM ; Investissement n'avait pas de persona. Données démo conservées. Prénom surchargeable via l'onboarding du socle ; boutons « Recharger les exemples » / « Tout effacer ». |
+| **D2** | Identité / données | **Une seule persona de démo : « Camille ».** « Julien » (Comptes) supprimé du DOM ; Investissement n'avait pas de persona. **Comptes & Budget démarre VIERGE** : parcours *accueil → import d'un relevé bancaire (CSV) → tableau de bord* ; le relevé démo de l'outil devient un « relevé d'exemple » accessible d'un clic. Prénom surchargeable via l'onboarding du socle. |
 | **D3** | Marque | **« Écrin »** partout : marque par défaut de la barre latérale, `<title>`, pictogramme « É » (thumbnail + étoile or), copies (`Ajouter à Écrin`, etc.). L'ancien « Repère » a été unifié. |
 | **D4** | Chart.js | **Bundlé une seule fois** comme asset compressé (`chart.umd.js` 4.4.1), partagé par les deux domaines. **Aucun CDN.** |
 | **D5** | localStorage | **Non fusionné.** `ecrin.app.v1`, `jl-fin:*`, `lplr-v5` (+ legacy) restent intacts. **Une** clé ajoutée : `ecrin.identity.v1` `{name}`, écrite par le socle, disponible pour les 3 domaines. |

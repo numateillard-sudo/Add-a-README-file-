@@ -45,7 +45,7 @@ function makeSandbox() {
   return { sandbox: win, store };
 }
 
-function run(name, file, signalCheck) {
+function run(name, file, signalCheck, setup) {
   const code = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const { sandbox } = makeSandbox();
   const ctx = vm.createContext(sandbox);
@@ -57,6 +57,7 @@ function run(name, file, signalCheck) {
   }
   const api = sandbox.window[name.includes('CB') ? 'ECRIN_CB' : 'ECRIN_INV'];
   if (!api || typeof api.getSignals !== 'function') { console.log(`  ${name}: API missing`); return false; }
+  if (setup) { try { ok = setup(api) && ok; } catch (e) { console.log(`  ${name}: setup threw -> ${e.message}`); ok = false; } }
   let sig;
   try { sig = api.getSignals(); } catch (e) { console.log(`  ${name}: getSignals ERROR -> ${e.message}`); return false; }
   console.log(`  ${name}: defines OK; getSignals() ->`, JSON.stringify(sig));
@@ -88,6 +89,12 @@ allOk = run('ECRIN_CB', 'build/modules/ecrin-cb.js', (s) => {
   const mebOk = meb === expMeb; if (!mebOk) good = false;
   console.log(`    anchor monthEndBalances: [${meb}] ${mebOk?'✅':'❌'}`);
   return good;
+}, (api) => {
+  // Comptes starts empty (import-first onboarding); load the example, then check.
+  const empty = api.getSignals().ready === false;
+  console.log(`    starts empty before import (ready=false): ${empty ? '✅' : '❌'}`);
+  api.loadExample();
+  return empty;
 }) && allOk;
 
 allOk = run('ECRIN_INV', 'build/modules/ecrin-inv.js', (s) => {
