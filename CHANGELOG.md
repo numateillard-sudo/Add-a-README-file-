@@ -2,6 +2,14 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 8 — Documents : vue « à compléter » + « expire bientôt »
+
+- Deux **filtres rapides** dans Mes documents : **À compléter** (fiches sans
+  aucune info ni date) et **Expire bientôt** (au moins une échéance proche), avec
+  compteur. Un clic isole exactement ce qui demande de l’attention.
+- `aria-pressed` sur ces filtres. Vérifié en e2e (fiche incomplète → filtre
+  proposé et appliqué).
+
 ## Lot 7 — Patrimoine & biens : inventaire pour l’assureur
 
 - **Inventaire imprimable** : un tableau propre (désignation, catégorie, n° de

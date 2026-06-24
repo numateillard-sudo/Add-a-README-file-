@@ -2412,6 +2412,7 @@ function isIncomplete(f){
   const hasDate=(f.dates||[]).some(d=>d.date);
   return !hasVal && !hasDate;
 }
+function docSoon(f){ return (f.dates||[]).some(dt=>{ const s=dateStatus(dt.date,dt.annual,dt.lead); return s && s.state!=='ok'; }); }
 function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 function humanSize(n){ if(n<1024) return n+' o'; if(n<1048576) return (n/1024).toFixed(0)+' Ko'; return (n/1048576).toFixed(1)+' Mo'; }
@@ -2480,13 +2481,20 @@ function renderDocs(){
   const st=docsState();
   $('#docs-sub').textContent = st.items.length ? (st.items.length+' document'+(st.items.length>1?'s':'')+' chiffré'+(st.items.length>1?'s':'')) : "Aucun document. Crée le premier.";
   const cats=$('#docs-cats'); cats.innerHTML='';
+  // filtres rapides : à compléter / expire bientôt
+  const incompleteN=st.items.filter(isIncomplete).length, soonN=st.items.filter(docSoon).length;
+  const flagChip=(flag,label,cnt)=>{ const b=document.createElement('button'); b.className='cat-chip'+(docsFilter.flag===flag?' on':''); b.textContent=label+' ('+cnt+')'; b.setAttribute('aria-pressed', docsFilter.flag===flag?'true':'false'); b.onclick=()=>{ docsFilter.flag = (docsFilter.flag===flag?null:flag); renderDocs(); }; cats.appendChild(b); };
+  if(incompleteN) flagChip('incomplete','À compléter',incompleteN);
+  if(soonN) flagChip('soon','Expire bientôt',soonN);
   const present=['Tous', ...CATS.filter(c=> st.items.some(i=>i.category===c))];
   present.forEach(c=>{ const cnt=c==='Tous'? st.items.length : st.items.filter(i=>i.category===c).length;
-    const b=document.createElement('button'); b.className='cat-chip'+(docsFilter.cat===c?' on':''); b.textContent=c+' ('+cnt+')';
-    b.onclick=()=>{ docsFilter.cat=c; renderDocs(); }; cats.appendChild(b); });
+    const b=document.createElement('button'); b.className='cat-chip'+((docsFilter.cat===c&&!docsFilter.flag)?' on':''); b.textContent=c+' ('+cnt+')';
+    b.onclick=()=>{ docsFilter.cat=c; docsFilter.flag=null; renderDocs(); }; cats.appendChild(b); });
   const q=docsFilter.q.toLowerCase();
   let items=st.items.slice().sort((a,b)=> (b.updatedAt||'').localeCompare(a.updatedAt||''));
-  if(docsFilter.cat!=='Tous') items=items.filter(i=>i.category===docsFilter.cat);
+  if(docsFilter.flag==='incomplete') items=items.filter(isIncomplete);
+  else if(docsFilter.flag==='soon') items=items.filter(docSoon);
+  if(docsFilter.cat!=='Tous' && !docsFilter.flag) items=items.filter(i=>i.category===docsFilter.cat);
   if(q) items=items.filter(i=> matchDoc(i,q));
   const list=$('#docs-list');
   if(!st.items.length){ list.innerHTML='<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 3h9l3 3v15H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><p><b>Aucun document.</b><br>Un passeport, un bail, une assurance\u2026<br>avec ses infos et ses dates, pas juste un PDF.</p></div>'; return; }

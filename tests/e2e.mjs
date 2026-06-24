@@ -260,6 +260,19 @@ try {
   if (await page.$('#f-kv .kv-row [data-act=copy]')) ok('bouton « Copier » présent sur chaque info (copier un numéro d’un geste)'); else bad('bouton copier manquant');
   await page.fill('#f-kv .kv-row .v', 'REF-ABC-2024');
   if (await page.isHidden('#f-kv .kv-row [data-act=call]')) ok('valeur non-téléphone → pas de bouton appeler'); else bad('bouton appeler affiché à tort');
+  // vue « à compléter » : une fiche sans info ni date est signalée et filtrable
+  await page.click('#f-cancel');
+  await page.waitForSelector('#docs-new-btn', { state: 'visible' });
+  await page.click('#docs-new-btn');
+  await page.fill('#f-title', 'Bail appartement');     // ni info ni date → à compléter
+  await page.click('#f-save');
+  await page.waitForSelector('#docs-cats', { state: 'visible' });
+  if (await page.locator('#docs-cats button:has-text("À compléter")').count()) {
+    ok('filtre « À compléter » proposé pour une fiche incomplète');
+    await page.click('#docs-cats button:has-text("À compléter")');
+    const shown = await page.$$eval('#docs-list .frow', e => e.length);
+    if (shown >= 1) ok('filtre « À compléter » appliqué (' + shown + ' fiche)'); else bad('filtre à compléter : liste vide');
+  } else bad('filtre « À compléter » manquant');
 
   /* ---------- Patrimoine : inventaire imprimable pour l'assureur ---------- */
   console.log('\n\x1b[1m7b. Patrimoine — inventaire imprimable\x1b[0m');
