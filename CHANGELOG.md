@@ -2,6 +2,16 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 7 — Patrimoine & biens : inventaire pour l’assureur
+
+- **Inventaire imprimable** : un tableau propre (désignation, catégorie, n° de
+  série, assurance, valeur, nb de pièces jointes) + total, prêt à présenter à un
+  assureur en cas de sinistre/vol. Généré localement, rien ne transite.
+- Champ **Assurance** (compagnie / n° de contrat) par bien — le lien vers
+  l’assurance correspondante.
+- Vérifié en e2e (valeur totale affichée + génération de l’inventaire avec n° de
+  série et assurance).
+
 ## Lot 6 — Documents : copier un numéro, appeler un téléphone
 
 - Chaque « info clé » d'un document a un **bouton Copier** — copier un numéro

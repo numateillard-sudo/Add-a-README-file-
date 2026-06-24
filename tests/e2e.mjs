@@ -261,6 +261,30 @@ try {
   await page.fill('#f-kv .kv-row .v', 'REF-ABC-2024');
   if (await page.isHidden('#f-kv .kv-row [data-act=call]')) ok('valeur non-téléphone → pas de bouton appeler'); else bad('bouton appeler affiché à tort');
 
+  /* ---------- Patrimoine : inventaire imprimable pour l'assureur ---------- */
+  console.log('\n\x1b[1m7b. Patrimoine — inventaire imprimable\x1b[0m');
+  await goTo('Patrimoine & biens');
+  await page.waitForSelector('#cl-new', { state: 'visible' });
+  await page.click('#cl-new');
+  await page.waitForSelector('#ce-fields input', { state: 'visible' });
+  await page.fill('#ce-title', 'Vélo de route');
+  const aFields = await page.$$('#ce-fields input');   // ordre : valeur, série, acquis, où, assurance
+  await aFields[0].fill('1200');
+  await aFields[1].fill('SN-XYZ-9');
+  await aFields[4].fill('MAIF n°777');
+  await page.click('#ce-save');
+  await page.waitForSelector('#assets-print', { state: 'visible', timeout: 5000 });
+  const totalTxt = await page.textContent('#cl-header .ch-big');
+  if (/1\s?200/.test(totalTxt)) ok('valeur totale du patrimoine affichée (' + totalTxt.trim() + ')'); else bad('total patrimoine inattendu : ' + totalTxt);
+  const invP = ctx.waitForEvent('page');
+  await page.click('#assets-print');
+  const inv = await invP;
+  await inv.waitForLoadState('domcontentloaded').catch(() => {});
+  const invTxt = await inv.evaluate(() => document.body ? document.body.innerText : '').catch(() => '');
+  if (/SN-XYZ-9/.test(invTxt) && /MAIF/.test(invTxt) && /Inventaire/i.test(invTxt)) ok('inventaire imprimable généré (désignation, n° de série, assurance, total)');
+  else bad('inventaire imprimable : contenu = ' + invTxt.slice(0, 90));
+  await inv.close();
+
   /* ---------- CSP & erreurs ---------- */
   console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
