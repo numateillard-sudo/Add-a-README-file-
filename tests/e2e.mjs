@@ -11,9 +11,58 @@
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
+import { deflateRawSync } from 'node:zlib';
+
+/* ---- construit un vrai .xlsx (ZIP + deflate) pour tester la lecture native ---- */
+function crc32(buf){ let c=~0; for(let i=0;i<buf.length;i++){ c^=buf[i]; for(let k=0;k<8;k++) c=(c>>>1)^(0xEDB88320 & -(c&1)); } return (~c)>>>0; }
+function zipFiles(files){
+  const enc=new TextEncoder(); const parts=[], central=[]; let offset=0;
+  for(const f of files){
+    const name=enc.encode(f.name), comp=deflateRawSync(Buffer.from(f.data)), crc=crc32(f.data);
+    const lh=Buffer.alloc(30);
+    lh.writeUInt32LE(0x04034b50,0); lh.writeUInt16LE(20,4); lh.writeUInt16LE(8,8);
+    lh.writeUInt32LE(crc,14); lh.writeUInt32LE(comp.length,18); lh.writeUInt32LE(f.data.length,22);
+    lh.writeUInt16LE(name.length,26);
+    parts.push(lh, Buffer.from(name), comp);
+    const cd=Buffer.alloc(46);
+    cd.writeUInt32LE(0x02014b50,0); cd.writeUInt16LE(20,4); cd.writeUInt16LE(20,6); cd.writeUInt16LE(8,10);
+    cd.writeUInt32LE(crc,16); cd.writeUInt32LE(comp.length,20); cd.writeUInt32LE(f.data.length,24);
+    cd.writeUInt16LE(name.length,28); cd.writeUInt32LE(offset,42);
+    central.push(cd, Buffer.from(name));
+    offset += lh.length + name.length + comp.length;
+  }
+  const cdBuf=Buffer.concat(central), eocd=Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50,0); eocd.writeUInt16LE(files.length,8); eocd.writeUInt16LE(files.length,10);
+  eocd.writeUInt32LE(cdBuf.length,12); eocd.writeUInt32LE(offset,16);
+  return Buffer.concat([...parts, cdBuf, eocd]);
+}
+function makeXlsx(matrix){
+  const strings=[], sidx=new Map();
+  const intern=s=>{ if(!sidx.has(s)){ sidx.set(s,strings.length); strings.push(s); } return sidx.get(s); };
+  const serial=iso=>{ const [y,m,d]=iso.split('-').map(Number); return Math.round((Date.UTC(y,m-1,d)-Date.UTC(1899,11,30))/86400000); };
+  const colL=i=>{ let s=''; i++; while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=(i-r-1)/26; } return s; };
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  let sheet='<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  matrix.forEach((row,ri)=>{ sheet+='<row r="'+(ri+1)+'">';
+    row.forEach((cell,ci)=>{ const ref=colL(ci)+(ri+1);
+      if(cell==null||cell==='') return;
+      if(typeof cell==='object'&&cell.d) sheet+='<c r="'+ref+'" s="1"><v>'+serial(cell.d)+'</v></c>';
+      else if(typeof cell==='number') sheet+='<c r="'+ref+'"><v>'+cell+'</v></c>';
+      else sheet+='<c r="'+ref+'" t="s"><v>'+intern(String(cell))+'</v></c>';
+    }); sheet+='</row>';
+  });
+  sheet+='</sheetData></worksheet>';
+  const enc=new TextEncoder();
+  return zipFiles([
+    {name:'[Content_Types].xml', data:enc.encode('<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>')},
+    {name:'xl/styles.xml', data:enc.encode('<?xml version="1.0"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cellXfs count="2"><xf numFmtId="0"/><xf numFmtId="14" applyNumberFormat="1"/></cellXfs></styleSheet>')},
+    {name:'xl/sharedStrings.xml', data:enc.encode('<?xml version="1.0"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strings.length+'" uniqueCount="'+strings.length+'">'+strings.map(s=>'<si><t>'+esc(s)+'</t></si>').join('')+'</sst>')},
+    {name:'xl/worksheets/sheet1.xml', data:enc.encode(sheet)},
+  ]);
+}
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PAGE = pathToFileURL(join(HERE, '..', 'coffre.html')).href;
@@ -337,6 +386,25 @@ try {
   if (recCount === 2) ok('consignes groupées par destinataire (2 personnes)'); else bad('groupes destinataires : ' + recCount);
   if (recHeads.some(h => /Marie/.test(h))) ok('bloc « Marie » présent (' + recHeads.join(' | ') + ')'); else bad('Marie manquante : ' + recHeads.join(' | '));
   await page.screenshot({ path: join(HERE, 'screen-legacy.png') });
+
+  /* ---------- Finances : import .xlsx natif (sans réseau) ---------- */
+  console.log('\n\x1b[1m7e. Finances — import .xlsx natif\x1b[0m');
+  const xlsxPath = join(vaultDir, 'releve.xlsx');
+  writeFileSync(xlsxPath, makeXlsx([
+    ['Date', 'Libellé', 'Montant'],
+    [{ d: '2023-03-15' }, 'CARREFOUR', -42.5],
+    [{ d: '2023-03-16' }, 'SALAIRE', 2500],
+  ]));
+  await goTo('Mes finances');
+  await page.waitForSelector('#fin-import', { state: 'visible' });
+  await page.click('#fin-import');
+  await page.waitForSelector('#imp-input', { state: 'attached' });
+  await page.setInputFiles('#imp-input', xlsxPath);
+  await page.waitForSelector('#imp-config', { state: 'visible', timeout: 6000 });
+  const prev = await page.textContent('#imp-preview');
+  if (/CARREFOUR/.test(prev) && /SALAIRE/.test(prev)) ok('xlsx lu nativement (libellés présents dans l’aperçu)'); else bad('aperçu xlsx sans libellés : ' + prev.slice(0, 90));
+  if (/2023-03-15/.test(prev)) ok('date sérielle Excel convertie en 2023-03-15'); else bad('date xlsx non convertie : ' + prev.slice(0, 140));
+  await page.screenshot({ path: join(HERE, 'screen-xlsx.png') });
 
   /* ---------- CSP & erreurs ---------- */
   console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');

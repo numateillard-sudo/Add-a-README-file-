@@ -2,6 +2,18 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 11 — Finances : import .xlsx natif (sans réseau)
+
+- Lecture **native des fichiers Excel .xlsx** : un .xlsx est une archive ZIP de
+  XML ; on lit le répertoire ZIP, on décompresse avec `DecompressionStream`
+  (natif au navigateur, **zéro dépendance, zéro réseau**), puis on parse la
+  feuille et les chaînes partagées. Les **dates sérielles Excel** sont
+  reconverties en AAAA-MM-JJ via `xl/styles.xml`.
+- Remplace l'ancien message « convertis en CSV ». Repli clair si le navigateur
+  ne sait pas décompresser, ou pour l'ancien format `.xls`.
+- Vérifié en e2e : un vrai .xlsx (ZIP+deflate) généré dans le test est lu, les
+  libellés apparaissent et la date sérielle est convertie.
+
 ## Lot 10 — Transmission : guide par destinataire
 
 - Un panneau **« Par personne de confiance »** regroupe les consignes par

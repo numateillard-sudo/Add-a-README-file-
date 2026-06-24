@@ -1015,8 +1015,8 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
 
       <div class="ed-block">
         <h4>Fichier</h4>
-        <p class="hint">Format lu : CSV (le plus répandu). Exporte tes opérations depuis ton espace bancaire.</p>
-        <button class="add-row" id="imp-pick">Choisir un fichier .csv</button>
+        <p class="hint">Formats lus : CSV et Excel <b>.xlsx</b>, nativement (lu sur cet appareil, rien n’est envoyé). Exporte tes opérations depuis ton espace bancaire.</p>
+        <button class="add-row" id="imp-pick">Choisir un fichier (.csv ou .xlsx)</button>
         <span class="hint" id="imp-filename" style="margin-left:10px"></span>
         <input type="file" id="imp-input" accept=".csv,.txt,.xlsx,.xls,text/csv" hidden>
       </div>
@@ -3290,20 +3290,110 @@ function setupImport(){
   $('#imp-config').hidden=true; $('#imp-filename').textContent=''; $('#imp-err').textContent='';
 }
 function toggleNewName(){ $('#imp-newname-wrap').hidden = ($('#imp-account').value!=='__new__'); }
-function looksLikeExcel(buf, name){
-  if(/\.xlsx?$/i.test(name||'')) return true;
-  const b=new Uint8Array(buf||new ArrayBuffer(0));
-  if(b.length>=4){
-    if(b[0]===0x50&&b[1]===0x4B&&b[2]===0x03&&b[3]===0x04) return true; // ZIP -> .xlsx
-    if(b[0]===0xD0&&b[1]===0xCF&&b[2]===0x11&&b[3]===0xE0) return true; // OLE -> .xls
+/* =========================================================================
+   Lecture .xlsx NATIVE, sans aucune dépendance ni réseau : un .xlsx est une
+   archive ZIP de XML. On lit le répertoire central du ZIP, on décompresse avec
+   DecompressionStream('deflate-raw') (natif au navigateur), puis on parse la
+   feuille et les chaînes partagées. Les dates (numéros de série Excel) sont
+   reconverties en AAAA-MM-JJ via les formats de xl/styles.xml.
+   ========================================================================= */
+async function inflateRaw(bytes){
+  if(typeof DecompressionStream==='undefined') throw new Error('NO_INFLATE');
+  const ds=new DecompressionStream('deflate-raw');
+  const buf=await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
+  return new Uint8Array(buf);
+}
+function unzipCentral(buf){
+  const dv=new DataView(buf), bytes=new Uint8Array(buf), n=buf.byteLength;
+  let eocd=-1;
+  for(let i=n-22;i>=0 && i>n-22-65536;i--){ if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; } }
+  if(eocd<0) throw new Error('NOT_ZIP');
+  const count=dv.getUint16(eocd+10,true); let p=dv.getUint32(eocd+16,true);
+  const files={};
+  for(let i=0;i<count && p+46<=n;i++){
+    if(dv.getUint32(p,true)!==0x02014b50) break;
+    const method=dv.getUint16(p+10,true), compSize=dv.getUint32(p+20,true);
+    const nameLen=dv.getUint16(p+28,true), extraLen=dv.getUint16(p+30,true), commLen=dv.getUint16(p+32,true);
+    const lho=dv.getUint32(p+42,true);
+    const name=new TextDecoder().decode(bytes.subarray(p+46,p+46+nameLen));
+    files[name]={method,compSize,lho}; p+=46+nameLen+extraLen+commLen;
   }
-  return false;
+  return {dv,bytes,files};
+}
+async function zipRead(zip,name){
+  const f=zip.files[name]; if(!f) return null;
+  const dv=zip.dv, p=f.lho;
+  if(dv.getUint32(p,true)!==0x04034b50) return null;
+  const nameLen=dv.getUint16(p+26,true), extraLen=dv.getUint16(p+28,true);
+  const start=p+30+nameLen+extraLen, data=zip.bytes.subarray(start, start+f.compSize);
+  if(f.method===0) return data.slice();
+  if(f.method===8) return await inflateRaw(data);
+  throw new Error('ZIP_METHOD_'+f.method);
+}
+async function readXlsx(buf){
+  const zip=unzipCentral(buf), td=new TextDecoder();
+  const parseXml=(u8)=> new DOMParser().parseFromString(td.decode(u8),'application/xml');
+  let shared=[];
+  const ss=await zipRead(zip,'xl/sharedStrings.xml');
+  if(ss){ const d=parseXml(ss); shared=[...d.getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(t=>t.textContent).join('')); }
+  const dateXf=new Set();
+  const stl=await zipRead(zip,'xl/styles.xml');
+  if(stl){ const d=parseXml(stl);
+    const custom=new Set();
+    [...d.getElementsByTagName('numFmt')].forEach(nf=>{ const id=+nf.getAttribute('numFmtId'); const code=(nf.getAttribute('formatCode')||'').toLowerCase(); if(/[dmy]/.test(code)) custom.add(id); });
+    const builtin=new Set([14,15,16,17,18,19,20,21,22,45,46,47]);
+    const xfs=d.getElementsByTagName('cellXfs')[0];
+    if(xfs) [...xfs.getElementsByTagName('xf')].forEach((xf,i)=>{ const id=+xf.getAttribute('numFmtId'); if(builtin.has(id)||custom.has(id)) dateXf.add(i); });
+  }
+  const sheetName=Object.keys(zip.files).filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort()[0];
+  if(!sheetName) throw new Error('NO_SHEET');
+  const doc=parseXml(await zipRead(zip,sheetName));
+  const colIdx=(ref)=>{ const m=/^([A-Z]+)/.exec(ref||''); if(!m) return 0; let c=0; for(const ch of m[1]) c=c*26+(ch.charCodeAt(0)-64); return c-1; };
+  const serialISO=(num)=>{ const d=new Date(Date.UTC(1899,11,30)+Math.round(num)*86400000); return d.toISOString().slice(0,10); };
+  const rows=[];
+  [...doc.getElementsByTagName('row')].forEach(r=>{
+    const arr=[];
+    [...r.getElementsByTagName('c')].forEach(c=>{
+      const idx=colIdx(c.getAttribute('r')), t=c.getAttribute('t'), s=c.getAttribute('s');
+      const isNode=c.getElementsByTagName('is')[0], vNode=c.getElementsByTagName('v')[0];
+      let val='';
+      if(t==='s'){ const k=+(vNode?vNode.textContent:''); val=shared[k]!=null?shared[k]:''; }
+      else if(t==='inlineStr'||isNode){ const tn=isNode?isNode.getElementsByTagName('t')[0]:null; val=tn?tn.textContent:(isNode?isNode.textContent:''); }
+      else { val=vNode?vNode.textContent:''; if(val!=='' && s!=null && dateXf.has(+s) && !isNaN(+val)) val=serialISO(+val); }
+      while(arr.length<idx) arr.push('');
+      arr[idx]=val;
+    });
+    rows.push(arr);
+  });
+  return rows;
 }
 async function onImportFile(file){
-  impCtx.buf=await file.arrayBuffer(); impCtx.fileName=file.name; $('#imp-filename').textContent=file.name;
-  if(looksLikeExcel(impCtx.buf, file.name)){
+  impCtx.buf=await file.arrayBuffer(); impCtx.fileName=file.name; impCtx.xlsxRows=null; $('#imp-filename').textContent=file.name;
+  const b=new Uint8Array(impCtx.buf);
+  const isOldXls = b.length>=4 && b[0]===0xD0&&b[1]===0xCF&&b[2]===0x11&&b[3]===0xE0;   // ancien .xls (OLE)
+  const isXlsx   = (b.length>=4 && b[0]===0x50&&b[1]===0x4B&&b[2]===0x03&&b[3]===0x04) || /\.xlsx$/i.test(file.name);
+  if(isXlsx && !isOldXls){
+    try{
+      const rows=await readXlsx(impCtx.buf);
+      if(!rows.length) throw new Error('VIDE');
+      impCtx.xlsxRows=rows;
+      $('#imp-enc').value='auto'; $('#imp-delim').value=';';   // sans objet pour xlsx, mais cohérent
+      $('#imp-header').checked = isHeaderRow(rows[0]);
+      $('#imp-config').hidden=false; $('#imp-err').textContent='';
+      refreshStructural();
+      return;
+    }catch(e){
+      console.error(e);
+      $('#imp-config').hidden=true;
+      $('#imp-err').innerHTML = (e.message==='NO_INFLATE')
+        ? "Ton navigateur ne sait pas décompresser le <b>.xlsx</b> ici. Ouvre le coffre dans Chrome ou Edge, ou exporte un <b>.csv</b> depuis ta banque."
+        : "Je n’ai pas réussi à lire ce <b>.xlsx</b>. Réessaie, ou exporte un <b>.csv</b> depuis ton espace bancaire.";
+      return;
+    }
+  }
+  if(isOldXls){
     $('#imp-config').hidden=true;
-    $('#imp-err').innerHTML="Ce fichier ressemble à un fichier <b>Excel</b>, pas à un CSV — je ne sais pas le lire tel quel. Dans Excel : <b>Fichier → Enregistrer sous</b>, puis choisis <b>« CSV (séparateur : point-virgule) »</b> ou <b>« CSV UTF-8 »</b>. Réimporte ensuite le <b>.csv</b> obtenu.";
+    $('#imp-err').innerHTML="C’est un ancien format <b>.xls</b>. Ouvre-le et fais <b>Enregistrer sous → .xlsx</b> ou <b>.csv</b>, puis réimporte.";
     return;
   }
   const txt=decodeImp('auto'); $('#imp-enc').value='auto';
@@ -3319,7 +3409,7 @@ function buildColOptions(ncol, header){
 function getMap(){ const g=s=>+$(s).value; return { date:g('#map-date'), label:g('#map-label'), amount:g('#map-amount'), debit:g('#map-debit'), credit:g('#map-credit'), balance:g('#map-balance') }; }
 function setMap(m){ $('#map-date').value=m.date; $('#map-label').value=m.label; $('#map-amount').value=m.amount; $('#map-debit').value=m.debit; $('#map-credit').value=m.credit; $('#map-balance').value=m.balance; }
 function impDelim(){ const dv=$('#imp-delim').value; return dv==='tab'?'\t':dv; }
-function impRows(){ const txt=decodeImp($('#imp-enc').value); const rows=parseCSV(txt, impDelim()); const hasHeader=$('#imp-header').checked; return { rows, header:hasHeader?rows[0]:null, dataRows:hasHeader?rows.slice(1):rows, hasHeader }; }
+function impRows(){ const rows = (impCtx && impCtx.xlsxRows) ? impCtx.xlsxRows : parseCSV(decodeImp($('#imp-enc').value), impDelim()); const hasHeader=$('#imp-header').checked; return { rows, header:hasHeader?rows[0]:null, dataRows:hasHeader?rows.slice(1):rows, hasHeader }; }
 function refreshStructural(){
   if(!impCtx||!impCtx.buf) return;
   const {rows, header, dataRows}=impRows();

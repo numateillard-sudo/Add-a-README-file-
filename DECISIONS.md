@@ -63,6 +63,19 @@ migration-safe.
 double-lecture (anciens vaults PBKDF2 toujours ouvrables), ré-emballage à la volée
 au prochain changement de mot de passe, le tout précédé d'une sauvegarde. Zéro perte.
 
+## D8 — Lire le .xlsx nativement, sans bibliothèque
+**Choix.** Implémenter un mini-lecteur xlsx maison : parsing du répertoire central
+du ZIP + décompression via `DecompressionStream('deflate-raw')` (API navigateur)
++ parsing XML via `DOMParser`. Aucune bibliothèque (type SheetJS) embarquée.
+**Pourquoi.** Le pacte interdit toute dépendance réseau et privilégie un fichier
+unique léger. `DecompressionStream` est disponible nativement dans les navigateurs
+qui supportent déjà le coffre (Chrome/Edge). On évite ~200 Ko de lib pour ne lire
+que ce dont on a besoin (feuille + chaînes partagées + formats de date).
+**Compromis.** Couverture volontairement limitée au cas d'usage « relevé bancaire »
+(première feuille, dates, nombres, texte). Repli explicite si `DecompressionStream`
+est absent ou pour l'ancien `.xls` (OLE). Testé avec un vrai .xlsx généré dans la
+suite (ZIP + deflate + dates sérielles).
+
 ## D7 — Tester la crypto sans la dupliquer (marqueurs d'extraction)
 **Choix.** Le bloc crypto est délimité par des marqueurs `crypto` dans `coffre.html` ;
 `tests/run.mjs` l'extrait et l'exécute réellement dans Node (WebCrypto natif).
