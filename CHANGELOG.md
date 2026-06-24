@@ -2,6 +2,13 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 10 — Transmission : guide par destinataire
+
+- Un panneau **« Par personne de confiance »** regroupe les consignes par
+  destinataire (Marie, Paul…), chacune cliquable — « pour X, voici quoi faire,
+  où ». Le ton juste, jamais anxiogène, est conservé (intro rassurante).
+- Vérifié en e2e (2 destinataires, regroupement correct) + capture.
+
 ## Lot 9 — Échéances : groupées par urgence
 
 - La vue agrégée passe de 2 à **3 paliers d’urgence** : **En retard** (rouge),

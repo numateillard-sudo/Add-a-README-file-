@@ -316,6 +316,28 @@ try {
   if (dlGroups.some(g => /En retard/.test(g))) ok('échéance passée classée « En retard » (' + dlGroups.join(' | ') + ')');
   else bad('groupe « En retard » manquant : ' + dlGroups.join(' | '));
 
+  /* ---------- Transmission : guide par destinataire ---------- */
+  console.log('\n\x1b[1m7d. Transmission — consignes par destinataire\x1b[0m');
+  await goTo('Transmission');
+  await page.waitForSelector('#cl-new', { state: 'visible' });
+  const addConsigne = async (title, recipient) => {
+    await page.click('#cl-new');
+    await page.waitForSelector('#ce-fields input', { state: 'visible' });
+    await page.fill('#ce-title', title);
+    const fs = await page.$$('#ce-fields input');     // [0]=Pour qui, [1]=Où trouver
+    await fs[0].fill(recipient);
+    await page.click('#ce-save');
+    await page.waitForSelector('#cl-new', { state: 'visible' });
+  };
+  await addConsigne('Mes comptes bancaires', 'Marie');
+  await addConsigne('Lettre personnelle', 'Marie');
+  await addConsigne('Accès au garage', 'Paul');
+  const recCount = await page.$$eval('#cl-header .lg-rec', e => e.length);
+  const recHeads = await page.$$eval('#cl-header .lg-rec-h', e => e.map(x => x.textContent.trim()));
+  if (recCount === 2) ok('consignes groupées par destinataire (2 personnes)'); else bad('groupes destinataires : ' + recCount);
+  if (recHeads.some(h => /Marie/.test(h))) ok('bloc « Marie » présent (' + recHeads.join(' | ') + ')'); else bad('Marie manquante : ' + recHeads.join(' | '));
+  await page.screenshot({ path: join(HERE, 'screen-legacy.png') });
+
   /* ---------- CSP & erreurs ---------- */
   console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
