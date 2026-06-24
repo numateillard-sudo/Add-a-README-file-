@@ -2,6 +2,19 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 12 — Déverrouillage par passkey (WebAuthn + PRF)
+
+- **Passkey en complément** du mot de passe et des 12 mots : un secret PRF
+  (extension WebAuthn) emballe une 3ᵉ copie de la DEK. Ouvre le coffre avec
+  empreinte/visage/code de l'appareil. **Ne remplace jamais** la clé.
+- Activation/retrait dans **Sécurité** ; bouton dédié sur l'écran verrouillé.
+- **Refus net** si l'appareil n'expose pas PRF (pas de repli affaibli) ; option
+  **masquée** sur `file://` (origine non sécurisée).
+- Vérifié de bout en bout (`tests/passkey.mjs`, authentificateur virtuel PRF) :
+  activation → verrouillage → réouverture par la passkey → le mot de passe ouvre
+  toujours → zéro violation CSP. Correctif au passage : `renderSecurity` rendait
+  la section passkey après un `return` anticipé (sans sauvegarde).
+
 ## Lot 11 — Finances : import .xlsx natif (sans réseau)
 
 - Lecture **native des fichiers Excel .xlsx** : un .xlsx est une archive ZIP de

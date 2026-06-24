@@ -76,20 +76,26 @@ que ce dont on a besoin (feuille + chaînes partagées + formats de date).
 est absent ou pour l'ancien `.xls` (OLE). Testé avec un vrai .xlsx généré dans la
 suite (ZIP + deflate + dates sérielles).
 
-## D9 — WebAuthn / passkey : reporté, pas bâclé
-**Choix.** Ne **pas** livrer le déverrouillage par passkey dans ces lots ; le
-documenter comme à faire, proprement.
-**Pourquoi.** Bien fait, il exige l'extension **PRF** de WebAuthn pour dériver un
-secret stable qui emballe la DEK (une 3ᵉ enveloppe, en complément du mot de passe
-et des 12 mots — jamais en remplacement). Or PRF est inégalement supporté et **ne
-peut pas être testé de façon fiable en Chromium headless** (l'authentificateur
-virtuel ne couvre pas PRF). Livrer une sécurité non vérifiée violerait deux règles
-du cahier des charges : « ne livre jamais du non vérifié » et l'intégrité du modèle
-de menace. Un « passkey » qui ne ferait que masquer l'UI sans crypto serait du
-théâtre de sécurité — exclu.
-**Plan.** Lot dédié : enveloppe DEK supplémentaire dérivée du secret PRF, ajout/retrait
-de la passkey dans l'écran Sécurité, repli toujours possible par mot de passe ou
-12 mots, tests via authentificateur virtuel CDP quand le support PRF sera fiable.
+## D9 — WebAuthn / passkey : LIVRÉ via l'extension PRF, vérifié
+**Choix.** Déverrouillage par passkey en **3ᵉ enveloppe** : un secret PRF stable
+(extension WebAuthn `prf`) dérive une clé AES-GCM qui emballe une copie de la DEK,
+**en complément** du mot de passe et des 12 mots — jamais en remplacement.
+**Pourquoi PRF.** C'est la seule façon correcte : l'authentificateur restitue un
+secret reproductible (et seulement à lui), sans jamais exposer de clé privée ni
+sortir de l'appareil. Pas de secret en clair, pas de réseau.
+**Garde-fous.**
+- **Origine.** WebAuthn exige une vraie origine (https/localhost/Tauri) : en
+  double-clic `file://`, l'option est **masquée** proprement (`waSupported()`),
+  vérifié en e2e.
+- **PRF obligatoire.** Si l'appareil n'expose pas PRF (`prf.enabled` faux), on
+  **refuse** d'activer — pas de repli affaibli, pas de théâtre de sécurité.
+- **Jamais bloquant.** Perdre/retirer la passkey ne ferme aucune porte : mot de
+  passe et 12 mots restent valides (prouvé en e2e).
+**Vérification.** `tests/passkey.mjs` sert le coffre sur `http://localhost` et
+branche un authentificateur virtuel CDP avec PRF : création → activation →
+verrouillage → **réouverture par la passkey sans mot de passe** → le mot de passe
+ouvre toujours → zéro violation CSP. Le doute de l'ancien report (PRF non testable)
+est levé : le support PRF de l'authentificateur virtuel fonctionne.
 
 ## D7 — Tester la crypto sans la dupliquer (marqueurs d'extraction)
 **Choix.** Le bloc crypto est délimité par des marqueurs `crypto` dans `coffre.html` ;

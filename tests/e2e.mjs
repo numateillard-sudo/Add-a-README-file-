@@ -253,6 +253,10 @@ try {
   for (const [label, anchor] of views.slice(1)) {
     await goTo(label);
     if (anchor) await page.waitForSelector(anchor, { state: 'visible', timeout: 6000 });
+    if (label === 'Sécurité & sauvegarde') {
+      if (await page.isHidden('#sec-passkey')) ok('passkey masquée hors origine sécurisée (file://) — repli propre');
+      else bad('section passkey visible à tort en file://');
+    }
     const found = await scanNames(label);
     nameless = [...new Set([...nameless, ...found])];
   }

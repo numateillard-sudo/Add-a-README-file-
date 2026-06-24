@@ -644,6 +644,10 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
       </label>
       <div class="error" id="unlock-err"></div>
       <button class="btn btn-primary" id="unlock-btn" style="margin-top:20px">Ouvrir le coffre</button>
+      <button class="btn btn-ghost" id="unlock-passkey" style="margin-top:10px;display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="3"/><path d="M9 12c-3 0-5 1.5-5 4v1h7M14 7l6 6M17 10l-2 2M19 12l-1.5 1.5"/></svg>
+        Déverrouiller avec ma passkey
+      </button>
       <div style="text-align:center;margin-top:14px">
         <button class="linkbtn" id="to-recovery">Mot de passe oublié ? Utiliser mes 12 mots de secours</button>
       </div>
@@ -842,6 +846,17 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
           <button class="btn btn-primary" id="do-export" style="width:auto">Exporter maintenant</button>
         </div>
         <p class="sec-stat" id="backup-stat">Aucune sauvegarde pour l'instant.</p>
+      </div>
+
+      <div class="sec-section" id="sec-passkey" hidden>
+        <h3>Déverrouillage par passkey</h3>
+        <p>Ouvre ton coffre avec l'empreinte, le visage ou le code de ton appareil, <b>en plus</b> du mot de passe. La passkey ne remplace jamais ta clé : ton mot de passe et tes 12 mots fonctionnent toujours. Le secret reste sur cet appareil.</p>
+        <div class="sec-actions">
+          <button class="btn btn-primary" id="pk-add" style="width:auto">Activer une passkey</button>
+          <button class="btn btn-ghost" id="pk-remove" style="width:auto;display:none">Retirer la passkey</button>
+        </div>
+        <p class="sec-stat" id="pk-stat"></p>
+        <div class="error" id="pk-err"></div>
       </div>
 
       <div class="sec-section">
@@ -1434,6 +1449,7 @@ function renderBackupReminder(){
   $('#rm-backup-now').onclick=()=>exportBackup();
 }
 function renderSecurity(){
+  renderPasskeySection();   // indépendant de l'état de sauvegarde
   const meta = (App.payload && App.payload.meta) || {};
   const n = docsCount();
   const el=$('#backup-stat'); if(!el) return;
@@ -1441,6 +1457,22 @@ function renderSecurity(){
   const d=new Date(meta.lastBackupAt);
   const days = Math.floor((Date.now()-d.getTime())/86400000);
   el.textContent = "Dernière sauvegarde : "+d.toLocaleString('fr-FR')+" ("+(days===0?"aujourd'hui":("il y a "+days+" j"))+") · "+(meta.lastBackupCount||0)+" document(s) à ce moment-là.";
+}
+function renderPasskeySection(){
+  const sec=$('#sec-passkey'); if(!sec) return;
+  if(!waSupported()){ sec.hidden=true; return; }
+  sec.hidden=false;
+  const has = !!(App.vault && App.vault.wa);
+  const stat=$('#pk-stat'), add=$('#pk-add'), rem=$('#pk-remove'), err=$('#pk-err');
+  err.textContent='';
+  if(has){
+    const when = App.vault.wa.createdAt ? new Date(App.vault.wa.createdAt).toLocaleDateString('fr-FR') : '';
+    stat.textContent = "Une passkey est active"+(when?(" (depuis le "+when+")"):"")+". Tu peux ouvrir ton coffre avec elle, en plus du mot de passe.";
+    add.style.display='none'; rem.style.display='';
+  } else {
+    stat.textContent = "Aucune passkey pour l'instant. Active-la pour ouvrir d'un geste sur cet appareil.";
+    add.style.display=''; rem.style.display='none';
+  }
 }
 
 /* =========================================================================
@@ -1457,6 +1489,7 @@ function show(id){
   SCREENS.forEach(s=>$('#'+s).classList.toggle('active', s===id));
   const focusMap={'s-password':'#pw1','s-locked':'#unlock-pw','s-recover-in':'#recover-input'};
   if(focusMap[id]) setTimeout(()=>$(focusMap[id]).focus(), 60);
+  if(id==='s-locked' && typeof refreshLockedPasskey==='function') refreshLockedPasskey();
 }
 function showApp(){
   $('#root').style.display='none';
@@ -1771,6 +1804,75 @@ async function tryUnlock(secret, which, errEl, btn){
 $('#unlock-btn').addEventListener('click', ()=> tryUnlock($('#unlock-pw').value, 'pwd', $('#unlock-err'), $('#unlock-btn')));
 $('#unlock-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#unlock-btn').click(); });
 $('#to-recovery').addEventListener('click', ()=>{ $('#recover-input').value=''; $('#recover-err').textContent=''; show('s-recover-in'); });
+
+/* =========================================================================
+   Déverrouillage par passkey (WebAuthn + extension PRF)
+   Invariant : la passkey s'AJOUTE aux deux secrets existants. Elle emballe une 3e
+   copie de la DEK via un secret PRF stable, propre à cet appareil. Elle ne remplace
+   jamais le mot de passe ni les 12 mots — perdre la passkey ne ferme aucune porte.
+   WebAuthn exige une vraie origine (https/localhost) : indisponible en double-clic
+   file://, où l'on masque proprement l'option.
+   ========================================================================= */
+function waRpId(){ return location.hostname || ''; }
+function waSupported(){ return !!(window.PublicKeyCredential && window.isSecureContext && location.protocol!=='file:' && waRpId()); }
+async function kekFromPrf(prfBytes){ return crypto.subtle.importKey('raw', prfBytes, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']); }
+async function getPrfOutput(credId, salt){
+  const asrt = await navigator.credentials.get({ publicKey:{
+    challenge: randBytes(32),
+    allowCredentials: [{ id: credId, type:'public-key' }],
+    userVerification: 'required', timeout: 60000,
+    extensions: { prf: { eval: { first: salt } } },
+  }});
+  const e = asrt && asrt.getClientExtensionResults();
+  const first = e && e.prf && e.prf.results && e.prf.results.first;
+  if(!first) throw new Error('PAS_DE_PRF');
+  return new Uint8Array(first);
+}
+async function registerPasskey(){
+  if(!waSupported()) throw new Error('NON_SUPPORTE');
+  if(!isUnlocked()) throw new Error('VERROUILLE');
+  const salt = randBytes(32);
+  const cred = await navigator.credentials.create({ publicKey:{
+    rp:{ id: waRpId(), name:'Coffre' },
+    user:{ id: randBytes(16), name:'coffre', displayName:'Coffre' },
+    challenge: randBytes(32),
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{ residentKey:'preferred', userVerification:'required' },
+    timeout: 60000, extensions:{ prf:{} },
+  }});
+  if(!cred) throw new Error('ANNULE');
+  const ext = cred.getClientExtensionResults();
+  if(!(ext.prf && ext.prf.enabled)) throw new Error('PAS_DE_PRF');
+  const credId = new Uint8Array(cred.rawId);
+  const prf = await getPrfOutput(credId, salt);
+  const wrap = await aesEncrypt(await kekFromPrf(prf), await exportRawDEK());
+  App.vault.wa = { credId: bufToB64(credId), salt: bufToB64(salt), iv: wrap.iv, ct: wrap.ct, rpId: waRpId(), createdAt: new Date().toISOString() };
+  await persistVault();
+}
+async function unlockWithPasskey(){
+  const wa = App.vault && App.vault.wa; if(!wa) throw new Error('PAS_DE_PASSKEY');
+  const prf = await getPrfOutput(b64ToBytes(wa.credId), b64ToBytes(wa.salt));
+  let rawDEK;
+  try{ rawDEK = await aesDecrypt(await kekFromPrf(prf), wa.iv, wa.ct); }
+  catch(e){ const err=new Error('BAD_PASSKEY'); err.code='BAD_PASSKEY'; throw err; }
+  const dek = await importDEK(rawDEK);
+  const payloadBytes = await aesDecrypt(dek, App.vault.data.iv, App.vault.data.ct);
+  App.dek = dek; App.payload = JSON.parse(dec.decode(payloadBytes));
+  unlockGate = { fails:0, until:0 }; saveUnlockGate();
+  if(!manualMode && dirHandle) await idbSet('vaultDir', dirHandle);
+  showApp(); toast('Coffre ouvert avec ta passkey');
+}
+async function removePasskey(){ if(App.vault){ delete App.vault.wa; await persistVault(); } }
+function refreshLockedPasskey(){
+  const b=$('#unlock-passkey'); if(!b) return;
+  b.style.display = (App.vault && App.vault.wa && waSupported()) ? '' : 'none';
+}
+$('#unlock-passkey').addEventListener('click', async ()=>{
+  const b=$('#unlock-passkey'), err=$('#unlock-err'); err.textContent=''; const old=b.textContent; b.disabled=true;
+  try{ await unlockWithPasskey(); }
+  catch(e){ err.textContent = e.code==='BAD_PASSKEY' ? "Cette passkey ne correspond pas à ce coffre." : (e.name==='NotAllowedError' ? "Demande annulée." : "Passkey indisponible — utilise ton mot de passe."); }
+  finally{ b.disabled=false; b.textContent=old; }
+});
 
 /* ----- écran : déverrouillage par phrase ----- */
 $('#recover-back').addEventListener('click', ()=>show('s-locked'));
@@ -3587,6 +3689,21 @@ $('#m-att-input').addEventListener('change', e=>{ addMoneyAttachments(e.target.f
 $('#m-dir').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b && b.dataset.dir) setDir(b.dataset.dir); });
 $('#security-back').addEventListener('click', ()=> goView('home'));
 $('#do-export').addEventListener('click', ()=> exportBackup());
+$('#pk-add').addEventListener('click', async ()=>{
+  const b=$('#pk-add'), err=$('#pk-err'); err.textContent=''; b.disabled=true; const old=b.textContent; b.textContent='Suis les instructions de ton appareil…';
+  try{ await registerPasskey(); toast('Passkey activée'); renderPasskeySection(); }
+  catch(e){
+    err.textContent = e.message==='PAS_DE_PRF' ? "Ton appareil ne permet pas ce déverrouillage sécurisé (PRF). Passkey non activée."
+      : e.name==='NotAllowedError' ? "Demande annulée."
+      : "Activation impossible : "+(e.message||e);
+  }
+  finally{ b.disabled=false; b.textContent=old; }
+});
+$('#pk-remove').addEventListener('click', async ()=>{
+  if(!confirm("Retirer la passkey de ce coffre ? Tu pourras toujours ouvrir avec ton mot de passe ou tes 12 mots.")) return;
+  try{ await removePasskey(); toast('Passkey retirée'); renderPasskeySection(); }
+  catch(e){ $('#pk-err').textContent="Retrait impossible : "+(e.message||e); }
+});
 $('#do-restore').addEventListener('click', ()=> $('#restore-input-2').click());
 $('#restore-input-2').addEventListener('change', async e=>{
   const f=e.target.files[0]; e.target.value=''; if(!f) return;

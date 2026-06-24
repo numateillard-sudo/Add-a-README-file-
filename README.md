@@ -29,6 +29,10 @@ double-clic l'ouvre dans le navigateur. C'est tout.
 - **Verrouillage automatique** (inactivité, onglet caché), **effacement des clés
   en mémoire**, **presse-papiers auto-effacé** après copie d'un secret,
   **anti-force-brute** au déverrouillage.
+- **Passkey optionnelle** (WebAuthn + extension PRF) : déverrouille avec
+  empreinte/visage/code de l'appareil, **en complément** du mot de passe et des
+  12 mots (jamais en remplacement). Disponible sur origine sécurisée
+  (https/localhost/app native), masquée en double-clic `file://`.
 - Modèle de menace complet : [`THREAT-MODEL.md`](./THREAT-MODEL.md).
 
 Aucun secret n'est jamais stocké en clair. Même en ouvrant le fichier à la main, on
@@ -57,10 +61,12 @@ Recherche transverse partout via **⌘K / Ctrl-K**.
 Tout est vérifié, sans aucune dépendance réseau. Deux commandes :
 
 ```sh
-node tests/run.mjs    # syntaxe (node --check) + zéro réseau + crypto + audit + contraste AA
-node tests/e2e.mjs    # navigateur réel (Playwright/Chromium) : onboarding, cycle
-                      # chiffrement→save→reload→déverrouillage, audit des accès,
-                      # palette ⌘K, accessibilité, zéro violation CSP
+node tests/run.mjs     # syntaxe (node --check) + zéro réseau + crypto + audit + contraste AA
+node tests/e2e.mjs     # navigateur réel (Playwright/Chromium) : onboarding, cycle
+                       # chiffrement→save→reload, audit des accès, palette ⌘K,
+                       # carte d'urgence, .xlsx natif, XSS, accessibilité, zéro CSP
+node tests/passkey.mjs # déverrouillage par passkey (WebAuthn/PRF, authentificateur
+                       # virtuel sur http://localhost)
 ```
 
 `tests/run.mjs` **extrait** les fonctions réelles du fichier (entre marqueurs) et

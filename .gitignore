@@ -1,2 +1,3 @@
 tests/screen-*.png
+tests/pk-vault-tmp.json
 node_modules/
