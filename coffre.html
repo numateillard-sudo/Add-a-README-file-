@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8" />
+<!-- Le pacte « tout-local » prouvé techniquement : connect-src 'none' interdit
+     toute requête sortante (fetch / XHR / WebSocket / beacon). default-src 'none'
+     ferme tout par défaut ; on n'ouvre que ce dont l'app a besoin, hors réseau.
+     Si quelqu'un ajoute un jour un appel réseau, le navigateur le bloque ET le
+     test tests/run.mjs échoue. La souveraineté se prouve, elle ne se promet pas. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob: data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Coffre — ton coffre-fort personnel</title>
 <style>
@@ -1112,6 +1118,7 @@ const BIP39=["abaisser","abandon","abdiquer","abeille","abolir","aborder","about
       jamais l'appareil. Aucun secret n'est stocké en clair.
    ========================================================================= */
 
+/*<crypto>*/
 const ITER = 600000;                 // PBKDF2 — recommandation OWASP (SHA-256)
 const VAULT_FILE = 'coffre.vault.json';
 const enc = new TextEncoder(), dec = new TextDecoder();
@@ -1188,6 +1195,7 @@ async function openVault(vault, secret, which){     // which: 'pwd' | 'rec'
   const payload = JSON.parse(dec.decode(payloadBytes));
   return { dek, payload };
 }
+/*</crypto>*/
 
 /* =========================================================================
    Stockage : File System Access API (Chrome/Edge) sinon repli « mode fichier »
@@ -1399,6 +1407,7 @@ function show(id){
 function showApp(){
   $('#root').style.display='none';
   $('#app-view').style.display='flex';
+  noteActivity();                 // repart le compteur d'inactivité à l'ouverture
   if(migratePayload()){ savePayload(); }
   renderShell();
   goView('home');
@@ -1408,6 +1417,75 @@ function toast(msg, isErr){
   const t=$('#toast'); $('#toast-msg').textContent=msg; t.classList.toggle('err', !!isErr);
   t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'), 2600);
 }
+
+/* =========================================================================
+   Sécurité de session
+   Invariant : dès que le coffre se verrouille (manuel, inactivité, onglet caché,
+   restauration), la DEK et le payload déchiffré quittent la mémoire — aucun
+   secret ne survit à l'écran de verrouillage. Le presse-papiers ne garde jamais
+   un mot de passe au-delà de quelques secondes. Le déverrouillage est freiné
+   après plusieurs échecs (anti-force-brute, persistant par navigateur).
+   ========================================================================= */
+const SECURITY = {
+  idleMs:        5*60*1000,   // verrouille après 5 min sans interaction
+  hiddenGraceMs: 60*1000,     // onglet caché : verrouille après 1 min en arrière-plan
+  clipboardMs:   25*1000,     // efface un secret du presse-papiers après 25 s
+  watchdogMs:    15*1000,     // pas du chien de garde d'inactivité
+};
+function isUnlocked(){ return !!(App.dek && App.payload); }
+
+/* ----- verrouillage centralisé : un seul chemin pour effacer les clés ----- */
+let lastActivity = Date.now();
+let hiddenTimer = null, clipTimer = null;
+function lockVault(reason){
+  if(!isUnlocked()) return;
+  App.dek = null; App.payload = null;          // la clé quitte la mémoire
+  clearTimeout(hiddenTimer); hiddenTimer=null;
+  wipeClipboard();                              // ne laisse pas un secret derrière
+  setLockedSubtitle();
+  const pw=$('#unlock-pw'); if(pw) pw.value='';
+  const er=$('#unlock-err');
+  if(er) er.textContent =
+      reason==='idle'   ? "Coffre reverrouillé après une période d'inactivité." :
+      reason==='hidden' ? "Coffre reverrouillé : l'onglet est resté en arrière-plan." : '';
+  show('s-locked');
+}
+function noteActivity(){ lastActivity = Date.now(); }
+['pointerdown','keydown','pointermove','wheel','touchstart','scroll'].forEach(ev=>
+  window.addEventListener(ev, noteActivity, {passive:true, capture:true}));
+setInterval(()=>{
+  if(isUnlocked() && (Date.now()-lastActivity) >= SECURITY.idleMs) lockVault('idle');
+}, SECURITY.watchdogMs);
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    if(isUnlocked()){ clearTimeout(hiddenTimer); hiddenTimer=setTimeout(()=>lockVault('hidden'), SECURITY.hiddenGraceMs); }
+  } else {
+    clearTimeout(hiddenTimer); hiddenTimer=null; noteActivity();
+  }
+});
+
+/* ----- presse-papiers : un secret n'y reste jamais longtemps ----- */
+function wipeClipboard(){
+  clearTimeout(clipTimer); clipTimer=null;
+  try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('').catch(()=>{}); }catch(e){}
+}
+function copySecret(txt, what){
+  if(!txt){ toast('Rien à copier', true); return; }
+  const secs = Math.round(SECURITY.clipboardMs/1000);
+  copyText(txt, (what||'Mot de passe copié')+' — effacé du presse-papiers dans '+secs+' s');
+  clearTimeout(clipTimer);
+  clipTimer = setTimeout(wipeClipboard, SECURITY.clipboardMs);   // copyText réarme via clearTimeout en cas de nouvelle copie
+}
+
+/* ----- anti-force-brute : délai croissant après plusieurs échecs ----- */
+let unlockGate = { fails:0, until:0 };
+async function loadUnlockGate(){ try{ const g=await idbGet('unlockGate'); if(g && typeof g==='object') unlockGate=g; }catch(e){} }
+async function saveUnlockGate(){ try{ await idbSet('unlockGate', unlockGate); }catch(e){} }
+function gateDelayMs(fails){
+  if(fails < 3) return 0;                                   // 3 essais francs
+  return Math.min(5*60*1000, Math.pow(2, fails-3) * 5*1000); // 5s,10s,20s,40s… plafonné à 5 min
+}
+function gateRemainingMs(){ return Math.max(0, unlockGate.until - Date.now()); }
 
 /* ----- afficher / masquer un champ ----- */
 function bindEye(btnSel, inputSel){
@@ -1611,16 +1689,29 @@ function setLockedSubtitle(){
     : "Saisis ton mot de passe maître pour ouvrir.";
 }
 async function tryUnlock(secret, which, errEl, btn){
+  const wait = gateRemainingMs();
+  if(wait > 0){
+    errEl.textContent = "Trop d'essais. Réessaie dans "+Math.ceil(wait/1000)+" s.";
+    return;
+  }
   errEl.textContent=''; const old=btn.textContent; btn.disabled=true; btn.textContent='Ouverture…';
   try{
     const { dek, payload } = await openVault(App.vault, secret, which);
     App.dek=dek; App.payload=payload;
+    unlockGate = { fails:0, until:0 }; saveUnlockGate();      // succès : on repart à zéro
     if(!manualMode && dirHandle) await idbSet('vaultDir', dirHandle);
     showApp(); toast("Coffre ouvert");
   }catch(e){
-    errEl.textContent = (e.code==='BAD_SECRET')
-      ? (which==='rec' ? "Phrase incorrecte. Vérifie les mots et l'ordre." : "Mot de passe incorrect.")
-      : "Ouverture impossible : "+(e.message||e);
+    if(e.code==='BAD_SECRET'){
+      unlockGate.fails = (unlockGate.fails||0) + 1;
+      const d = gateDelayMs(unlockGate.fails);
+      unlockGate.until = d ? Date.now()+d : 0;
+      saveUnlockGate();
+      const base = which==='rec' ? "Phrase incorrecte. Vérifie les mots et l'ordre." : "Mot de passe incorrect.";
+      errEl.textContent = d ? (base+" Pause de "+Math.ceil(d/1000)+" s avant le prochain essai.") : base;
+    } else {
+      errEl.textContent = "Ouverture impossible : "+(e.message||e);
+    }
   }finally{ btn.disabled=false; btn.textContent=old; }
 }
 $('#unlock-btn').addEventListener('click', ()=> tryUnlock($('#unlock-pw').value, 'pwd', $('#unlock-err'), $('#unlock-btn')));
@@ -1766,7 +1857,7 @@ function newCollItem(cfg){ return { id:crypto.randomUUID(), title:'', category:(
 function collInitials(cfg,it){ const t=(it.title||'').trim(); if(t){ const p=t.split(/\s+/); return ((p[0][0]||'')+(p[1]?p[1][0]:(p[0][1]||''))).toUpperCase(); } return (it.category||'?').slice(0,2).toUpperCase(); }
 function collMatch(cfg,it,q){ if((it.title||'').toLowerCase().includes(q)) return true; if((it.category||'').toLowerCase().includes(q)) return true; if((it.note||'').toLowerCase().includes(q)) return true; return Object.keys(it.fields||{}).some(k=> String(it.fields[k]||'').toLowerCase().includes(q)); }
 
-function copyText(txt,msg){ if(!txt){ toast('Rien à copier', true); return; } const done=()=>toast(msg||'Copié'); try{ navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done)); }catch(e){ fallbackCopy(txt,done); } }
+function copyText(txt,msg){ if(!txt){ toast('Rien à copier', true); return; } clearTimeout(clipTimer); clipTimer=null; const done=()=>toast(msg||'Copié'); try{ navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done)); }catch(e){ fallbackCopy(txt,done); } }
 function fallbackCopy(txt,done){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done&&done(); }catch(e){ toast('Copie impossible', true); } document.body.removeChild(ta); }
 
 /* ---------- liste ---------- */
@@ -1811,7 +1902,7 @@ function renderColl(){
       '<div class="sub">'+escapeHtml(sub)+(att?(' \u00b7 '+att+' pièce'+(att>1?'s':'')):'')+'</div></div>'+
       '<div class="doc-badges">'+(badge?'<span class="dbadge">'+escapeHtml(badge)+'</span>':'')+(worst?('<span class="dbadge '+worst.state+'">'+whenLabel(worst)+'</span>'):'')+actions+'</div>';
     row.onclick=(e)=>{ if(e.target.closest('[data-copy]')) return; openCollItem(it.id); };
-    const cp=row.querySelector('[data-copy]'); if(cp) cp.onclick=(e)=>{ e.stopPropagation(); copyText(it.fields[cp.getAttribute('data-copy')]||'', 'Mot de passe copié'); };
+    const cp=row.querySelector('[data-copy]'); if(cp) cp.onclick=(e)=>{ e.stopPropagation(); copySecret(it.fields[cp.getAttribute('data-copy')]||''); };
     list.appendChild(row);
   });
 }
@@ -1922,7 +2013,7 @@ function renderCollFields(cfg){
       const upd=()=>{ collDraft.fields[fld.k]=inp.value; pwMeter(inp.value, meter, hint); };
       inp.oninput=upd; pwMeter(val, meter, hint);
       wrap.querySelector('[data-act=reveal]').onclick=(ev)=>{ const b=ev.currentTarget; const show=inp.type==='password'; inp.type=show?'text':'password'; b.classList.toggle('on',show); };
-      wrap.querySelector('[data-act=copy]').onclick=()=> copyText(inp.value, 'Mot de passe copié');
+      wrap.querySelector('[data-act=copy]').onclick=()=> copySecret(inp.value);
       const g=wrap.querySelector('[data-act=gen]'); if(g) g.onclick=()=>{ inp.value=genPassword(18); inp.type='text'; wrap.querySelector('[data-act=reveal]').classList.add('on'); upd(); };
     } else if(fld.type==='url'){
       wrap.innerHTML='<span>'+fld.label+'</span><div class="url-row"><input type="text" inputmode="url" value="'+escapeAttr(val)+'" placeholder="'+escapeAttr(fld.ph||'')+'"><button type="button" class="sec-btn" data-act="open" title="Ouvrir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5h5v5M19 5l-9 9M19 14v5H5V5h5"/></svg></button></div>';
@@ -3268,13 +3359,13 @@ $('#docs-quick-input').addEventListener('change', e=>{ quickAddFromFiles(e.targe
   dz.addEventListener('click', ()=> $('#docs-quick-input').click());
 })();
 $('#lock-now').addEventListener('click', ()=>{
-  App.dek=null; App.payload=null;       // la clé quitte la mémoire
-  setLockedSubtitle(); $('#unlock-pw').value=''; $('#unlock-err').textContent='';
-  show('s-locked');
+  if(!isUnlocked()){ setLockedSubtitle(); $('#unlock-pw').value=''; $('#unlock-err').textContent=''; show('s-locked'); return; }
+  lockVault('manual');           // chemin unique d'effacement des clés
 });
 
 /* ----- amorçage ----- */
 async function boot(){
+  await loadUnlockGate();   // restaure l'éventuel délai anti-force-brute
   // garde-fou : contexte sécurisé requis pour Web Crypto
   if(!(window.crypto && crypto.subtle)){
     $('#s-boot').innerHTML='<div class="card"><h1>Navigateur non compatible</h1><p class="lede">Ouvre ce fichier dans une fenêtre récente de Chrome, Edge, Firefox ou Safari.</p></div>';

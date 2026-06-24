@@ -1,0 +1,126 @@
+#!/usr/bin/env node
+/* =========================================================================
+   Coffre — harness de tests, lançable d'une commande :  node tests/run.mjs
+   Trois garanties, sans aucune dépendance externe (le pacte vaut aussi ici) :
+     1. SYNTAXE   — le <script> du coffre passe `node --check`.
+     2. ZÉRO RÉSEAU — échoue si un appel réseau / une URL externe apparaît.
+     3. CRYPTO    — l'enveloppe (AES-GCM 256 + PBKDF2) est extraite du fichier
+                    lui-même (entre les marqueurs crypto) et testée pour de vrai :
+                    round-trip mot de passe, round-trip phrase, rejet d'un mauvais
+                    secret, et absence de tout secret en clair.
+   ========================================================================= */
+import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import assert from 'node:assert/strict';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FILE = join(HERE, '..', 'coffre.html');
+const html = readFileSync(FILE, 'utf8');
+
+let failures = 0;
+const ok   = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
+const bad  = (m) => { console.log('  \x1b[31m✗ ' + m + '\x1b[0m'); failures++; };
+async function section(title, fn){ console.log('\n\x1b[1m' + title + '\x1b[0m'); try{ await fn(); }catch(e){ bad(title + ' a levé : ' + (e && e.stack || e)); } }
+
+/* ---------- 1. SYNTAXE ---------- */
+await section('1. Syntaxe du script (node --check)', () => {
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+  assert.ok(scripts.length >= 1, 'aucun <script> trouvé');
+  const dir = mkdtempSync(join(tmpdir(), 'coffre-'));
+  scripts.forEach((src, i) => {
+    const p = join(dir, 'script' + i + '.js');
+    writeFileSync(p, src);
+    execFileSync(process.execPath, ['--check', p]);   // jette si erreur de syntaxe
+    ok('script #' + i + ' (' + src.length + ' caractères) : syntaxe valide');
+  });
+});
+
+/* ---------- 2. ZÉRO RÉSEAU ---------- */
+await section('2. Souveraineté — aucun appel réseau ni ressource externe', () => {
+  // Chaque motif est un « puits » réseau interdit. On ignore le scheme-completion
+  // ('https://'+u) et le test /^https?:\/\// car ils ne chargent rien : ils ne
+  // font que normaliser un lien que l'UTILISATEUR ouvre dans son propre onglet.
+  const sinks = [
+    [/\bfetch\s*\(/,                       'appel fetch()'],
+    [/\bXMLHttpRequest\b/,                 'XMLHttpRequest'],
+    [/\bnew\s+WebSocket\b/,                'WebSocket'],
+    [/\bnew\s+EventSource\b/,              'EventSource (SSE)'],
+    [/navigator\s*\.\s*sendBeacon/,        'navigator.sendBeacon'],
+    [/\bimportScripts\s*\(/,               'importScripts()'],
+    [/<script[^>]+\bsrc\s*=/i,             '<script src> externe'],
+    [/<link\b[^>]*\bhref\s*=/i,            '<link href> externe'],
+    [/<img[^>]+\bsrc\s*=\s*["']https?:/i,  '<img> distante'],
+    [/@import\b/,                          '@import CSS'],
+    [/url\(\s*["']?https?:/i,              'url(http…) en CSS'],
+    [/(?:src|href)\s*=\s*["']https?:\/\//i,'attribut src/href absolu (http)'],
+    [/\bintegrity\s*=\s*["']/i,            'balise avec integrity (sous-ressource distante)'],
+  ];
+  let clean = true;
+  for(const [re, label] of sinks){
+    const m = html.match(re);
+    if(m){ clean = false; bad('motif réseau détecté → ' + label + ' : « ' + m[0].slice(0,60) + ' »'); }
+  }
+  if(clean) ok('aucun puits réseau : 0 fetch/XHR/WebSocket/CDN/ressource externe');
+  // garde-fou positif : la CSP doit verrouiller le réseau
+  assert.match(html, /Content-Security-Policy/i, 'CSP absente');
+  assert.match(html, /connect-src\s+'none'/, "connect-src 'none' absent de la CSP");
+  ok("CSP présente avec connect-src 'none' (le réseau est fermé par défaut)");
+});
+
+/* ---------- 3. CRYPTO (extraite du fichier, exécutée pour de vrai) ---------- */
+await section('3. Enveloppe cryptographique (extraite de coffre.html)', async () => {
+  const m = html.match(/\/\*<crypto>\*\/([\s\S]*?)\/\*<\/crypto>\*\//);
+  assert.ok(m, 'marqueurs /*<crypto>*/ introuvables dans coffre.html');
+  const cryptoSrc = m[1];
+  // On évalue le bloc tel quel (il n'utilise que des globaux présents dans Node 20+ :
+  // crypto.subtle, getRandomValues, TextEncoder/Decoder, btoa/atob) et on récupère l'API.
+  const factory = new Function(cryptoSrc + '\n;return { createVault, openVault, normPhrase, ITER };');
+  const C = factory();
+  assert.equal(C.ITER, 600000, 'ITER attendu à 600000 (OWASP)');
+  ok('bloc crypto évalué — ITER = ' + C.ITER + ' (PBKDF2, OWASP)');
+
+  const password = 'cheval-agrafe-lune-batterie';
+  const phrase   = 'licorne abeille cobra dragon écureuil fableau';  // peu importe le contenu
+
+  const { vault, dek, payload } = await C.createVault(password, phrase);
+  assert.deepEqual(payload, { modules: {} }, 'payload initial inattendu');
+  assert.equal(vault.cipher, 'AES-GCM-256');
+  assert.equal(vault.kdf.iterations, 600000);
+  ok('création : vault format ' + vault.format + ', ' + vault.cipher + ', PBKDF2 ' + vault.kdf.iterations);
+
+  // (a) aucun secret en clair dans le fichier vault
+  const serialized = JSON.stringify(vault);
+  assert.ok(!serialized.includes(password), 'le mot de passe FUITE en clair dans le vault !');
+  assert.ok(!serialized.includes(C.normPhrase(phrase)), 'la phrase FUITE en clair dans le vault !');
+  assert.ok(!serialized.includes('"modules"'), 'le payload n\'est pas chiffré (modules en clair) !');
+  ok('confidentialité : ni mot de passe, ni phrase, ni payload lisibles dans le vault');
+
+  // (b) round-trip par mot de passe
+  const byPwd = await C.openVault(vault, password, 'pwd');
+  assert.deepEqual(byPwd.payload, { modules: {} });
+  ok('déverrouillage par mot de passe : round-trip OK');
+
+  // (c) round-trip par phrase de récupération (normalisée)
+  const byRec = await C.openVault(vault, '  ' + phrase.toUpperCase() + '  ', 'rec');
+  assert.deepEqual(byRec.payload, { modules: {} });
+  ok('déverrouillage par phrase (insensible casse/espaces) : round-trip OK');
+
+  // (d) un mauvais secret est rejeté proprement (BAD_SECRET), pas un crash
+  await assert.rejects(() => C.openVault(vault, password + 'x', 'pwd'), e => e.code === 'BAD_SECRET',
+    'un mauvais mot de passe devrait lever BAD_SECRET');
+  ok('mauvais mot de passe : rejeté avec le code BAD_SECRET');
+
+  // (e) deux coffres successifs ne partagent ni sel ni IV (aléa correct)
+  const second = await C.createVault(password, phrase);
+  assert.notEqual(second.vault.pwd.salt, vault.pwd.salt, 'sel mot de passe non aléatoire !');
+  assert.notEqual(second.vault.data.iv, vault.data.iv, 'IV de données non aléatoire !');
+  ok('aléa : sels et IV distincts entre deux coffres');
+});
+
+/* ---------- bilan ---------- */
+console.log('');
+if(failures){ console.log('\x1b[31m\x1b[1m' + failures + ' test(s) en échec.\x1b[0m'); process.exit(1); }
+console.log('\x1b[32m\x1b[1mTout est vert.\x1b[0m');
