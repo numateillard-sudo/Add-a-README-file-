@@ -174,6 +174,27 @@ input:focus{border-color:var(--brass-deep); box-shadow:0 0 0 3px #c9a24b22; outl
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
 .toast.err{border-color:#5a3b2f}
 
+/* ---------- palette de commandes (⌘K) ---------- */
+.cmdk-back{position:fixed;inset:0;background:rgba(6,10,13,.62);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}
+.cmdk-back.show{display:flex}
+.cmdk{width:100%;max-width:600px;background:linear-gradient(180deg,#16222B,#0F1820);border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:0 50px 120px -40px #000,inset 0 1px 0 rgba(255,255,255,.05);overflow:hidden;animation:rise .16s cubic-bezier(.2,.7,.2,1)}
+.cmdk-top{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--line-soft)}
+.cmdk-top svg{color:var(--muted-2);flex:none}
+.cmdk-top input{flex:1;background:none;border:0;color:var(--text);font-size:16px;font-family:var(--sans);outline:none;padding:0}
+.cmdk-top input::placeholder{color:#52656F}
+.cmdk-kbd{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);border:1px solid var(--line);border-radius:6px;padding:3px 7px;flex:none}
+.cmdk-results{max-height:52vh;overflow-y:auto;padding:7px}
+.cmdk-group{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);padding:11px 10px 5px}
+.cmdk-item{display:flex;align-items:center;gap:12px;padding:10px 11px;border-radius:10px;cursor:pointer}
+.cmdk-item .ci-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.cmdk-item .ci-main{flex:1;min-width:0}
+.cmdk-item .ci-t{font-size:14px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdk-item .ci-s{font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdk-item.sel{background:#1b2832}
+.cmdk-item.sel .ci-t{color:var(--brass-bright)}
+.cmdk-empty{padding:26px 16px;text-align:center;color:var(--muted-2);font-size:13.5px}
+@media (prefers-reduced-motion: reduce){ .cmdk{animation:none} }
+
 /* screens */
 /* ---------- file manager ---------- */
 .backlink{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13.5px;padding:6px 0;margin-bottom:10px}
@@ -654,6 +675,10 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
     <div class="status">
       <span class="chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Chiffré AES-256</span>
       <span class="chip path" id="vault-path"></span>
+      <button class="lockbtn" id="cmdk-open" title="Rechercher partout (Ctrl/⌘ K)" aria-keyshortcuts="Control+K Meta+K">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        Rechercher
+      </button>
       <div class="add-wrap" id="add-wrap">
         <button class="addbtn" id="add-btn" title="Ajouter — raccourci disponible partout">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
@@ -3358,6 +3383,7 @@ $('#add-btn').addEventListener('click', ()=> toggleAddMenu());
 document.addEventListener('click', e=>{ const w=$('#add-wrap'); if(w && w.classList.contains('open') && !w.contains(e.target)) closeAddMenu(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAddMenu(); });
 $('#open-security').addEventListener('click', ()=> goView('security'));
+$('#cmdk-open').addEventListener('click', ()=> cmdkOpen());
 $('#finance-back').addEventListener('click', ()=> goView('home'));
 $('#fin-new-account').addEventListener('click', ()=> openMoney('account', null));
 $('#fin-new-flow').addEventListener('click', ()=> openMoney('flow', null));
@@ -3483,6 +3509,110 @@ $('#docs-quick-input').addEventListener('change', e=>{ quickAddFromFiles(e.targe
 $('#lock-now').addEventListener('click', ()=>{
   if(!isUnlocked()){ setLockedSubtitle(); $('#unlock-pw').value=''; $('#unlock-err').textContent=''; show('s-locked'); return; }
   lockVault('manual');           // chemin unique d'effacement des clés
+});
+
+/* =========================================================================
+   Palette de commandes (⌘K / Ctrl-K) — recherche transverse à TOUS les modules
+   et navigation au clavier. Invariant : on indexe titres et métadonnées, jamais
+   une valeur secrète (les mots de passe sont exclus du haystack).
+   ========================================================================= */
+let cmdkIndex=[], cmdkItems=[], cmdkSel=0, cmdkLastFocus=null;
+function cmdkEnsureDom(){
+  if($('#cmdk-back')) return;
+  const back=document.createElement('div'); back.className='cmdk-back'; back.id='cmdk-back';
+  back.innerHTML='<div class="cmdk" role="dialog" aria-modal="true" aria-label="Recherche globale">'+
+    '<div class="cmdk-top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>'+
+    '<input id="cmdk-input" type="text" autocomplete="off" spellcheck="false" placeholder="Rechercher partout, ou aller à…" aria-label="Rechercher dans le coffre" role="combobox" aria-expanded="true" aria-controls="cmdk-results">'+
+    '<span class="cmdk-kbd">Échap</span></div>'+
+    '<div class="cmdk-results" id="cmdk-results" role="listbox" aria-label="Résultats"></div></div>';
+  document.body.appendChild(back);
+  back.addEventListener('click', e=>{ if(e.target===back) cmdkClose(); });
+  $('#cmdk-input').addEventListener('input', cmdkRender);
+  $('#cmdk-input').addEventListener('keydown', cmdkKey);
+}
+function buildSearchIndex(){
+  const out=[];
+  try{ docsState().items.forEach(f=> out.push({ group:'Documents', label:f.title||'Document',
+    sub:[f.category,f.holder].filter(Boolean).join(' · '), color:'#4FC8E0',
+    hay:((f.title||'')+' '+(f.category||'')+' '+(f.holder||'')+' '+(f.fields||[]).map(x=>(x.k||'')+' '+(x.v||'')).join(' ')+' '+(f.note||'')).toLowerCase(),
+    run:()=> openEditor(f.id) })); }catch(e){}
+  Object.keys(COLLECTIONS).forEach(key=>{ const cfg=COLLECTIONS[key];
+    const secret=new Set((cfg.fields||[]).filter(x=>x.type==='secret').map(x=>x.k));
+    try{ collState(key).items.forEach(it=>{
+      const vals=Object.keys(it.fields||{}).filter(k=>!secret.has(k)).map(k=>it.fields[k]).join(' ');
+      out.push({ group:cfg.eyebrow, label:it.title||cfg.newLabel, sub:(cfg.sub?cfg.sub(it):it.category)||'', color:cfg.color,
+        hay:((it.title||'')+' '+(it.category||'')+' '+(it.note||'')+' '+vals).toLowerCase(),
+        run:()=>{ openColl(key); openCollItem(it.id); } });
+    }); }catch(e){}
+  });
+  try{ const f=financeState();
+    f.accounts.forEach(a=> out.push({ group:'Comptes', label:a.name||'Compte', sub:[a.kind,a.inst].filter(Boolean).join(' · '), color:'#4FD68A', hay:((a.name||'')+' '+(a.kind||'')+' '+(a.inst||'')).toLowerCase(), run:()=> openMoney('account', a.id) }));
+    f.flows.forEach(x=> out.push({ group:"Rappels d'argent", label:x.label||'Rappel', sub:(typeof periodLabel==='function'?periodLabel(x.period):''), color:'#C9A24B', hay:((x.label||'')+' '+(x.cat||'')).toLowerCase(), run:()=> openMoney('flow', x.id) }));
+  }catch(e){}
+  return out;
+}
+function cmdkStatic(){
+  const nav=[
+    ['Accueil','',()=>goView('home'),'#C9A24B'],
+    ['Mes documents','Papiers, contrats, scans',()=>goView('docs'),'#4FC8E0'],
+    ['Mes finances','Comptes et flux',()=>goView('finance'),'#4FD68A'],
+    ['Échéances & rappels','Ce qui expire bientôt',()=>openDeadlines(),'#F0C04A'],
+    ['Sécurité & sauvegarde','Exporter, mot de passe',()=>goView('security'),'#92A4AE'],
+  ].map(([label,sub,run,color])=>({group:'Aller à',label,sub,color,run,hay:(label+' '+sub).toLowerCase()}));
+  MODULES.forEach(([target,t,d])=> nav.push({group:'Aller à',label:t,sub:d,color:'#9A7B2E',run:()=>openModule(target),hay:(t+' '+d).toLowerCase()}));
+  const actions=[
+    ['Nouveau document','',()=>openEditor(null),'#4FC8E0'],
+    ['Verrouiller le coffre','',()=>lockVault('manual'),'#E0735C'],
+  ].map(([label,sub,run,color])=>({group:'Action',label,sub,color,run,hay:label.toLowerCase()}));
+  return nav.concat(actions);
+}
+function cmdkOpen(){
+  if(!isUnlocked()) return;
+  cmdkEnsureDom();
+  cmdkLastFocus=document.activeElement;
+  cmdkIndex = buildSearchIndex().concat(cmdkStatic());
+  $('#cmdk-input').value=''; $('#cmdk-back').classList.add('show');
+  cmdkRender(); setTimeout(()=>{ const i=$('#cmdk-input'); if(i) i.focus(); }, 20);
+}
+function cmdkClose(){ const b=$('#cmdk-back'); if(b) b.classList.remove('show'); if(cmdkLastFocus&&cmdkLastFocus.focus){ try{cmdkLastFocus.focus();}catch(e){} } }
+function cmdkRender(){
+  const q=($('#cmdk-input').value||'').trim().toLowerCase();
+  const toks=q.split(/\s+/).filter(Boolean);
+  let res = toks.length ? cmdkIndex.filter(it=> toks.every(t=> it.hay.includes(t))) : cmdkIndex.slice();
+  res.sort((a,b)=>{ const A=a.label.toLowerCase().startsWith(q)?0:1, B=b.label.toLowerCase().startsWith(q)?0:1; return A-B; });
+  res = res.slice(0,40);
+  cmdkItems = res; cmdkSel = 0;
+  const box=$('#cmdk-results');
+  if(!res.length){ box.innerHTML='<div class="cmdk-empty">Rien ne correspond.</div>'; return; }
+  let html=''; let lastGroup=null;
+  res.forEach((it,i)=>{
+    if(it.group!==lastGroup){ html+='<div class="cmdk-group">'+escapeHtml(it.group)+'</div>'; lastGroup=it.group; }
+    html+='<div class="cmdk-item'+(i===0?' sel':'')+'" role="option" data-i="'+i+'" aria-selected="'+(i===0)+'">'+
+      '<span class="ci-dot" style="background:'+it.color+'"></span>'+
+      '<div class="ci-main"><div class="ci-t">'+escapeHtml(it.label)+'</div>'+(it.sub?'<div class="ci-s">'+escapeHtml(it.sub)+'</div>':'')+'</div></div>';
+  });
+  box.innerHTML=html;
+  box.querySelectorAll('.cmdk-item').forEach(el=>{
+    el.onmousemove=()=>cmdkSelect(+el.dataset.i);
+    el.onclick=()=>{ cmdkSel=+el.dataset.i; cmdkRun(); };
+  });
+}
+function cmdkSelect(i){ if(i===cmdkSel) return; cmdkSel=i; $('#cmdk-results').querySelectorAll('.cmdk-item').forEach(el=>{ const on=+el.dataset.i===i; el.classList.toggle('sel',on); el.setAttribute('aria-selected',on); }); }
+function cmdkRun(){ const it=cmdkItems[cmdkSel]; if(!it) return; cmdkClose(); try{ it.run(); }catch(e){ console.error(e); } }
+function cmdkKey(e){
+  if(e.key==='ArrowDown'){ e.preventDefault(); if(cmdkSel<cmdkItems.length-1){ cmdkSelect(cmdkSel+1); cmdkScroll(); } }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); if(cmdkSel>0){ cmdkSelect(cmdkSel-1); cmdkScroll(); } }
+  else if(e.key==='Enter'){ e.preventDefault(); cmdkRun(); }
+  else if(e.key==='Escape'){ e.preventDefault(); cmdkClose(); }
+}
+function cmdkScroll(){ const el=$('#cmdk-results').querySelector('.cmdk-item.sel'); if(el) el.scrollIntoView({block:'nearest'}); }
+window.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){
+    const open = $('#cmdk-back') && $('#cmdk-back').classList.contains('show');
+    if(!isUnlocked() && !open) return;
+    e.preventDefault();
+    open ? cmdkClose() : cmdkOpen();
+  }
 });
 
 /* ----- amorçage ----- */

@@ -134,8 +134,29 @@ try {
   await page.screenshot({ path: join(HERE, 'screen-passwords.png') });
   ok('capture audit accès → tests/screen-passwords.png');
 
+  /* ---------- palette ⌘K : recherche transverse, sans fuite de secret ---------- */
+  console.log('\n\x1b[1m4. Recherche globale ⌘K (navigateur réel)\x1b[0m');
+  await page.keyboard.press('Control+K');
+  await page.waitForSelector('#cmdk-back.show', { timeout: 5000 });
+  ok('palette ouverte au clavier (Ctrl+K)');
+  // un mot de passe stocké ne doit JAMAIS être indexé / retrouvable
+  await page.fill('#cmdk-input', 'azerty');
+  await page.waitForFunction(() => document.querySelector('#cmdk-results .cmdk-empty') ||
+    ![...document.querySelectorAll('#cmdk-results .ci-t')].length, null, { timeout: 4000 });
+  const leak = await page.$('#cmdk-results .cmdk-item');
+  if (leak) bad('un mot de passe (azerty) ressort dans la recherche — fuite !'); else ok('les mots de passe ne sont pas indexés (recherche « azerty » : vide)');
+  // recherche transverse normale → navigation directe
+  await page.fill('#cmdk-input', 'Banque');
+  await page.waitForFunction(() => [...document.querySelectorAll('#cmdk-results .ci-t')].some(e => /Banque/.test(e.textContent)), null, { timeout: 4000 });
+  ok('résultat « Banque » trouvé');
+  await page.screenshot({ path: join(HERE, 'screen-cmdk.png') });
+  await page.keyboard.press('Enter');
+  await page.waitForSelector('#ce-title', { state: 'visible', timeout: 5000 });
+  const navTitle = await page.inputValue('#ce-title');
+  if (navTitle === 'Banque') ok('Entrée → ouverture directe de l’accès « Banque »'); else bad('navigation palette inattendue : ' + navTitle);
+
   /* ---------- CSP & erreurs ---------- */
-  console.log('\n\x1b[1m4. CSP stricte & propreté console\x1b[0m');
+  console.log('\n\x1b[1m5. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');

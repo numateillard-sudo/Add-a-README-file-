@@ -2,6 +2,19 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 3 — Recherche globale ⌘K & navigation clavier
+
+- **Palette de commandes** (Ctrl/⌘ K, plus un bouton « Rechercher » visible dans
+  la barre) : recherche **transverse** à tous les modules — documents, accès,
+  patrimoine, santé, transmission, comptes et rappels d'argent — plus « Aller à »
+  (chaque module/écran) et actions (nouveau document, verrouiller).
+- Navigation **100 % clavier** : flèches ↑/↓, Entrée pour ouvrir l'élément
+  directement, Échap pour fermer ; sélection à la souris au survol.
+- **Confidentialité** : les valeurs secrètes (mots de passe) sont **exclues de
+  l'index** — prouvé par un test e2e (rechercher « azerty » ne retourne rien).
+- Accessibilité : `role="dialog"`/`listbox`/`option`, `aria-selected`, restitution
+  du focus à la fermeture, `aria-keyshortcuts`, respect de `prefers-reduced-motion`.
+
 ## Lot 2 — Mots de passe en masterclass
 
 - **Audit des accès** : panneau en tête du module qui repère les mots de passe
