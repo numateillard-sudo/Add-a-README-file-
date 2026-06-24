@@ -1986,13 +1986,36 @@ function emergencyCardHtml(){
       itemFull('Pathologies', e.conditions)+
       itemFull('Traitements en cours', e.treatments)+
       item('Personne à prévenir', e.contactName)+
-      item('Téléphone', e.contactPhone)+
+      (e.contactPhone ? '<div class="emerg-item"><div class="el">Téléphone</div><div class="ev"><a href="tel:'+escapeAttr(e.contactPhone.replace(/\s+/g,''))+'">'+escapeHtml(e.contactPhone)+'</a></div></div>' : '')+
     '</div>';
   }
-  return '<div class="coll-hero" id="emerg-card"><div class="ch-eyebrow"><span>\uD83E\uDE78 Carte d\u2019urgence</span><button class="linkmini" id="emerg-edit-btn">'+(has?'Modifier':'Remplir')+'</button></div>'+body+'</div>';
+  const actions='<span style="display:flex;gap:14px">'+(has?'<button class="linkmini" id="emerg-print">Imprimer</button>':'')+'<button class="linkmini" id="emerg-edit-btn">'+(has?'Modifier':'Remplir')+'</button></span>';
+  return '<div class="coll-hero" id="emerg-card"><div class="ch-eyebrow"><span>\uD83E\uDE78 Carte d\u2019urgence</span>'+actions+'</div>'+body+'</div>';
+}
+function printEmergency(){
+  const e=emergencyState();
+  const row=(l,v)=> v ? '<tr><th>'+l+'</th><td>'+escapeHtml(v)+'</td></tr>' : '';
+  const html='<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Carte d\u2019urgence \u2014 Coffre</title>'+
+    '<style>body{font-family:Arial,Helvetica,sans-serif;color:#111;max-width:560px;margin:36px auto;padding:0 24px}'+
+    'h1{font-size:20px;margin:0 0 2px;color:#7d231a}.sub{color:#555;font-size:12px;margin:0 0 18px}'+
+    '.card{border:2px solid #c0392b;border-radius:10px;padding:16px 20px}'+
+    'table{border-collapse:collapse;width:100%}th{text-align:left;color:#7d231a;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:9px 12px 9px 0;vertical-align:top;width:40%}'+
+    'td{padding:9px 0;font-size:15px;border-bottom:1px solid #eee}.foot{margin-top:16px;color:#888;font-size:11px}</style></head><body>'+
+    '<h1>\uD83E\uDE78 Carte d\u2019urgence</h1><p class="sub">\u00C0 pr\u00E9senter aux secours \u2014 informations m\u00E9dicales essentielles.</p>'+
+    '<div class="card"><table>'+
+      row('Groupe sanguin', e.blood)+ row('Don d\u2019organes', e.donor)+
+      row('Allergies', e.allergies)+ row('Pathologies', e.conditions)+
+      row('Traitements en cours', e.treatments)+ row('Personne \u00E0 pr\u00E9venir', e.contactName)+
+      row('T\u00E9l\u00E9phone', e.contactPhone)+
+    '</table></div>'+
+    '<p class="foot">G\u00E9n\u00E9r\u00E9e le '+new Date().toLocaleDateString('fr-FR')+' depuis ton Coffre \u2014 \u00E0 garder sur toi.</p>'+
+    '<script>window.onload=function(){window.print()}<\/script></body></html>';
+  const w=window.open('','_blank'); if(!w){ toast('Autorise les fen\u00EAtres pop-up pour imprimer', true); return; }
+  w.document.write(html); w.document.close();
 }
 function bindCollHeader(cfg, st){
   const b=$('#emerg-edit-btn'); if(b) b.onclick=()=> renderEmergencyEditor();
+  const p=$('#emerg-print'); if(p) p.onclick=()=> printEmergency();
   $$('#cl-header [data-open]').forEach(el=> el.onclick=()=> openCollItem(el.getAttribute('data-open')));
 }
 function passwordAuditHtml(st){

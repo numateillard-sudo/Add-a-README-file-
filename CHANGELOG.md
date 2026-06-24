@@ -2,6 +2,15 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 5 — Santé : carte d’urgence imprimable + README
+
+- **Carte d’urgence imprimable** : bouton « Imprimer » qui génère une feuille
+  propre (groupe sanguin, allergies, pathologies, traitements, personne à
+  prévenir) à présenter aux secours. Vérifié en e2e (pop-up d’impression).
+- **Téléphone cliquable** (`tel:`) sur la carte d’urgence — un tap appelle.
+- **README.md** : présentation, pacte local, sécurité, modules, stockage et
+  commandes de test (le dépôt portait bien son nom).
+
 ## Lot 4 — Accessibilité (WCAG 2.2 AA)
 
 - **Noms accessibles** sur tous les contrôles visibles (boutons, champs, options) —

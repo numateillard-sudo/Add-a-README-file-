@@ -211,8 +211,38 @@ try {
   if (nameless.length) bad('contrôles sans nom accessible : ' + nameless.join(', '));
   else ok('tous les contrôles visibles ont un nom accessible (6 vues + éditeur)');
 
+  /* ---------- Santé : carte d'urgence imprimable ---------- */
+  console.log('\n\x1b[1m6. Santé — carte d’urgence imprimable\x1b[0m');
+  // (réutilise goTo défini plus haut)
+  await page.keyboard.press('Control+K');
+  await page.waitForSelector('#cmdk-back.show');
+  await page.fill('#cmdk-input', 'Santé');
+  await page.waitForFunction(() => [...document.querySelectorAll('#cmdk-results .ci-t')].some(e => e.textContent.trim() === 'Santé'), null, { timeout: 4000 });
+  await page.click('#cmdk-results .cmdk-item:has(.ci-t:text-is("Santé"))');
+  await page.waitForSelector('#emerg-edit-btn', { state: 'visible', timeout: 6000 });
+  await page.click('#emerg-edit-btn');
+  await page.waitForSelector('#em-blood', { state: 'visible' });
+  await page.fill('#em-blood', 'O+');
+  await page.fill('#em-allergies', 'Pénicilline');
+  await page.fill('#em-contactName', 'Marie');
+  await page.fill('#em-contactPhone', '06 12 34 56 78');
+  await page.click('#em-save');
+  await page.waitForSelector('#emerg-print', { state: 'visible', timeout: 5000 });
+  ok('carte d’urgence remplie et enregistrée');
+  const telHref = await page.getAttribute('#emerg-card a[href^="tel:"]', 'href');
+  if (telHref === 'tel:0612345678') ok('téléphone cliquable (' + telHref + ')'); else bad('lien tel inattendu : ' + telHref);
+  const popP = ctx.waitForEvent('page');
+  await page.click('#emerg-print');
+  const printPage = await popP;
+  await printPage.waitForLoadState('domcontentloaded').catch(() => {});
+  const ptxt = await printPage.evaluate(() => document.body ? document.body.innerText : '').catch(() => '');
+  if (/O\+/.test(ptxt) && /Marie/.test(ptxt)) ok('feuille imprimable générée (groupe sanguin + contact présents)');
+  else bad('feuille imprimable : contenu = ' + ptxt.slice(0, 80));
+  await printPage.close();
+  await page.screenshot({ path: join(HERE, 'screen-emergency.png') });
+
   /* ---------- CSP & erreurs ---------- */
-  console.log('\n\x1b[1m6. CSP stricte & propreté console\x1b[0m');
+  console.log('\n\x1b[1m7. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');
