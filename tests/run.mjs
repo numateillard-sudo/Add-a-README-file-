@@ -120,6 +120,38 @@ await section('3. Enveloppe cryptographique (extraite de coffre.html)', async ()
   ok('aléa : sels et IV distincts entre deux coffres');
 });
 
+/* ---------- 4. AUDIT DES ACCÈS (fonctions pures extraites) ---------- */
+await section('4. Force & audit des mots de passe (extraits de coffre.html)', () => {
+  const m = html.match(/\/\*<pure>\*\/([\s\S]*?)\/\*<\/pure>\*\//);
+  assert.ok(m, 'marqueurs pure introuvables');
+  const C = new Function(m[1] + '\n;return { pwScore, pwEntropyBits, auditPasswords, genPassword };')();
+
+  // jauge honnête : les classiques sont déclassés, le costaud est reconnu
+  assert.equal(C.pwScore('password'), 1, '« password » devrait être très faible');
+  assert.equal(C.pwScore('azerty'),   1, '« azerty » devrait être très faible');
+  assert.equal(C.pwScore('aaaaaaaaaaaa'), 1, 'répétition devrait être très faible');
+  assert.ok(C.pwScore('Tomate7!') <= 3, 'un mot+chiffre court reste moyen au mieux');
+  assert.equal(C.pwScore(C.genPassword(20)), 5, 'un mot de passe généré (20) doit être excellent');
+  assert.ok(C.pwEntropyBits('aA1!aA1!aA1!') > C.pwEntropyBits('aaaa'), 'entropie croissante avec la variété/longueur');
+  ok('jauge : faibles déclassés, générés notés excellents, entropie cohérente');
+
+  // audit : faibles + réutilisés correctement repérés
+  const items = [
+    { id:'1', title:'Gmail',  fields:{ password:'Sun-licorne-cobra-42xZ' } },  // fort, unique
+    { id:'2', title:'Banque', fields:{ password:'azerty' } },                  // faible
+    { id:'3', title:'Forum',  fields:{ password:'reseau123' } },               // réutilisé…
+    { id:'4', title:'Boutique', fields:{ password:'reseau123' } },             // …avec celui-ci
+    { id:'5', title:'Sans pw', fields:{ username:'x' } },                      // ignoré (pas de pw)
+  ];
+  const a = C.auditPasswords(items);
+  assert.equal(a.withPw, 4, '4 accès ont un mot de passe');
+  assert.ok(a.weak.some(w=>w.id==='2'), 'la Banque (azerty) doit être faible');
+  assert.equal(a.reused.length, 1, 'un seul groupe réutilisé');
+  assert.equal(a.reusedIds.size, 2, 'deux accès partagent le même mot de passe');
+  assert.ok(a.reusedIds.has('3') && a.reusedIds.has('4'), 'Forum et Boutique sont le doublon');
+  ok('audit : 1 faible repéré, doublon « reseau123 » (Forum+Boutique) détecté');
+});
+
 /* ---------- bilan ---------- */
 console.log('');
 if(failures){ console.log('\x1b[31m\x1b[1m' + failures + ' test(s) en échec.\x1b[0m'); process.exit(1); }

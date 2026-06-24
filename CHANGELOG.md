@@ -2,6 +2,22 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 2 — Mots de passe en masterclass
+
+- **Audit des accès** : panneau en tête du module qui repère les mots de passe
+  **faibles** et **réutilisés** (groupes de doublons), chaque ligne cliquable
+  ouvre l'accès concerné. Message rassurant quand tout est solide et unique.
+- **Jauge de force honnête** : estimation par entropie (longueur × log2(jeu de
+  caractères)) corrigée des répétitions/séquences, plus une liste des mots de
+  passe les plus éventés déclassés d'office. Remplace le simple comptage de classes.
+- **Générateur enrichi** : popover avec longueur réglable (8–32) et deux modes —
+  mot de passe aléatoire fort, ou **phrase mémorisable** (mots français BIP39 +
+  nombre), tirés au sort sur l'appareil.
+- Copie d'un accès **sans ouvrir la fiche** (déjà là) désormais couplée à
+  l'effacement auto du presse-papiers (Lot 1).
+- Tests : fonctions pures `pwScore`/`pwEntropyBits`/`auditPasswords` extraites et
+  vérifiées ; e2e navigateur qui crée des accès et valide l'audit (faibles + doublon).
+
 ## Lot 1 — Souveraineté & Sécurité
 
 **Souveraineté prouvée**

@@ -267,6 +267,30 @@ textarea.ed-note{width:100%;background:#0C141A;border:1px solid var(--line);colo
 .gen-hint{font-size:11.5px;color:var(--muted-2);margin:7px 0 0}
 .pw-meter{height:4px;border-radius:3px;background:#0b1217;margin-top:9px;overflow:hidden}
 .pw-meter i{display:block;height:100%;width:0;border-radius:3px;transition:width .2s,background .2s}
+/* générateur : popover d'options */
+.pw-genpop{margin-top:11px;border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#0C141A;display:flex;flex-direction:column;gap:11px;animation:rise .14s ease}
+.pw-genpop .row{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.pw-genpop label{font-size:12px;color:var(--muted)}
+.pw-genpop input[type=range]{accent-color:var(--brass);flex:1;min-width:120px}
+.pw-genpop .lenval{font-family:var(--mono);font-size:12.5px;color:var(--brass-bright);min-width:24px;text-align:right}
+.pw-genbtn{background:#13202a;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-size:12.5px;cursor:pointer;transition:border-color .12s,color .12s}
+.pw-genbtn:hover{border-color:var(--brass-deep);color:var(--brass-bright)}
+/* audit des accès (mots de passe faibles / réutilisés) */
+.pw-audit{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.pwa-chip{display:flex;flex-direction:column;gap:3px;padding:11px 15px;border:1px solid var(--line-soft);border-radius:12px;background:#0e1820;min-width:92px}
+.pwa-chip .n{font-family:var(--serif);font-size:23px;font-weight:600;line-height:1}
+.pwa-chip .l{font-size:11px;color:var(--muted)}
+.pwa-chip.good .n{color:var(--ok)}
+.pwa-chip.warn .n{color:var(--danger)}
+.pw-audit-rows{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.pwa-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line-soft);border-left:3px solid var(--danger);border-radius:11px;background:linear-gradient(180deg,#141f27,#0f181f);cursor:pointer;transition:border-color .12s,transform .12s}
+.pwa-row:hover{border-color:var(--brass-deep);transform:translateY(-1px)}
+.pwa-row .grow{flex:1;min-width:0}
+.pwa-row .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pwa-row .s{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pwa-tags{display:flex;gap:6px;flex:none}
+.pwa-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--danger);border:1px solid #5a3b2f;padding:3px 7px;border-radius:20px}
+.pwa-allgood{color:var(--ok);font-size:13.5px;margin-top:8px;display:flex;align-items:center;gap:9px}
 /* ---- carte d'urgence (santé) ---- */
 .coll-hero{border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px;margin-bottom:18px;background:linear-gradient(180deg,#16222B,#101A21);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .coll-hero .ch-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);margin:0 0 6px;display:flex;align-items:center;justify-content:space-between}
@@ -1796,7 +1820,7 @@ const COLLECTIONS = {
     ],
     hasDates:false, hasAtt:false, hasNote:true,
     sub:(it)=> it.fields.username || cleanUrl(it.fields.url) || it.category || '',
-    rowCopy:'password',
+    rowCopy:'password', audit:true,
   },
   assets:{
     key:'assets', eyebrow:'Patrimoine & biens', h1:'Ce que tu possèdes.',
@@ -1909,6 +1933,7 @@ function renderColl(){
 
 /* ---------- en-têtes spéciaux (total / urgence / intro) ---------- */
 function collHeaderHtml(cfg, st){
+  if(cfg.audit){ return passwordAuditHtml(st); }
   if(cfg.showTotal){
     const total=st.items.reduce((s,it)=> s+(Number(it.fields.value)||0), 0);
     return '<div class="coll-hero"><div class="ch-eyebrow"><span>Valeur estimée du patrimoine</span></div>'+
@@ -1943,6 +1968,35 @@ function emergencyCardHtml(){
 }
 function bindCollHeader(cfg, st){
   const b=$('#emerg-edit-btn'); if(b) b.onclick=()=> renderEmergencyEditor();
+  $$('#cl-header [data-open]').forEach(el=> el.onclick=()=> openCollItem(el.getAttribute('data-open')));
+}
+function passwordAuditHtml(st){
+  const a=auditPasswords(st.items);
+  const head='<div class="ch-eyebrow"><span>🛡️ Audit des accès</span>'+
+    (a.withPw? '<span>'+a.withPw+' avec mot de passe</span>':'')+'</div>';
+  if(a.withPw===0){
+    return '<div class="coll-hero">'+head+'<div class="emerg-empty">Ajoute tes accès : je repère pour toi les mots de passe faibles ou réutilisés — sans qu’aucun ne sorte d’ici.</div></div>';
+  }
+  // une ligne par accès à problème, avec ses étiquettes (Faible / Réutilisé)
+  const issues=new Map();
+  const add=(id,title,tag,sub)=>{ const e=issues.get(id)||{title,tags:[],sub}; if(!e.tags.includes(tag)) e.tags.push(tag); if(sub&&!e.sub) e.sub=sub; e.title=title; issues.set(id,e); };
+  a.weak.forEach(w=> add(w.id, w.title, 'Faible', 'mot de passe trop court ou trop simple'));
+  a.reused.forEach(g=> g.forEach(x=>{ const others=g.filter(y=>y.id!==x.id).map(y=>y.title||'sans nom').join(', '); add(x.id, x.title, 'Réutilisé', 'même mot de passe que : '+others); }));
+  const chips='<div class="pw-audit">'+
+    '<div class="pwa-chip'+(a.strong>0?' good':'')+'"><div class="n">'+a.strong+'</div><div class="l">solide'+(a.strong>1?'s':'')+'</div></div>'+
+    '<div class="pwa-chip'+(a.weak.length?' warn':' good')+'"><div class="n">'+a.weak.length+'</div><div class="l">faible'+(a.weak.length>1?'s':'')+'</div></div>'+
+    '<div class="pwa-chip'+(a.reused.length?' warn':' good')+'"><div class="n">'+a.reusedIds.size+'</div><div class="l">réutilisé'+(a.reusedIds.size>1?'s':'')+'</div></div>'+
+  '</div>';
+  if(issues.size===0){
+    return '<div class="coll-hero">'+head+chips+'<div class="pwa-allgood"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Tes '+a.withPw+' accès sont tous solides et uniques.</div></div>';
+  }
+  let rows='';
+  issues.forEach((e,id)=>{
+    rows += '<div class="pwa-row" data-open="'+escapeAttr(id)+'"><div class="grow"><div class="t">'+escapeHtml(e.title||'Accès sans nom')+'</div>'+
+      '<div class="s">'+escapeHtml(e.sub||'')+'</div></div><div class="pwa-tags">'+
+      e.tags.map(t=>'<span class="pwa-tag">'+escapeHtml(t)+'</span>').join('')+'</div></div>';
+  });
+  return '<div class="coll-hero">'+head+chips+'<div class="pw-audit-rows">'+rows+'</div></div>';
 }
 function renderEmergencyEditor(){
   const e=emergencyState();
@@ -2014,7 +2068,7 @@ function renderCollFields(cfg){
       inp.oninput=upd; pwMeter(val, meter, hint);
       wrap.querySelector('[data-act=reveal]').onclick=(ev)=>{ const b=ev.currentTarget; const show=inp.type==='password'; inp.type=show?'text':'password'; b.classList.toggle('on',show); };
       wrap.querySelector('[data-act=copy]').onclick=()=> copySecret(inp.value);
-      const g=wrap.querySelector('[data-act=gen]'); if(g) g.onclick=()=>{ inp.value=genPassword(18); inp.type='text'; wrap.querySelector('[data-act=reveal]').classList.add('on'); upd(); };
+      const g=wrap.querySelector('[data-act=gen]'); if(g) g.onclick=()=> openGenPopover(wrap, inp, ()=>{ inp.type='text'; wrap.querySelector('[data-act=reveal]').classList.add('on'); upd(); });
     } else if(fld.type==='url'){
       wrap.innerHTML='<span>'+fld.label+'</span><div class="url-row"><input type="text" inputmode="url" value="'+escapeAttr(val)+'" placeholder="'+escapeAttr(fld.ph||'')+'"><button type="button" class="sec-btn" data-act="open" title="Ouvrir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5h5v5M19 5l-9 9M19 14v5H5V5h5"/></svg></button></div>';
       const inp=wrap.querySelector('input'); inp.oninput=()=>{ collDraft.fields[fld.k]=inp.value; };
@@ -2094,7 +2148,51 @@ async function deleteCollItem(){
   renderShell(); toast('Supprimé'); renderColl(); goView('coll');
 }
 
-/* ---------- générateur + force de mot de passe ---------- */
+/* ---------- générateur + force de mot de passe (fonctions pures, testées) ---------- */
+/*<pure>*/
+// Petite liste des mots de passe les plus éventés (FR + universels). Ils sont
+// déclassés d'office quelle que soit leur longueur.
+const COMMON_PW = new Set(['password','passw0rd','motdepasse','azerty','azertyuiop','qwerty','qwertyuiop',
+  '123456','1234567','12345678','123456789','1234567890','000000','111111','123123','123321','abc123',
+  'admin','iloveyou','soleil','bonjour','doudou','loulou','chouchou','marseille','liverpool','naruto']);
+// Estimation HONNÊTE de la force : entropie ≈ longueur × log2(taille du jeu de
+// caractères), corrigée des répétitions/séquences qui gonflent faussement le score.
+function pwEntropyBits(p){
+  if(!p) return 0;
+  let pool=0;
+  if(/[a-z]/.test(p)) pool+=26;
+  if(/[A-Z]/.test(p)) pool+=26;
+  if(/[0-9]/.test(p)) pool+=10;
+  if(/[^A-Za-z0-9]/.test(p)) pool+=33;
+  if(pool===0) pool=1;
+  let bits = p.length * Math.log2(pool);
+  if(/^(.)\1*$/.test(p)) bits = Math.min(bits, 8);                 // « aaaaaa »
+  if(new Set(p.split('')).size <= 2 && p.length > 4) bits = Math.min(bits, 16);
+  return Math.round(bits*10)/10;
+}
+function pwScore(p){
+  if(!p) return 0;
+  if(COMMON_PW.has(p.toLowerCase())) return 1;
+  const bits = pwEntropyBits(p);
+  if(bits < 28) return 1;   // très faible
+  if(bits < 40) return 2;   // faible
+  if(bits < 56) return 3;   // moyen
+  if(bits < 72) return 4;   // bon
+  return 5;                 // excellent
+}
+// Audit d'un ensemble d'accès : repère les mots de passe faibles et ceux réutilisés.
+function auditPasswords(items){
+  const list = (items||[])
+    .map(it => ({ id:it.id, title:(it.title||'').trim(), pw:(it.fields&&it.fields.password)||'' }))
+    .filter(x => x.pw);
+  const byPw = new Map();
+  list.forEach(x => { if(!byPw.has(x.pw)) byPw.set(x.pw, []); byPw.get(x.pw).push(x); });
+  const weak = list.filter(x => pwScore(x.pw) <= 2).map(x => ({ id:x.id, title:x.title, score:pwScore(x.pw) }));
+  const reused = [...byPw.values()].filter(g => g.length > 1)
+    .map(g => g.map(x => ({ id:x.id, title:x.title })));
+  const reusedIds = new Set(reused.flat().map(x => x.id));
+  return { withPw:list.length, weak, reused, reusedIds, strong: list.length - weak.length };
+}
 function genPassword(len){
   len=len||18;
   const sets=['abcdefghijkmnpqrstuvwxyz','ABCDEFGHJKLMNPQRSTUVWXYZ','23456789','!@#$%&*?-_=+'];
@@ -2105,7 +2203,31 @@ function genPassword(len){
   for(let i=out.length-1;i>0;i--){ const j=rnd(i+1); const t=out[i]; out[i]=out[j]; out[j]=t; }
   return out.join('');
 }
-function pwScore(p){ if(!p) return 0; let s=0; if(p.length>=8) s++; if(p.length>=12) s++; if(p.length>=16) s++; if(/[a-z]/.test(p)&&/[A-Z]/.test(p)) s++; if(/\d/.test(p)) s++; if(/[^A-Za-z0-9]/.test(p)) s++; return Math.min(s,5); }
+/*</pure>*/
+// Phrase mémorisable : mots français (liste BIP39) + un nombre, tirés au sort sûr.
+function genPassphrase(words, sep){
+  words = words || 4; sep = (sep==null) ? '-' : sep;
+  const rnd=(n)=>{ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; };
+  const out=[];
+  for(let i=0;i<words;i++){ let w=BIP39[rnd(BIP39.length)]; if(i===0) w=w.charAt(0).toUpperCase()+w.slice(1); out.push(w); }
+  out.push(String(rnd(90)+10));   // un nombre, pour les sites qui l'exigent
+  return out.join(sep);
+}
+// Popover d'options du générateur (longueur + aléatoire/phrase).
+function openGenPopover(wrap, inp, after){
+  let pop=wrap.querySelector('.pw-genpop');
+  if(pop){ pop.remove(); return; }   // bouton bascule
+  pop=document.createElement('div'); pop.className='pw-genpop';
+  pop.innerHTML='<div class="row"><label>Longueur</label><input type="range" min="8" max="32" value="18"><span class="lenval">18</span></div>'+
+    '<div class="row"><button type="button" class="pw-genbtn" data-g="rand">🎲 Mot de passe fort</button>'+
+    '<button type="button" class="pw-genbtn" data-g="phrase">💬 Phrase mémorisable</button></div>'+
+    '<div class="gen-hint" style="margin:0">Tiré au sort sur ton appareil, jamais transmis.</div>';
+  wrap.appendChild(pop);
+  const range=pop.querySelector('input[type=range]'); const lv=pop.querySelector('.lenval');
+  range.oninput=()=> lv.textContent=range.value;
+  pop.querySelector('[data-g=rand]').onclick=()=>{ inp.value=genPassword(+range.value); after&&after(); };
+  pop.querySelector('[data-g=phrase]').onclick=()=>{ inp.value=genPassphrase(4,'-'); after&&after(); };
+}
 function pwMeter(p, bar, hint){
   if(!bar) return;
   const sc=pwScore(p);

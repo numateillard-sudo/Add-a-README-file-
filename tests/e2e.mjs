@@ -24,6 +24,7 @@ const require = createRequire(join(gRoot, 'x'));
 const { chromium } = require('playwright');
 
 const PW = 'cheval-agrafe-lune-batterie';     // mot de passe maître de test (≥ 8)
+const genStrong = () => 'Licorne-Cobra7-Brasier!9-Zephyr';   // fort et unique pour l'audit
 let failures = 0;
 const ok  = (m) => console.log('  \x1b[32m✓\x1b[0m ' + m);
 const bad = (m) => { console.log('  \x1b[31m✗ ' + m + '\x1b[0m'); failures++; };
@@ -105,8 +106,36 @@ try {
   await page.screenshot({ path: join(HERE, 'screen-unlocked.png') });
   ok('capture coffre ouvert → tests/screen-unlocked.png');
 
+  /* ---------- module Mots de passe : audit faibles / réutilisés ---------- */
+  console.log('\n\x1b[1m3. Module Mots de passe — audit (navigateur réel)\x1b[0m');
+  const addAccess = async (title, pw) => {
+    await page.click('#cl-new');
+    await page.waitForSelector('#ce-title', { state: 'visible' });
+    await page.fill('#ce-title', title);
+    await page.fill('#ce-fields .secret-row input', pw);
+    await page.click('#ce-save');
+    await page.waitForSelector('#cl-new', { state: 'visible' });
+  };
+  await page.click('#soon-modules >> text=Mots de passe');
+  await page.waitForSelector('#cl-new', { state: 'visible', timeout: 8000 });
+  ok('module Mots de passe ouvert');
+  await addAccess('Gmail',  'azerty');        // faible + réutilisé
+  await addAccess('Banque', 'azerty');        // réutilisé avec le précédent
+  await addAccess('Forum',  genStrong());     // fort + unique
+  ok('3 accès créés (2 faibles/réutilisés, 1 fort)');
+
+  const chips = await page.$$eval('#cl-header .pwa-chip .n', els => els.map(e => e.textContent.trim()));
+  const tags  = await page.$$eval('#cl-header .pwa-tag', els => els.map(e => e.textContent.trim()));
+  const rows  = await page.$$('#cl-header .pwa-row');
+  if (rows.length >= 2) ok('audit : ' + rows.length + ' accès signalés (chips ' + chips.join('/') + ')');
+  else bad('audit : ' + rows.length + ' lignes signalées, attendu ≥ 2');
+  if (tags.includes('Réutilisé')) ok('étiquette « Réutilisé » présente'); else bad('« Réutilisé » manquant');
+  if (tags.includes('Faible'))    ok('étiquette « Faible » présente');    else bad('« Faible » manquant');
+  await page.screenshot({ path: join(HERE, 'screen-passwords.png') });
+  ok('capture audit accès → tests/screen-passwords.png');
+
   /* ---------- CSP & erreurs ---------- */
-  console.log('\n\x1b[1m3. CSP stricte & propreté console\x1b[0m');
+  console.log('\n\x1b[1m4. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);
   if (csp.length) csp.forEach(v => bad('violation CSP : ' + v)); else ok('aucune violation CSP pendant tout le parcours');
   if (pageErrors.length) pageErrors.forEach(e => bad('erreur JS : ' + e)); else ok('aucune erreur JS non gérée');
