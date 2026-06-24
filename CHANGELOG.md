@@ -2,6 +2,13 @@
 
 Format : par lot vérifié (édité → syntaxe → e2e navigateur → tests fonctions pures).
 
+## Lot 9 — Échéances : groupées par urgence
+
+- La vue agrégée passe de 2 à **3 paliers d’urgence** : **En retard** (rouge),
+  **Bientôt** (ambre), **Plus tard** — chacun avec son compteur, le plus pressant
+  d’abord. Chaque ligne ouvre toujours sa source.
+- Vérifié en e2e (une échéance passée remonte bien sous « En retard »).
+
 ## Lot 8 — Documents : vue « à compléter » + « expire bientôt »
 
 - Deux **filtres rapides** dans Mes documents : **À compléter** (fiches sans

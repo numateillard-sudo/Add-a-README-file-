@@ -298,6 +298,24 @@ try {
   else bad('inventaire imprimable : contenu = ' + invTxt.slice(0, 90));
   await inv.close();
 
+  /* ---------- Échéances : groupées par urgence ---------- */
+  console.log('\n\x1b[1m7c. Échéances — groupées par urgence\x1b[0m');
+  await goTo('Mes documents');
+  await page.waitForSelector('#docs-new-btn', { state: 'visible' });
+  await page.click('#docs-new-btn');
+  await page.fill('#f-title', 'Passeport');
+  await page.click('#reveal-dates');
+  await page.waitForSelector('#f-dates .dt-row .dte', { state: 'visible' });
+  await page.fill('#f-dates .dt-row .lbl', 'Expiration');
+  await page.fill('#f-dates .dt-row .dte', '2020-01-01');   // échéance passée → en retard
+  await page.click('#f-save');
+  await page.waitForSelector('#docs-new-btn', { state: 'visible' });
+  await goTo('Échéances & rappels');
+  await page.waitForSelector('#dl-list', { state: 'visible' });
+  const dlGroups = await page.$$eval('#dl-list .dl-group-h', els => els.map(e => e.textContent));
+  if (dlGroups.some(g => /En retard/.test(g))) ok('échéance passée classée « En retard » (' + dlGroups.join(' | ') + ')');
+  else bad('groupe « En retard » manquant : ' + dlGroups.join(' | '));
+
   /* ---------- CSP & erreurs ---------- */
   console.log('\n\x1b[1m8. CSP stricte & propreté console\x1b[0m');
   const csp = await page.evaluate(() => window.__csp || []);

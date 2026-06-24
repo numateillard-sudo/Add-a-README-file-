@@ -2326,7 +2326,6 @@ function allDeadlines(){
 function renderDeadlines(){
   const all=allDeadlines();
   const upcoming=all.filter(d=> d.status.state!=='ok');
-  const later=all.filter(d=> d.status.state==='ok');
   $('#dl-sub').textContent = upcoming.length ? (upcoming.length+' échéance'+(upcoming.length>1?'s':'')+' à surveiller') : (all.length? 'Tout est à jour. Rien dans l\u2019immédiat.' : 'Aucune échéance enregistrée pour l\u2019instant.');
   const list=$('#dl-list'); list.innerHTML='';
   if(!all.length){ list.innerHTML='<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg><p><b>Aucune échéance.</b><br>Ajoute une date à un document, un bien ou un rappel,<br>elle remontera automatiquement ici.</p></div>'; return; }
@@ -2340,8 +2339,14 @@ function renderDeadlines(){
     row.onclick=()=> d.open&&d.open();
     return row;
   };
-  if(upcoming.length){ const h=document.createElement('div'); h.className='dl-group-h'; h.textContent='À surveiller'; list.appendChild(h); upcoming.forEach(d=> list.appendChild(groupRow(d))); }
-  if(later.length){ const h=document.createElement('div'); h.className='dl-group-h'; h.textContent='Plus tard'; list.appendChild(h); later.forEach(d=> list.appendChild(groupRow(d))); }
+  // groupées par urgence : en retard → bientôt → plus tard, le plus pressant d'abord
+  const order=[['overdue','En retard','#E0735C'],['soon','Bientôt','#E0C05C'],['ok','Plus tard',null]];
+  order.forEach(([state,label,col])=>{
+    const arr=all.filter(d=> d.status.state===state).sort((a,b)=> (a.status.days||0)-(b.status.days||0));
+    if(!arr.length) return;
+    const h=document.createElement('div'); h.className='dl-group-h'; h.textContent=label+' ('+arr.length+')'; if(col) h.style.color=col;
+    list.appendChild(h); arr.forEach(d=> list.appendChild(groupRow(d)));
+  });
 }
 
 /* =========================================================================
