@@ -1,0 +1,35 @@
+######## verify.js (rendu == recalcul moteur, tous états) ########
+================ VERIFICATION HARNESS ================
+PASS: 110   FAIL: 0
+ALL CHECKS GREEN ✓
+======================================================
+
+######## smoke.js (sweep interactif, 0 erreur console) ########
+A. legacy migration still resets old format ✓
+B. full interaction sweep: zero console errors ✓ (charts created: 15)
+
+================ SMOKE TEST ================
+ALL SMOKE CHECKS GREEN ✓
+
+######## test-restore.js (persistance quiz au rechargement) ########
+
+--- Pass2 (reload) ---
+loadState() returned (restored?): true
+BEFORE restoreUIFromState: {"answers":{"horizon":4,"tolerance":4,"poids":4,"experience":4,"situation":4},"completed":true,"profileKey":"offensif"}
+AFTER  restoreUIFromState: {"answers":{"horizon":4,"tolerance":4,"poids":4,"experience":4,"situation":4},"completed":true,"profileKey":"offensif"}
+
+>>> QUIZ WIPED ON RELOAD: no
+
+######## struct-scan.js (structure) ########
+=== 1. DUPLICATE declarations (function/const/let/var, any indent) ===
+  ⚠ s declared 10× at lines 7173, 7269, 7544, 7553, 8163, 9640, 9694, 9753, 9871, 9886
+  ⚠ el declared 8× at lines 7204, 7887, 9076, 9092, 9167, 9184, 9288, 9935
+  ⚠ fmt declared 2× at lines 7218, 7280
+  ⚠ abs declared 2× at lines 7220, 7225
+  ⚠ pct declared 2× at lines 7231, 9706
+  ⚠ asset declared 5× at lines 7250, 8054, 8238, 8342, 8777
+  ⚠ EXP_MAP declared 2× at lines 7436, 7607
+  ⚠ appetit declared 2× at lines 7437, 7609
+  ⚠ capacite declared 2× at lines 7438, 7610
+  ⚠ total declared 4× at lines 7476, 8712, 8781, 9216
+  ⚠ ids declared 2× at lines 7478, 9224
