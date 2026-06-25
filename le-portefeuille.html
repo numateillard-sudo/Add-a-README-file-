@@ -4817,56 +4817,56 @@ section[style*="padding:80px 0"] {
 .env-tag.env-cto{background:var(--beige-deep,#E8D2A6);color:var(--gold-dark,#8B6520)}
 </style>
 <style>
-/* ── Restitution profil (design module) — scopé sous #pc-shell ── */
+/* ── Restitution profil (design module, compact) — scopé sous #pc-shell ── */
 #pc-shell{display:block;text-align:left}
-#pc-shell .r2-verdict{background:var(--paper);border:1.5px solid var(--border);border-radius:18px;padding:24px 26px;box-shadow:var(--shadow-md);margin-bottom:16px;position:relative;overflow:hidden}
-#pc-shell .r2-verdict::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--vcolor,var(--gold))}
-#pc-shell .verdict-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
-#pc-shell .vk{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
-#pc-shell .vbadge{font-family:var(--serif);font-size:clamp(30px,5vw,44px);font-weight:800;color:var(--vcolor,var(--gold-dark));line-height:1}
-#pc-shell .vmention{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted);text-align:right;max-width:15em}
-#pc-shell .vtag{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink-soft);background:var(--bg-section);border-radius:99px;padding:5px 14px}
-#pc-shell .why{margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);font-style:italic}
+#pc-shell .r2-verdict{background:var(--paper);border:1.5px solid var(--border);border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-md);margin-bottom:12px;position:relative;overflow:hidden}
+#pc-shell .r2-verdict::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--vcolor,var(--gold))}
+#pc-shell .verdict-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+#pc-shell .vk{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:3px}
+#pc-shell .vbadge{font-family:var(--serif);font-size:clamp(26px,4.5vw,38px);font-weight:800;color:var(--vcolor,var(--gold-dark));line-height:1}
+#pc-shell .vmention{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--muted);text-align:right;max-width:15em}
+#pc-shell .vtag{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:var(--bg-section);border-radius:99px;padding:4px 12px}
+#pc-shell .why{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);font-family:var(--serif);font-size:15.5px;line-height:1.45;color:var(--ink);font-style:italic}
 #pc-shell .why::before{content:"« ";color:var(--gold)} #pc-shell .why::after{content:" »";color:var(--gold)}
-#pc-shell .scoregrid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-bottom:16px}
-@media(max-width:760px){#pc-shell .scoregrid{grid-template-columns:1fr}}
-#pc-shell .r2-card{background:var(--paper);border:1.5px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow-sm)}
-#pc-shell .r2-block{margin-bottom:16px}
-#pc-shell .r2-card h3{font-family:var(--serif);font-size:18px;margin-bottom:4px;display:flex;align-items:center;gap:9px}
-#pc-shell .r2-card h3 .hn{font-family:var(--mono);font-size:11px;color:var(--gold-dark);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;font-weight:600}
-#pc-shell .csub{font-size:13px;color:var(--muted);margin-bottom:16px}
-#pc-shell .scorebars{display:flex;flex-direction:column;gap:13px}
-#pc-shell .sb-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-#pc-shell .sb-label{font-size:14px;font-weight:600} #pc-shell .sb-val{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--ink-soft)}
-#pc-shell .sb-track{height:11px;background:var(--bg-deep,#E8DFC9);border-radius:99px;overflow:hidden;display:flex;gap:3px;padding:2px}
+#pc-shell .scoregrid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-bottom:12px}
+#pc-shell .dualgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:760px){#pc-shell .scoregrid,#pc-shell .dualgrid{grid-template-columns:1fr}}
+#pc-shell .r2-card{background:var(--paper);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+#pc-shell .r2-card h3{font-family:var(--serif);font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+#pc-shell .r2-card h3 .hn{font-family:var(--mono);font-size:10.5px;color:var(--gold-dark);border:1px solid var(--gold);border-radius:5px;padding:1px 5px;font-weight:600}
+#pc-shell .scorebars{display:flex;flex-direction:column;gap:11px}
+#pc-shell .sb-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+#pc-shell .sb-label{font-size:13px;font-weight:600} #pc-shell .sb-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-soft)}
+#pc-shell .sb-track{height:10px;background:var(--bg-deep,#E8DFC9);border-radius:99px;overflow:hidden;display:flex;gap:3px;padding:2px}
 #pc-shell .sb-seg{flex:1;border-radius:99px;background:var(--border)}
 #pc-shell .sb-seg.on{background:var(--gold)}
 #pc-shell .sb.cap .sb-seg.on{background:var(--blue-text)}
 #pc-shell .sb.app .sb-seg.on{background:#A4502A}
-#pc-shell .constraint{margin-top:16px;font-size:13.5px;color:var(--ink-soft);background:var(--beige-highlight);border-radius:10px;padding:11px 14px;line-height:1.45}
-#pc-shell .radar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
-#pc-shell .radar-wrap svg{max-width:230px;width:100%}
-#pc-shell .radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:12.5px;width:100%}
-#pc-shell .radar-legend div{display:flex;justify-content:space-between;color:var(--ink-soft)}
-#pc-shell .radar-legend b{font-family:var(--mono);color:var(--ink)}
-#pc-shell .gf-list{display:flex;flex-direction:column;gap:11px}
-#pc-shell .gf{display:flex;gap:13px;align-items:flex-start;background:var(--red-bg);border:1px solid #E8C4C4;border-radius:12px;padding:13px 16px}
-#pc-shell .gf-ic{font-size:18px;line-height:1.3;flex:none} #pc-shell .gf-b{flex:1}
-#pc-shell .gf-t{font-weight:700;font-size:14.5px;color:var(--red-text);margin-bottom:2px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-#pc-shell .gf-cap{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--red-book);color:#fff;border-radius:5px;padding:1px 6px}
-#pc-shell .gf-x{font-size:13.5px;color:var(--ink-soft);line-height:1.5}
-#pc-shell .gf-none{font-size:14px;color:var(--green-text);background:var(--green-bg);border:1px solid #C6DBB0;border-radius:12px;padding:13px 16px;font-weight:600}
-#pc-shell .riskgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media(max-width:620px){#pc-shell .riskgrid{grid-template-columns:1fr 1fr}}
-#pc-shell .rstat{background:var(--paper-soft);border:1px solid var(--border-soft);border-radius:12px;padding:14px}
-#pc-shell .rk{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:5px}
-#pc-shell .rv{font-family:var(--serif);font-size:25px;font-weight:800;color:var(--ink)}
+#pc-shell .constraint{margin-top:12px;font-size:12.5px;color:var(--ink-soft);background:var(--beige-highlight);border-radius:9px;padding:9px 12px;line-height:1.4}
+#pc-shell .radar-wrap{display:flex;justify-content:center;align-items:center;height:100%}
+#pc-shell .radar-wrap svg{max-width:205px;width:100%}
+#pc-shell .gf-list{display:flex;flex-direction:column;gap:9px}
+#pc-shell .gf{display:flex;gap:11px;align-items:flex-start;background:var(--red-bg);border:1px solid #E8C4C4;border-radius:11px;padding:11px 13px}
+#pc-shell .gf-ic{font-size:16px;line-height:1.3;flex:none} #pc-shell .gf-b{flex:1}
+#pc-shell .gf-t{font-weight:700;font-size:13.5px;color:var(--red-text);margin-bottom:2px;display:flex;gap:7px;align-items:baseline;flex-wrap:wrap}
+#pc-shell .gf-cap{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--red-book);color:#fff;border-radius:5px;padding:1px 5px}
+#pc-shell .gf-x{font-size:12.5px;color:var(--ink-soft);line-height:1.45}
+#pc-shell .gf-none{font-size:13px;color:var(--green-text);background:var(--green-bg);border:1px solid #C6DBB0;border-radius:11px;padding:11px 13px;font-weight:600}
+#pc-shell .riskgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#pc-shell .rstat{background:var(--paper-soft);border:1px solid var(--border-soft);border-radius:10px;padding:10px 12px}
+#pc-shell .rk{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:3px}
+#pc-shell .rv{font-family:var(--serif);font-size:21px;font-weight:800;color:var(--ink)}
 #pc-shell .rstat.loss .rv{color:var(--red-text)}
-#pc-shell .honesty{display:flex;flex-direction:column;gap:11px;margin-top:18px}
-#pc-shell .hcard{display:flex;gap:12px;align-items:flex-start;background:var(--bg-section);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 15px}
-#pc-shell .hi{font-size:16px;flex:none} #pc-shell .ht{font-size:13.5px;line-height:1.5;color:var(--ink-soft)} #pc-shell .ht b{color:var(--ink)}
-#pc-shell .assum{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5;padding-top:12px;border-top:1px dashed var(--border)}
-#pc-shell .actions-bar{display:flex;gap:12px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+#pc-shell .r2-more{margin-top:12px}
+#pc-shell .r2-more summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--gold-dark);list-style:none;padding:4px 0}
+#pc-shell .r2-more summary::-webkit-details-marker{display:none}
+#pc-shell .r2-more summary::before{content:"+ ";font-family:var(--mono)}
+#pc-shell .r2-more[open] summary::before{content:"− "}
+#pc-shell .honesty{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+#pc-shell .hcard{display:flex;gap:10px;align-items:flex-start;background:var(--bg-section);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:9px 12px}
+#pc-shell .hi{font-size:15px;flex:none} #pc-shell .ht{font-size:12.5px;line-height:1.45;color:var(--ink-soft)} #pc-shell .ht b{color:var(--ink)}
+#pc-shell .assum{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.45;padding-top:9px;border-top:1px dashed var(--border)}
+#pc-shell .actions-bar{display:flex;gap:10px;justify-content:center;margin-top:4px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -7664,7 +7664,6 @@ function quizShowResult() {
   if (result) { result.hidden = false; result.classList.add('show'); }
 
   const color = PROFILE_COLOR_BY_LEVEL[det.final];
-  const axes = computeProfileAxes(a);
   const shell = document.getElementById('pc-shell');
   if (shell) {
     shell.innerHTML = `
@@ -7680,7 +7679,6 @@ function quizShowResult() {
       <div class="scoregrid">
         <div class="r2-card">
           <h3><span class="hn">2</span> Appétit vs Capacité</h3>
-          <p class="csub">On regarde les deux séparément, on retient le plus contraignant.</p>
           <div class="scorebars">
             ${pcrBar('Capacité — ce que tu peux', det.capacite, 'cap')}
             ${pcrBar('Appétit — ce que tu supportes', det.appetit, 'app')}
@@ -7688,52 +7686,43 @@ function quizShowResult() {
           <div class="constraint">${constraintText(det)}</div>
         </div>
         <div class="r2-card">
-          <h3>Ton profil en un coup d'œil</h3>
-          <p class="csub">Capacité · Appétit · Horizon · Conviction</p>
-          <div class="radar-wrap">
-            ${pcrRadar(det.capacite, det.appetit, +a.horizon || 0, +a.experience || 0)}
-            <div class="radar-legend">
-              <div>Capacité <b>${det.capacite}/4</b></div><div>Appétit <b>${det.appetit}/4</b></div>
-              <div>Horizon <b>${(+a.horizon || 0)}/4</b></div><div>Conviction <b>${(+a.experience || 0)}/4</b></div>
-            </div>
+          <h3>En un coup d'œil</h3>
+          <div class="radar-wrap">${pcrRadar(det.capacite, det.appetit, +a.horizon || 0, +a.experience || 0)}</div>
+        </div>
+      </div>
+
+      <div class="dualgrid">
+        <div class="r2-card">
+          <h3><span class="hn">3</span> Garde-fous</h3>
+          ${pcrGardeFous(det)}
+        </div>
+        <div class="r2-card">
+          <h3><span class="hn">4</span> Rendement &amp; risque</h3>
+          <div class="riskgrid">
+            <div class="rstat"><div class="rk">Rdt / an</div><div class="rv">${p.return}</div></div>
+            <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${p.vol}</div></div>
+            <div class="rstat loss"><div class="rk">Perte max</div><div class="rv">${p.drawdown}</div></div>
+            <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${p.sharpe}</div></div>
           </div>
+          <details class="r2-more">
+            <summary>Comment lire ces chiffres ?</summary>
+            <div class="honesty">
+              <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Sharpe ~0,29 sur les 4 profils.</b> Même frontière efficiente : monter en risque déplace le curseur rendement/volatilité, ça ne « gagne » rien en soi.</span></div>
+              <div class="hcard"><span class="hi">📉</span><span class="ht"><b>Perte max = pire régime.</b> 2008 (les obligations amortissent) vs 2022 (tout baisse sauf le fonds euro). On affiche le pire des deux.</span></div>
+            </div>
+            <p class="assum">Hypothèses : actions dév. 7 % · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · corrélation actions-oblig +0,15.</p>
+          </details>
         </div>
-      </div>
-
-      <div class="r2-card r2-block">
-        <h3><span class="hn">3</span> Garde-fous</h3>
-        <p class="csub">Les réponses qui plafonnent le profil, en clair.</p>
-        ${pcrGardeFous(det)}
-      </div>
-
-      <div class="r2-card r2-block">
-        <h3><span class="hn">4</span> Rendement &amp; risque attendus</h3>
-        <p class="csub">Hypothèses prospectives, par matrice de covariance — pas une extrapolation du passé.</p>
-        <div class="riskgrid">
-          <div class="rstat"><div class="rk">Rendement / an</div><div class="rv">${p.return}</div></div>
-          <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${p.vol}</div></div>
-          <div class="rstat loss"><div class="rk">Perte max type</div><div class="rv">${p.drawdown}</div></div>
-          <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${p.sharpe}</div></div>
-        </div>
-        <div class="honesty">
-          <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Sharpe identique (~0,29) sur les 4 profils.</b> Même frontière efficiente : on ne « gagne » pas en montant en risque, on déplace seulement le curseur rendement/volatilité.</span></div>
-          <div class="hcard"><span class="hi">📉</span><span class="ht"><b>La perte max dépend du régime de crise.</b> Type 2008 (krach actions, les obligations amortissent) vs type 2022 (actions <em>et</em> obligations baissent, seul le fonds euro tient). Le chiffre affiché = <b>le pire des deux</b>.</span></div>
-        </div>
-        <p class="assum">Hypothèses : actions développées 7 % · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · corrélation actions-obligations +0,15.</p>
       </div>
 
       <div class="actions-bar">
         <button class="cta-btn primary" type="button" onclick="navTo('i-sec3');">Voir mon portefeuille en détail →</button>
         <button class="cta-btn outline" type="button" id="pcr-reset">Refaire le quiz</button>
       </div>`;
-
-    // anime les barres après insertion
-    requestAnimationFrame(() => { /* segments déjà colorés via .on */ });
     const rb = document.getElementById('pcr-reset');
     if (rb) rb.addEventListener('click', quizReset);
   }
 
-  // Synthèses externes (autres sections du livre)
   setText('synth-invest-val', p.name);
   setText('synth-invest-sub', `${p.return}/an · vol ${p.vol}`);
   setText('passerelle-profile', p.name);
