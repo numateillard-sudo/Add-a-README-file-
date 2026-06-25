@@ -1,2 +1,2 @@
-audit-harness/*.png
-audit-harness/node_modules/
+*.png
+node_modules/
