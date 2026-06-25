@@ -139,6 +139,27 @@ function driveProfile(key) {
   ['dynamique','offensif'].forEach(k => check(`satellite ${k} ≤2%/line`, (SW[k]/n) <= 2, (SW[k]/n)+''));
 })();
 
+// ── 5. F-006: planner PROFILE_PROBA is DERIVED from the engine (single source) ──
+(() => {
+  const PP = J('PROFILE_PROBA');
+  const PS = J('PROFILE_STATS');
+  ['prudent','equilibre','dynamique','offensif'].forEach(k => {
+    check(`PROFILE_PROBA[${k}].rate == engine arith`, Math.abs(PP[k].rate*100 - PS[k].arith) < 1e-9, PP[k].rate*100+' vs '+PS[k].arith);
+    check(`PROFILE_PROBA[${k}].vol == engine vol`,    Math.abs(PP[k].vol*100  - PS[k].vol)   < 1e-9, PP[k].vol*100+' vs '+PS[k].vol);
+  });
+  // Cross-consistency: planner MC median (rate=arith, vol) ≈ guided deterministic geometric median,
+  // for the same inputs. Run a large MC so sampling noise is small.
+  ['prudent','equilibre','dynamique','offensif'].forEach(k => {
+    const cap = 10000, dca = 300, T = 25;
+    const mc = J(`planMonteCarlo(${cap}, ${dca}, ${T}, PROFILE_PROBA['${k}'].rate, PROFILE_PROBA['${k}'].vol, 0, 4000)`);
+    const det = J(`simulate(${cap}, ${dca}, ${T}, PROFILE_STATS['${k}'].rate)`); // geometric deterministic
+    const detFinal = det.values[det.values.length-1];
+    const rel = Math.abs(mc.p50 - detFinal) / detFinal;
+    check(`planner MC median ≈ guided geometric median for ${k} (±8%)`, rel < 0.08,
+      'MC p50='+Math.round(mc.p50)+' vs guided '+Math.round(detFinal)+' (rel '+(rel*100).toFixed(1)+'%)');
+  });
+})();
+
 // ── Summary ──
 console.log('================ VERIFICATION HARNESS ================');
 console.log('PASS: ' + PASS + '   FAIL: ' + FAIL);

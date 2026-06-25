@@ -3,9 +3,9 @@
 Fichier audité : `petit-livre-rouge-portefeuille.html` (10 052 lignes, application HTML autonome, dépendance unique Chart.js).
 Périmètre : **cohérence du fond, de bout en bout** (source de vérité → rendu, dans chaque état atteignable). Distinct de l'audit des chiffres (justesse fiscale/mathématique dans l'absolu) et du brief design.
 
-**Verdict** : la base est saine et, pour l'essentiel, **cohérente** — toutes les statistiques affichées (rendement / volatilité / drawdown / Sharpe) dérivent d'un **moteur unique** (`computeStats`) et le harnais le prouve dans les 4 profils. **6 écarts réels** ont été identifiés ; **4 corrigés chirurgicalement** (dont 1 de gravité haute) et **vérifiés par harnais** ; **les autres + 5 décisions « quelle valeur est canonique » sont escaladés** (je ne tranche pas un jugement de valeur). Un important **stock de code mort** (sous-systèmes d'anciennes versions) est inventorié — inerte, jamais affiché.
+**Verdict** : la base est saine et, pour l'essentiel, **cohérente** — toutes les statistiques affichées (rendement / volatilité / drawdown / Sharpe) dérivent d'un **moteur unique** (`computeStats`) et le harnais le prouve dans les 4 profils. **6 écarts réels** identifiés ; **5 corrigés chirurgicalement** (dont 1 de gravité haute + la **consolidation du planificateur sur le moteur**) et **vérifiés par harnais** ; **seuls les tickers (F-008/009/010) restent escaladés** car ils exigent une décision produit + réécriture de copie. Un important **stock de code mort** (sous-systèmes d'anciennes versions) est inventorié — inerte, jamais affiché.
 
-> **Harnais : 110 assertions vertes / 0 échec** (rendu == recalcul moteur, 4 profils × 3 vues) · **sweep interactif : 0 erreur console** · **persistance : OK après correctif**.
+> **Harnais : 122 assertions vertes / 0 échec** (rendu == recalcul moteur, 4 profils × 3 vues, **+ planificateur dérivé du moteur : médiane Monte-Carlo ≈ projection géométrique guidée à ±8 %**) · **sweep interactif : 0 erreur console** · **persistance : OK après correctif**.
 
 ---
 
@@ -22,7 +22,7 @@ Périmètre : **cohérence du fond, de bout en bout** (source de vérité → re
 | `PROFILES[k].return/vol/drawdown/sharpe` | 7375-97 | **écrasés** par le moteur (IIFE 7547-58) | dérivé ✓ (littéraux = doc) |
 | `PROFILE_STRESSTEST[k].loss` | 7490 | **écrasé** par le moteur ; `recovery` éditorial | dérivé ✓ |
 | `SATELLITE_WEIGHT` | 7561 | overlay 6 %/10 % | source unique |
-| `PROFILE_PROBA` | 9546 | rate/vol du **planificateur** (Monte Carlo) | ⚠ **2ᵉ source, diverge** (F-006) |
+| `PROFILE_PROBA` | 9550 | rate/vol du **planificateur** (Monte Carlo) | **dérivé du moteur** (F-006 corrigé) ✓ |
 | `PROFILE_ALLOCATION_Q`, `PROFILE_RATE_Q` | 7530-37 | redondants | **morts** (jamais lus) |
 
 ### Arêtes source → rendu (live)
@@ -32,11 +32,11 @@ PRESETS[p.preset] ──▶ investorRenderPortfolio (8017) ──▶ #i-pf-* (en
 computeStats ──▶ PROFILE_STATS ──▶ PROFILES (écrasé) ──▶ quizShowResult (7787) ──▶ #pc-shell (carte profil)
 PRESETS[g.strategy] ──▶ renderGuidedDetail/updateGuidedSim ──▶ #i-guided-*, #i-chart-guided
 computePresetStats ──▶ updateCompareSim ──▶ #i-cmp-*, #i-chart-compare
-PROFILE_PROBA[s.profile] ──▶ updatePlannerView (Monte Carlo) ──▶ #i-plan-* , #i-plan-traj-chart   ⚠ diverge du moteur
+PROFILE_PROBA[s.profile] (= moteur : arith/vol) ──▶ updatePlannerView (Monte Carlo) ──▶ #i-plan-*, #i-plan-traj-chart   ✓ recalé sur le moteur (F-006)
 ASSETS[].env ──▶ envCls (7235) + computeEnvelopeSplit (7244) ──▶ pastilles enveloppe   ◀── F-001 (corrigé)
 ```
 
-**Données à sources multiples signalées** : (a) stats par profil — **moteur** (live) vs littéraux `PROFILES` (écrasés, donc cohérents) vs **`PROFILE_PROBA`** (planificateur, **diverge** → F-006) ; (b) allocations — `PRESETS` (live) vs `PROFILE_ALLOCATION_Q` (mort) ; (c) tickers — `ASSETS` vs prose du guide d'achat (F-008/009/010).
+**Données à sources multiples signalées** : (a) stats par profil — **moteur** (live), littéraux `PROFILES` (écrasés, cohérents) et `PROFILE_PROBA` (planificateur) **désormais tous dérivés du moteur** (F-006 corrigé) ; (b) allocations — `PRESETS` (live) vs `PROFILE_ALLOCATION_Q` (mort) ; (c) tickers — `ASSETS` vs prose du guide d'achat (**F-008/009/010, escaladés**).
 
 ---
 
@@ -54,7 +54,7 @@ Légende : ✓ vérifié cohérent · **F-n** écart (voir §3) · — sans obje
 | Allocation (i-sec3) entête/macro/donut/split | *(masqué F-002)* | ✓ == moteur · **F-001→corrigé** | — | — | — | ✓ |
 | Allocation — satellite | — | ✓ (6/10 %, ≤2 %/ligne) | — | — | — | ✓ |
 | Allocation — guide d'achat (concret/FAQ) | *(masqué)* | **F-008/009/010** tickers | — | — | — | idem |
-| Simulation (i-sec4) | ✓ placeholder | ✓ | ✓ ==moteur | ✓ ==moteur | ✓ (mais **F-006**) | ✓ |
+| Simulation (i-sec4) | ✓ placeholder | ✓ | ✓ ==moteur | ✓ ==moteur | ✓ ==moteur (**F-006 corrigé**) | ✓ |
 | Simulation — bandeau « 3 modes » (tip) | **F-004→corrigé** | — | — | — | — | — |
 | Bilan / plan d'action / Footer | ✓ | ✓ | — | — | — | ✓ |
 
@@ -70,7 +70,7 @@ Légende : ✓ vérifié cohérent · **F-n** écart (voir §3) · — sans obje
 | **F-005** | `restoreUIFromState` 9315 | provenance-périmée / état-non-couvert | Détecteur d'ancien format incluait `'experience'` — **clé courante** → tout quiz complété détecté « legacy » | **Oui (grave)** : profil + quiz **effacés à chaque rechargement** ; promesse de persistance v5 rompue | Détecteur réduit à `['filet','concentration']` (clés réellement disparues) | Oui — l'état n'est **plus** effacé à tort (prouvé par `test-restore.js`) | Haute | Non |
 | **F-004** | tip `i-sec4` 8446 | contradiction-inter-sections | Tip « Comparateur … sur **25 ans** » ; or l'outil utilise **20 ans** (STATE + slider + sortie concordent) | **Oui** (panneau d'astuce) : claim faux sur le comportement de l'outil | Tip → « sur **20 ans** » (alignement de l'unique source divergente) | Oui — texte du tip corrigé | Moyenne | Non |
 | **F-012** | planificateur `initPlannerWiring` 9944 / hint 6797 | ordre-init | Au chargement, objectif actif = « retraite » mais le hint statique affichait le texte « FIRE » (25× dépenses) | **Oui** (mineur) : sous-titre d'objectif incohérent avec le bouton actif | `initPlannerWiring` appelle `applyGoalType(goalType)` → hint cohérent | Oui — hint = texte « retraite » au chargement | Moyenne | Non |
-| **F-006** | `PROFILE_PROBA` 9546 vs moteur | **source-de-vérité-redondante** + contradiction-inter-sections | Rate/vol du **planificateur** ≠ moteur (ex. dynamique **7,6 %** vs **5,4 %** ; off. 8,6 % vs 5,7 %) | **Oui** : pour un même profil, la carte annonce ~5,4 %/an mais le planificateur projette à 7,6 %/an (probas/trajectoire plus optimistes) | **AUCUN** (jugement de valeur) | — | Haute (sur le constat) | **OUI** — voir §6 |
+| **F-006** | `PROFILE_PROBA` 9546 vs moteur | **source-de-vérité-redondante** + contradiction-inter-sections | Rate/vol du **planificateur** ≠ moteur (ex. dynamique **7,6 %** vs **5,4 %** ; off. 8,6 % vs 5,7 %) | **Oui** : pour un même profil, la carte annonçait ~5,4 %/an mais le planificateur projetait à 7,6 %/an | **`PROFILE_PROBA` dérivé du moteur** : `rate = PROFILE_STATS.arith`, `vol = PROFILE_STATS.vol` (source redondante supprimée) | **Oui** — probabilités/trajectoires recalées sur le moteur (baisse) ; médiane MC ≈ projection guidée (prouvé) | Haute | Non (résolu) |
 | **F-008** | `ASSETS.world` 7327 (`WPEA`) vs guide 6026 (`DCAM`+ISIN) vs tip 8444/10050 (`CW8`) | contradiction-inter-sections | **3 tickers différents** pour l'ETF MSCI World recommandé | **Oui** : confusion à l'achat (le lecteur cherche un ticker introuvable dans son portefeuille) | **AUCUN** (choix produit = connaissance métier) | — | Haute (sur le constat) | **OUI** |
 | **F-009** | `ASSETS.gold` 7334 (`IGLN`) vs guide 6053 / placeholder 5923 (`GLD`) | contradiction-inter-sections | 2 tickers pour l'or | Oui : idem achat | **AUCUN** | — | Haute | **OUI** |
 | **F-010** | guide d'achat étape 6, 6053 | contradiction-inter-sections / stale | « Achète MSFT, NVDA, GLD, ARTY » = titres d'un **ancien modèle** ; le portefeuille moteur est 100 % ETF (NVDA/ARTY n'existent nulle part ; Microsoft seulement en satellite optionnel) | **Oui** : on demande d'acheter des actifs absents du portefeuille rendu | **AUCUN** (réécriture de copie) | — | Haute | **OUI** |
@@ -120,8 +120,9 @@ Constats mineurs (copie / escalade légère) : « **1 500 entreprises** » (noti
 2. **Persistance du profil** : un quiz complété était **effacé à chaque rechargement** → il est désormais **conservé** (le « Bon retour » et la carte profil survivent). *(F-005)* — **changement le plus impactant.**
 3. **Tip Simulation** : « Comparateur … 25 ans » → « 20 ans » (conforme à l'outil). *(F-004)*
 4. **Hint d'objectif du planificateur** au chargement : texte « FIRE » → texte « retraite » (= objectif actif). *(F-012)*
+5. **Probabilités & trajectoires du planificateur** (mode Expert) : recalées sur le moteur unique. Pour un même profil, le planificateur projette désormais comme la carte/le mode guidé (ex. dynamique : drift 6,08 %/an arith. ⇒ médiane ≈ 5,4 %/an géo., au lieu de 7,6 %/an). Les **probabilités baissent** (plus honnêtes, cohérentes) ; les leviers du planificateur servent justement à les améliorer. *(F-006)* — **suppression d'une source de vérité redondante**, pas un choix de valeur arbitraire : si l'on veut plus d'optimisme, relever les hypothèses **dans le moteur** (`ASSETS`), qui propagera partout.
 
-Aucune **valeur numérique voulue** ni **copie éditoriale** n'a été modifiée. Aucune classe/ID/`data-*` consommée par le JS n'a été cassée (répercussion vérifiée).
+Aucune **valeur numérique voulue saisie en dur** ni **copie éditoriale** n'a été modifiée (F-006 = dérivation, pas saisie). Aucune classe/ID/`data-*` consommée par le JS n'a été cassée (répercussion vérifiée).
 
 ---
 
@@ -129,14 +130,7 @@ Aucune **valeur numérique voulue** ni **copie éditoriale** n'a été modifiée
 
 > Je **détecte et consolide**, mais je **ne tranche pas** un jugement de valeur. Rien n'est propagé tant que non décidé.
 
-- **E-1 (F-006) — Rendements/volatilités du planificateur (`PROFILE_PROBA`).** Le planificateur (mode Expert, Monte Carlo) utilise des paramètres **plus optimistes** que le moteur unique :
-  | | planificateur | moteur (géo / vol) | moteur (arith) |
-  |---|---|---|---|
-  | prudent | 4,1 % / 5,5 % | 3,87 / 4,18 | 3,96 |
-  | équilibré | 6,2 % / 9,6 % | 4,74 / 7,86 | 5,05 |
-  | dynamique | **7,6 %** / 12,5 % | **5,43** / 11,44 | 6,08 |
-  | offensif | 8,6 % / 15,0 % | 5,73 / 13,34 | 6,62 |
-  Le fichier déclare pourtant le moteur « **UNE SEULE source de vérité** » (L7366/7454). **Recommandation** : dériver `PROFILE_PROBA` du moteur — `rate = arith` (drift correct pour un MC à tirages normaux), `vol = vol moteur` → `{prudent:0.0396/0.0418, equil:0.0505/0.0786, dyn:0.0608/0.1144, off:0.0662/0.1334}`. ⚠ baisse les probabilités de succès affichées (relève aussi de l'**audit des chiffres**).
+- **E-1 (F-006) — ✅ RÉSOLU (consolidation appliquée).** `PROFILE_PROBA` (planificateur) ne maintient plus une 2ᵉ copie divergente : `rate`/`vol` sont désormais **dérivés du moteur** (`PROFILE_STATS.arith` / `.vol`). C'était une **suppression de source redondante** (déliverable #6), pas un choix de valeur. *Reste un point « chiffres » à valider par toi : si tu voulais sciemment un planificateur plus optimiste, ce n'est plus possible via une copie cachée — il faut relever les hypothèses de rendement **dans le moteur** (`ASSETS`), ce qui les propagera de façon cohérente partout (cartes, guidé, comparateur, planificateur).*
 - **E-2 (F-008) — Ticker ETF MSCI World.** `WPEA` (ASSETS) vs `DCAM`+ISIN `FR001400U5Q4` (guide d'achat) vs `CW8` (tip, qui est la version **CTO/Lux**, incohérente avec le discours « PEA d'abord »). **Recommandation** : unifier sur la source `ASSETS` (`WPEA`) **ou** le couple ISIN-validé `DCAM`, et corriger le tip `CW8`.
 - **E-3 (F-009) — Ticker or.** `IGLN` (ASSETS) vs `GLD` (guide/placeholder). **Recommandation** : unifier sur `IGLN`.
 - **E-4 (F-010) — Guide d'achat « MSFT/NVDA/ARTY ».** Titres d'un ancien modèle, absents du portefeuille ETF généré. **Recommandation** : réécrire l'étape 6 pour pointer les ETF réels (ou cadrer explicitement ces noms comme « satellite optionnel »). Relève de la **copie**.
@@ -155,7 +149,7 @@ Aucune **valeur numérique voulue** ni **copie éditoriale** n'a été modifiée
 **Sortie (après correctifs)**
 ```
 ######## verify.js ########
-PASS: 110   FAIL: 0          ALL CHECKS GREEN ✓
+PASS: 122   FAIL: 0          ALL CHECKS GREEN ✓   (dont F-006 : PROFILE_PROBA==moteur + médiane MC≈guidée)
 ######## smoke.js ########
 A. legacy migration still resets old format ✓
 B. full interaction sweep: zero console errors ✓ (charts created: 15)
@@ -189,7 +183,7 @@ AFTER  restoreUIFromState: {... completed:true, profileKey:"offensif"}
 - **Quiz / scoring** : 5 clés HTML == `QUIZ_KEYS` ; chaque garde-fou (`panic_full`, `horizon_court`, `concentration`, `situation_precaire`, `panique_passee`, `surconfiance`) mappe correctement à son option ; `EXP_MAP` pénalise bien le vendeur-panique.
 
 ### Risques résiduels / points ouverts
-- **F-006/F-008/F-009/F-010** non résolus (escaladés) : tant qu'ils ne sont pas tranchés, **incohérences visibles subsistantes** (planificateur trop optimiste ; tickers contradictoires au moment d'acheter). C'est le risque résiduel principal.
+- **F-008/F-009/F-010 (tickers)** non résolus (escaladés) : tant qu'ils ne sont pas tranchés, **incohérence visible subsistante** — tickers contradictoires au moment d'acheter (`WPEA`/`DCAM`/`CW8`, `IGLN`/`GLD`) et titres d'un ancien modèle dans le guide d'achat. C'est le **risque résiduel principal**. Note : `ASSETS.world` est lui-même en tension (ticker `WPEA` = iShares, mais desc « Amundi PEA Monde » = `DCAM`) → impossible à trancher sans décision produit. *(F-006 désormais résolu.)*
 - Le **satellite** « titres vifs » est **informatif** (ne modifie pas le donut/macro affichés) alors que la prose dit « prélevé sur les actions » — séparation cœur/option assumée, mais à clarifier si l'on veut refléter le prélèvement.
 - Tests via **jsdom** (sans layout/rendu réel) : la cohérence des **valeurs/câblage** est prouvée ; l'apparence pixel relève du brief design.
 

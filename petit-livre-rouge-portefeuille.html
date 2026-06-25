@@ -9547,12 +9547,23 @@ document.addEventListener('DOMContentLoaded', init);
 // ═══════════════════ LE PLANIFICATEUR (BETA) ═══════════════════
 // Calculs probabilistes Monte Carlo, leviers, stress test, trajectoire
 
+// rate/vol DÉRIVÉS du moteur unique (PROFILE_STATS) — plus de seconde source divergente.
+// rate = rendement ARITHMÉTIQUE (drift correct d'un Monte Carlo à tirages normaux : la
+//        médiane simulée retombe sur le rendement géométrique affiché ailleurs ≈ arith − σ²/2),
+// vol  = volatilité par covariance du moteur. Les libellés (name/nextName) restent éditoriaux.
+// ⚠ Si l'on veut un planificateur plus optimiste, relever les hypothèses DANS le moteur (ASSETS),
+//   pas ici : sinon on recrée la divergence carte ↔ planificateur.
 const PROFILE_PROBA = {
-  prudent:   { rate: 0.041, vol: 0.055, name: 'Prudent',   nextName: 'Équilibré' },
-  equilibre: { rate: 0.062, vol: 0.096, name: 'Équilibré', nextName: 'Dynamique' },
-  dynamique: { rate: 0.076, vol: 0.125, name: 'Dynamique', nextName: 'Offensif'  },
-  offensif:  { rate: 0.086, vol: 0.150, name: 'Offensif',  nextName: null        }
+  prudent:   { name: 'Prudent',   nextName: 'Équilibré' },
+  equilibre: { name: 'Équilibré', nextName: 'Dynamique' },
+  dynamique: { name: 'Dynamique', nextName: 'Offensif'  },
+  offensif:  { name: 'Offensif',  nextName: null        }
 };
+['prudent','equilibre','dynamique','offensif'].forEach(k => {
+  PROFILE_PROBA[k].rate = PROFILE_STATS[k].arith / 100;
+  PROFILE_PROBA[k].vol  = PROFILE_STATS[k].vol   / 100;
+});
+
 
 const PLANNER_STATE = {
   goalType: 'retraite',
