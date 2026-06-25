@@ -5461,7 +5461,7 @@ section[style*="padding:80px 0"] {
 
     <div class="portfolio-empty reveal visible" id="i-portfolio-empty">
       <div class="icon">▥</div>
-      <p>Réponds d’abord aux 4 questions de l’étape 2 pour générer ton portefeuille personnalisé.</p>
+      <p>Réponds d’abord aux 5 questions de l’étape 2 pour générer ton portefeuille personnalisé.</p>
       <a class="cta-btn outline" onclick="navTo(&#39;i-sec2&#39;)">Répondre au questionnaire <span class="arrow">→</span></a>
     </div>
 
@@ -7404,7 +7404,7 @@ let investorDonut = null;
 // (les charts de simulation guidedChart/expertChart/compareChart sont déclarés plus bas dans leurs modules respectifs)
 
 // ═══════════════════════════════════════════════════════════════════════
-//  QUIZ ÉTAPE 2 — 4 questions humaines (horizon / tolérance / poids / expérience)
+//  QUIZ ÉTAPE 2 — 5 questions humaines (horizon / tolérance / poids / expérience / situation)
 //  Plus de jauge spectrum, plus de STOPs : caps internes dans le scoring.
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -7593,7 +7593,7 @@ const SATELLITE_WARNINGS = [
   { t: "TSMC porte le risque Taïwan", x: "binaire et potentiellement catastrophique — à assumer en connaissance de cause." }
 ];
 
-// ─── Détermination du profil après 4 réponses ───
+// ─── Détermination du profil après 5 réponses ───
 // ─── Détermination du profil : appétit vs capacité, MIN, garde-fous (refonte) ───
 //  appétit (psychologique) = tolérance (dominante) + expérience
 //  capacité (objective)    = moyenne horizon + poids + situation
@@ -9412,6 +9412,18 @@ function restoreUIFromState() {
 
 function init() {
   const stateRestored = STATE_RESTORED_ON_LOAD;   // déjà chargé en synchrone (cf. STATE_RESTORED_ON_LOAD)
+
+  // ── Entrée TOUJOURS par le questionnaire (Étape 2) ──
+  // Le parcours « découvre ton profil » doit commencer au quiz à chaque ouverture : on ne
+  // ré-affiche pas un profil/portefeuille déjà déterminé au rechargement. Le baromètre de
+  // connaissance (financeKnowledge) reste, lui, conservé. Pour re-persister le profil entre
+  // sessions, supprimer ce bloc.
+  STATE.investor.profile        = null;
+  STATE.investor.quiz.completed = false;
+  STATE.investor.quiz.currentStep = 1;
+  STATE.investor.quiz.answers   = {};
+  STATE.investor.answers        = {};
+  STATE.investor.guided.strategy = null;
 
   // Pondérations par défaut : si un profil existe et pas de poids saisis → preset du profil
   // Sinon → tout à zéro (l'utilisateur saisit manuellement ou clique sur un preset)

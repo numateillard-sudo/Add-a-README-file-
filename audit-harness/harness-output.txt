@@ -1,4 +1,4 @@
-######## verify.js (rendu==moteur + F-006 dérivation + F-008/009 tickers) ########
+######## verify.js (rendu==moteur + F-006 + F-008/009 tickers) ########
 ================ VERIFICATION HARNESS ================
 PASS: 135   FAIL: 0
 ALL CHECKS GREEN ✓
@@ -11,11 +11,13 @@ B. full interaction sweep: zero console errors ✓ (charts created: 15)
 ================ SMOKE TEST ================
 ALL SMOKE CHECKS GREEN ✓
 
-######## test-restore.js (persistance quiz) ########
+######## render-behavior.js (rendu réel Chromium — entrée par le questionnaire) ########
 
---- Pass2 (reload) ---
-loadState() returned (restored?): true
-BEFORE restoreUIFromState: {"answers":{"horizon":4,"tolerance":4,"poids":4,"experience":4,"situation":4},"completed":true,"profileKey":"offensif"}
+RENDER BEHAVIOR: 8 PASS / 0 FAIL ✓
+
+######## test-restore.js (couche restoreUIFromState / détection legacy F-005) ########
 AFTER  restoreUIFromState: {"answers":{"horizon":4,"tolerance":4,"poids":4,"experience":4,"situation":4},"completed":true,"profileKey":"offensif"}
 
->>> QUIZ WIPED ON RELOAD: no
+>>> QUIZ WIPED ON RELOAD (couche restoreUIFromState): no
+NB : ce test isole restoreUIFromState (détection legacy F-005, qui ne doit PAS effacer à tort).
+    Le comportement utilisateur au rechargement (retour au questionnaire, voulu) est prouvé par render-behavior.js.

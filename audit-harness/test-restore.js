@@ -50,4 +50,6 @@ console.log('loadState() returned (restored?):', parsed.restored);
 console.log('BEFORE restoreUIFromState:', JSON.stringify(parsed.before));
 console.log('AFTER  restoreUIFromState:', JSON.stringify(parsed.after));
 const wiped = parsed.before.completed === true && parsed.after.completed === false;
-console.log('\n>>> QUIZ WIPED ON RELOAD:', wiped ? 'YES (BUG CONFIRMED)' : 'no');
+console.log('\n>>> QUIZ WIPED ON RELOAD (couche restoreUIFromState):', wiped ? 'YES (BUG CONFIRMED)' : 'no');
+console.log('NB : ce test isole restoreUIFromState (détection legacy F-005, qui ne doit PAS effacer à tort).');
+console.log('    Le comportement utilisateur au rechargement (retour au questionnaire, voulu) est prouvé par render-behavior.js.');

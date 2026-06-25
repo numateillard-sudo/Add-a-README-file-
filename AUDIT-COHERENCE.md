@@ -5,6 +5,11 @@ Périmètre : **cohérence du fond, de bout en bout** (source de vérité → re
 
 **Verdict** : la base est saine et désormais **cohérente de bout en bout** — toutes les statistiques affichées (rendement / volatilité / drawdown / Sharpe) dérivent d'un **moteur unique** (`computeStats`), prouvé par harnais dans les 4 profils. **Les 6 écarts réels sont tous corrigés et vérifiés** : F-001 (enveloppe), F-005 (grave — persistance du quiz), F-004 (tip horizon), F-012 (init planificateur), **F-006** (consolidation du planificateur sur le moteur), **F-008/009/010** (tickers — MSCI World unifié sur **`DCAM`** *vérifié sur le web* = Amundi PEA Monde, or sur `IGLN`, guide d'achat réécrit sur le portefeuille réel). Restent uniquement : un **stock de code mort** (sous-systèmes d'anciennes versions, **inerte, jamais affiché**) inventorié pour une passe de nettoyage dédiée, et des micro-points de copie documentés.
 
+### Mise à jour post-livraison (retour utilisateur)
+
+- **UX-1 — Entrée par le questionnaire.** Remarque : « le doc est de base en portefeuille offensif alors qu'il devrait y avoir les questions ». **Diagnostic (rendu réel Chromium)** : au **premier chargement**, le document affiche bien le quiz (vérifié) ; le portefeuille « offensif » provenait d'un **profil sauvegardé** en `localStorage` (quiz déjà complété → persistance, désormais fiable depuis F-005). Sur demande, **changement de comportement appliqué** : `init()` recommence **toujours** au questionnaire (le profil n'est plus ré-affiché au rechargement ; le baromètre de connaissance reste conservé). Prouvé par `audit-harness/render-behavior.js` (**8/8**) : 1ᵉʳ chargement = quiz · quiz complété = profil rendu en session · rechargement = retour au quiz.
+- **F-013 — « 4 questions » → « 5 questions ».** L'état vide de l'allocation disait « Réponds d'abord aux **4 questions** » alors que le quiz en compte **5** (et le titre dit « en cinq questions ») → corrigé (+ 2 commentaires internes alignés).
+
 > **Harnais : 122 assertions vertes / 0 échec** (rendu == recalcul moteur, 4 profils × 3 vues, **+ planificateur dérivé du moteur : médiane Monte-Carlo ≈ projection géométrique guidée à ±8 %**) · **sweep interactif : 0 erreur console** · **persistance : OK après correctif**.
 
 ---

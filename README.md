@@ -14,6 +14,8 @@ Un document interactif déroulé en 4 étapes (Chapitre « Portefeuille ») :
 3. **Allocation** — ton portefeuille personnalisé : cœur ETF (Monde / Europe / Émergents), coussins (fonds euro, obligations, or), satellite « titres vifs » optionnel, et la répartition concrète sur tes 3 comptes.
 4. **Simulation** — 3 modes : **Guidé** (3 scénarios sur 20 ans), **Comparateur** (2 stratégies face à face), **Expert** (planificateur d'objectif probabiliste Monte-Carlo, leviers, stress-test).
 
+> **Entrée par le questionnaire.** Le document s'ouvre **toujours sur les 5 questions** (Étape 2) : le parcours « découvre ton profil » recommence à chaque ouverture, plutôt que de ré-afficher un profil déterminé lors d'une visite précédente. Le baromètre de connaissance, lui, est conservé. *(Pour re-persister le profil entre sessions, supprimer le bloc « Entrée TOUJOURS par le questionnaire » dans `init()`.)*
+
 ## Caractéristiques techniques
 
 - **Fichier unique autonome** : tout le HTML/CSS/JS dans un seul `.html`.

@@ -16,6 +16,10 @@ node test-restore.js     # persistance du quiz au rechargement (preuve F-005)
 node struct-scan.js      # déclarations dupliquées, handlers, câblage mort, ids dupliqués
 node dead-code.js        # déclarations top-level inutilisées
 node dump-engine.js      # dump des valeurs moteur (vérité terrain)
+
+# Comportement en vrai navigateur (Chromium pré-installé sous PLAYWRIGHT_BROWSERS_PATH) :
+npm install playwright-core
+node render-behavior.js  # 1er chargement = quiz · quiz complété = profil rendu · rechargement = retour au quiz  → 8/8
 ```
 
 Surcharger la cible : `LPLR_FILE=/chemin/vers/fichier.html node verify.js`.
@@ -30,6 +34,7 @@ Surcharger la cible : `LPLR_FILE=/chemin/vers/fichier.html node verify.js`.
 | `struct-scan.js` | balayage structurel |
 | `dead-code.js` | déclarations inutilisées |
 | `dump-engine.js` | dump vérité terrain du moteur |
+| `render-behavior.js` | **rendu réel Chromium** : entrée par le questionnaire + flux quiz→profil→rechargement |
 | `harness-output.txt` | sortie de référence (après correctifs) |
 
 > jsdom n'exécute pas de *layout* : le harnais prouve la cohérence des **valeurs et du câblage**, pas l'apparence pixel (ressort du brief design).
