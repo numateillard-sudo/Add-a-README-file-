@@ -7828,34 +7828,26 @@ function quizShowResult() {
         </div>
       </div>
 
-      <div class="dualgrid">
-        <div class="r2-card">
-          <h3><span class="hn">3</span> Pour aller plus loin</h3>
-          <p class="r2-sub">Ce qui te bride aujourd'hui — et le levier pour viser plus haut.</p>
-          <div class="lever">${buildLever(det, a)}</div>
+      <div class="r2-card" style="margin-bottom:12px">
+        <h3><span class="hn">3</span> Rendement &amp; risque</h3>
+        <p class="r2-sub">Sur le long terme, en moyenne — rien n'est garanti.</p>
+        <div class="riskgrid">
+          <div class="rstat"><div class="rk">Rendement / an</div><div class="rv">${p.return}</div><div class="rsub">annualisé, ce qui compose réellement</div></div>
+          <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${p.vol}</div><div class="rsub">à quel point ça monte et descend</div></div>
+          <div class="rstat loss"><div class="rk">Perte max</div><div class="rv">${p.drawdown}</div><div class="rsub">le pire creux en cas de crise</div></div>
+          <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${p.sharpe}</div><div class="rsub">rendement gagné par unité de risque (réf. 2,75 %)</div></div>
         </div>
-        <div class="r2-card">
-          <h3><span class="hn">4</span> Rendement &amp; risque</h3>
-          <p class="r2-sub">Sur le long terme, en moyenne — rien n'est garanti.</p>
-          <div class="riskgrid">
-            <div class="rstat"><div class="rk">Rendement / an</div><div class="rv">${p.return}</div><div class="rsub">annualisé, ce qui compose réellement</div></div>
-            <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${p.vol}</div><div class="rsub">à quel point ça monte et descend</div></div>
-            <div class="rstat loss"><div class="rk">Perte max</div><div class="rv">${p.drawdown}</div><div class="rsub">le pire creux en cas de crise</div></div>
-            <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${p.sharpe}</div><div class="rsub">rendement gagné par unité de risque (réf. 2,75 %)</div></div>
+        <details class="r2-more">
+          <summary>C'est quoi, ces chiffres ?</summary>
+          <div class="honesty">
+            <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Le « Sharpe » est le même (~0,29) sur les 4 profils.</b> Autrement dit : prendre plus de risque ne te rend pas « plus malin » — ça augmente le rendement <em>et</em> les secousses, en même temps.</span></div>
+            <div class="hcard"><span class="hi">📉</span><span class="ht"><b>La perte max dépend du type de crise.</b> En 2008, les obligations amortissaient la chute ; en 2022, presque tout a baissé en même temps (seul le fonds euro a tenu). On affiche toujours le pire des deux cas.</span></div>
           </div>
-          <details class="r2-more">
-            <summary>C'est quoi, ces chiffres ?</summary>
-            <div class="honesty">
-              <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Le « Sharpe » est le même (~0,29) sur les 4 profils.</b> Autrement dit : prendre plus de risque ne te rend pas « plus malin » — ça augmente le rendement <em>et</em> les secousses, en même temps.</span></div>
-              <div class="hcard"><span class="hi">📉</span><span class="ht"><b>La perte max dépend du type de crise.</b> En 2008, les obligations amortissaient la chute ; en 2022, presque tout a baissé en même temps (seul le fonds euro a tenu). On affiche toujours le pire des deux cas.</span></div>
-            </div>
-            <p class="assum">Hypothèses de calcul : actions des pays développés 7 %/an · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · taux sans risque (Sharpe) 2,75 % · le rendement affiché est <strong>annualisé composé</strong> (géométrique, ≈ arithmétique − σ²/2).</p>
-          </details>
-        </div>
+          <p class="assum">Hypothèses de calcul : actions des pays développés 7 %/an · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · taux sans risque (Sharpe) 2,75 % · le rendement affiché est <strong>annualisé composé</strong> (géométrique, ≈ arithmétique − σ²/2).</p>
+        </details>
       </div>
 
       <div class="actions-bar">
-        <button class="cta-btn primary" type="button" onclick="navTo('i-sec3');">Voir mon portefeuille en détail →</button>
         <button class="cta-btn outline" type="button" id="pcr-reset">Refaire le quiz</button>
       </div>`;
     const rb = document.getElementById('pcr-reset');
