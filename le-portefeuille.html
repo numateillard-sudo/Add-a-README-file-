@@ -4816,6 +4816,58 @@ section[style*="padding:80px 0"] {
 .env-tag.env-pea{background:var(--blue-bg,#D6E2F0);color:var(--blue-deep,#1E3A5F)}
 .env-tag.env-cto{background:var(--beige-deep,#E8D2A6);color:var(--gold-dark,#8B6520)}
 </style>
+<style>
+/* ── Restitution profil (design module) — scopé sous #pc-shell ── */
+#pc-shell{display:block;text-align:left}
+#pc-shell .r2-verdict{background:var(--paper);border:1.5px solid var(--border);border-radius:18px;padding:24px 26px;box-shadow:var(--shadow-md);margin-bottom:16px;position:relative;overflow:hidden}
+#pc-shell .r2-verdict::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--vcolor,var(--gold))}
+#pc-shell .verdict-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+#pc-shell .vk{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px}
+#pc-shell .vbadge{font-family:var(--serif);font-size:clamp(30px,5vw,44px);font-weight:800;color:var(--vcolor,var(--gold-dark));line-height:1}
+#pc-shell .vmention{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted);text-align:right;max-width:15em}
+#pc-shell .vtag{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink-soft);background:var(--bg-section);border-radius:99px;padding:5px 14px}
+#pc-shell .why{margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);font-style:italic}
+#pc-shell .why::before{content:"« ";color:var(--gold)} #pc-shell .why::after{content:" »";color:var(--gold)}
+#pc-shell .scoregrid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-bottom:16px}
+@media(max-width:760px){#pc-shell .scoregrid{grid-template-columns:1fr}}
+#pc-shell .r2-card{background:var(--paper);border:1.5px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow-sm)}
+#pc-shell .r2-block{margin-bottom:16px}
+#pc-shell .r2-card h3{font-family:var(--serif);font-size:18px;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+#pc-shell .r2-card h3 .hn{font-family:var(--mono);font-size:11px;color:var(--gold-dark);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;font-weight:600}
+#pc-shell .csub{font-size:13px;color:var(--muted);margin-bottom:16px}
+#pc-shell .scorebars{display:flex;flex-direction:column;gap:13px}
+#pc-shell .sb-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+#pc-shell .sb-label{font-size:14px;font-weight:600} #pc-shell .sb-val{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+#pc-shell .sb-track{height:11px;background:var(--bg-deep,#E8DFC9);border-radius:99px;overflow:hidden;display:flex;gap:3px;padding:2px}
+#pc-shell .sb-seg{flex:1;border-radius:99px;background:var(--border)}
+#pc-shell .sb-seg.on{background:var(--gold)}
+#pc-shell .sb.cap .sb-seg.on{background:var(--blue-text)}
+#pc-shell .sb.app .sb-seg.on{background:#A4502A}
+#pc-shell .constraint{margin-top:16px;font-size:13.5px;color:var(--ink-soft);background:var(--beige-highlight);border-radius:10px;padding:11px 14px;line-height:1.45}
+#pc-shell .radar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+#pc-shell .radar-wrap svg{max-width:230px;width:100%}
+#pc-shell .radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:12.5px;width:100%}
+#pc-shell .radar-legend div{display:flex;justify-content:space-between;color:var(--ink-soft)}
+#pc-shell .radar-legend b{font-family:var(--mono);color:var(--ink)}
+#pc-shell .gf-list{display:flex;flex-direction:column;gap:11px}
+#pc-shell .gf{display:flex;gap:13px;align-items:flex-start;background:var(--red-bg);border:1px solid #E8C4C4;border-radius:12px;padding:13px 16px}
+#pc-shell .gf-ic{font-size:18px;line-height:1.3;flex:none} #pc-shell .gf-b{flex:1}
+#pc-shell .gf-t{font-weight:700;font-size:14.5px;color:var(--red-text);margin-bottom:2px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+#pc-shell .gf-cap{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--red-book);color:#fff;border-radius:5px;padding:1px 6px}
+#pc-shell .gf-x{font-size:13.5px;color:var(--ink-soft);line-height:1.5}
+#pc-shell .gf-none{font-size:14px;color:var(--green-text);background:var(--green-bg);border:1px solid #C6DBB0;border-radius:12px;padding:13px 16px;font-weight:600}
+#pc-shell .riskgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:620px){#pc-shell .riskgrid{grid-template-columns:1fr 1fr}}
+#pc-shell .rstat{background:var(--paper-soft);border:1px solid var(--border-soft);border-radius:12px;padding:14px}
+#pc-shell .rk{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:5px}
+#pc-shell .rv{font-family:var(--serif);font-size:25px;font-weight:800;color:var(--ink)}
+#pc-shell .rstat.loss .rv{color:var(--red-text)}
+#pc-shell .honesty{display:flex;flex-direction:column;gap:11px;margin-top:18px}
+#pc-shell .hcard{display:flex;gap:12px;align-items:flex-start;background:var(--bg-section);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 15px}
+#pc-shell .hi{font-size:16px;flex:none} #pc-shell .ht{font-size:13.5px;line-height:1.5;color:var(--ink-soft)} #pc-shell .ht b{color:var(--ink)}
+#pc-shell .assum{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5;padding-top:12px;border-top:1px dashed var(--border)}
+#pc-shell .actions-bar{display:flex;gap:12px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+</style>
 </head>
 <body>
 
@@ -5368,117 +5420,7 @@ section[style*="padding:80px 0"] {
 
       <!-- ── ÉCRAN RÉSULTAT — Carte d’identité d’investisseur ── -->
       <div class="qs-result" id="qs-result" hidden>
-        <div class="profile-card">
-
-          <!-- En-tête : eyebrow + mention contextuelle -->
-          <div class="pc-header">
-            <span class="pc-eyebrow">Ton profil investisseur</span>
-            <span class="pc-mention" id="pc-mention">Le profil le plus courant à 30 ans</span>
-          </div>
-
-          <!-- Nom du profil — typographie XXL -->
-          <h3 class="pc-name" id="pc-name">Dynamique</h3>
-
-          <!-- Phrase comportementale, l'idée centrale -->
-          <p class="pc-keyphrase" id="pc-keyphrase">Tu es le type qui vise 15-20 ans, mais qui vérifie son app trop souvent.</p>
-
-          <!-- Scores séparés : appétit vs capacité (on retient le plus contraignant) -->
-          <div class="pc-scores">
-            <div class="pc-score pc-score-cap"><span class="pc-score-k">Capacité — ce que tu peux</span><span class="pc-score-v" id="pc-score-cap">0 / 4</span></div>
-            <div class="pc-score pc-score-app"><span class="pc-score-k">Appétit — ce que tu supportes</span><span class="pc-score-v" id="pc-score-app">0 / 4</span></div>
-          </div>
-          <p class="pc-constraint" id="pc-constraint"></p>
-
-          <!-- Signature : 4 axes (Capacité, Appétit, Horizon, Conviction) -->
-          <div class="pc-signature">
-            <div class="pc-signature-title">Ta signature</div>
-            <div class="pc-axes">
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Capacité</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-capacite-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-capacite-pct">0/4</span>
-                <span class="pc-axis-note" id="pc-axis-capacite-note"></span>
-              </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Appétit</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-appetit-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-appetit-pct">0/4</span>
-                <span class="pc-axis-note" id="pc-axis-appetit-note"></span>
-              </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Horizon</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-horizon-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-horizon-pct">0/4</span>
-                <span class="pc-axis-note" id="pc-axis-horizon-note"></span>
-              </div>
-              <div class="pc-axis">
-                <span class="pc-axis-lbl">Conviction</span>
-                <div class="pc-axis-bar"><div class="pc-axis-fill" id="pc-axis-conviction-fill" style="width:0%"></div></div>
-                <span class="pc-axis-pct" id="pc-axis-conviction-pct">0/4</span>
-                <span class="pc-axis-note" id="pc-axis-conviction-note"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Garde-fous déclenchés (en clair) -->
-          <div class="pc-gardefous" id="pc-gardefous"></div>
-
-          <!-- Stress-test rétrospectif — l'épreuve de réalité -->
-          <div class="pc-stresstest">
-            <div class="pc-stresstest-head">
-              <span class="pc-stresstest-tag">L'épreuve de réalité</span>
-              <span class="pc-stresstest-event" id="pc-stresstest-event">Mars 2020 — COVID</span>
-            </div>
-            <div class="pc-stresstest-body">
-              <div class="pc-stresstest-stat">
-                <span class="pc-stresstest-stat-val" id="pc-stresstest-loss">-30 %</span>
-                <span class="pc-stresstest-stat-lbl">de baisse au pire</span>
-              </div>
-              <div class="pc-stresstest-divider"></div>
-              <div class="pc-stresstest-stat">
-                <span class="pc-stresstest-stat-val" id="pc-stresstest-recovery">7 mois</span>
-                <span class="pc-stresstest-stat-lbl">pour récupérer</span>
-              </div>
-            </div>
-            <p class="pc-stresstest-cta">Si tu n'avais pas vendu pendant la chute.</p>
-          </div>
-
-          <!-- Chiffres de référence (compacts, en bas) -->
-          <div class="pc-stats">
-            <div class="pc-stat">
-              <span class="pc-stat-val" id="pc-stat-return">~7,3 %</span>
-              <span class="pc-stat-lbl">Rendement / an</span>
-            </div>
-            <div class="pc-stat">
-              <span class="pc-stat-val" id="pc-stat-vol">~11,8 %</span>
-              <span class="pc-stat-lbl">Volatilité</span>
-            </div>
-            <div class="pc-stat">
-              <span class="pc-stat-val" id="pc-stat-drawdown">~ -39 %</span>
-              <span class="pc-stat-lbl">Perte max type</span>
-            </div>
-            <div class="pc-stat">
-              <span class="pc-stat-val" id="pc-stat-sharpe">~0,29</span>
-              <span class="pc-stat-lbl">Sharpe</span>
-            </div>
-          </div>
-
-          <!-- Deux points d'honnêteté (section I) -->
-          <div class="pc-honesty">
-            <div class="pc-honesty-row"><span>⚖️</span><span><strong>Sharpe identique (~0,29) sur les 4 profils.</strong> Même frontière efficiente : on ne « gagne » pas en montant en risque, on déplace seulement le curseur rendement/volatilité.</span></div>
-            <div class="pc-honesty-row"><span>📉</span><span><strong>La perte max dépend du régime de crise.</strong> Type 2008 (krach actions, les obligations amortissent) vs type 2022 (actions <em>et</em> obligations baissent, seul le fonds euro tient). Le chiffre affiché = <strong>le pire des deux</strong>.</span></div>
-            <p class="pc-assum">Hypothèses : actions développées 7 % · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · corrélation actions-obligations +0,15.</p>
-          </div>
-
-          <!-- CTA -->
-          <div class="pc-actions">
-            <button class="cta-btn primary" type="button" onclick="navTo('i-sec3');">Voir mon portefeuille en détail →</button>
-            <button class="cta-btn outline" type="button" id="qsr-reset">Refaire le quiz</button>
-          </div>
-
-          <!-- Note discrète si caps déclenchés -->
-          <p class="pc-note" id="qsr-note" hidden></p>
-        </div>
+        <div id="pc-shell"></div>
       </div>
 
     </div>
@@ -7670,6 +7612,45 @@ function quizShowStep(step) {
 
 // ─── Affiche l'écran résultat avec animation ───
 // ─── Affiche l'écran résultat (restitution conseiller) ───
+// ─── Affiche l'écran résultat (restitution conseiller — design module standalone) ───
+function pcrRadar(cap, app, hor, conv) {
+  const c = 100, R = 78;
+  const pt = (val, ax) => { const r = (val / 4) * R;
+    if (ax === 'top') return [c, c - r]; if (ax === 'right') return [c + r, c];
+    if (ax === 'bottom') return [c, c + r]; return [c - r, c]; };
+  const poly = [pt(cap, 'top'), pt(app, 'right'), pt(hor, 'bottom'), pt(conv, 'left')]
+    .map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+  let rings = '';
+  for (let g = 1; g <= 4; g++) { const r = (g / 4) * R;
+    rings += `<polygon points="${c},${c - r} ${c + r},${c} ${c},${c + r} ${c - r},${c}" fill="none" stroke="var(--border)" stroke-width="1"/>`; }
+  const dots = [pt(cap, 'top'), pt(app, 'right'), pt(hor, 'bottom'), pt(conv, 'left')]
+    .map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="var(--red-book)"/>`).join('');
+  return `<svg viewBox="0 0 200 210" role="img" aria-label="Profil sur 4 axes">
+    ${rings}
+    <line x1="${c}" y1="${c - R}" x2="${c}" y2="${c + R}" stroke="var(--border)" stroke-width="1"/>
+    <line x1="${c - R}" y1="${c}" x2="${c + R}" y2="${c}" stroke="var(--border)" stroke-width="1"/>
+    <polygon points="${poly}" fill="rgba(183,32,46,.14)" stroke="var(--red-book)" stroke-width="2"/>
+    ${dots}
+    <text x="${c}" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-soft)">Capacité</text>
+    <text x="195" y="${c + 4}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink-soft)">Appétit</text>
+    <text x="${c}" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-soft)">Horizon</text>
+    <text x="5" y="${c + 4}" text-anchor="start" font-size="11" font-weight="700" fill="var(--ink-soft)">Conviction</text>
+  </svg>`;
+}
+function pcrBar(label, val, cls) {
+  let segs = '';
+  for (let i = 1; i <= 4; i++) segs += `<span class="sb-seg ${i <= val ? 'on' : ''}"></span>`;
+  return `<div class="sb ${cls}"><div class="sb-head"><span class="sb-label">${label}</span><span class="sb-val">${val} / 4</span></div><div class="sb-track">${segs}</div></div>`;
+}
+function pcrGardeFous(det) {
+  if (!det.triggered.length) return '<div class="gf-none">✓ Aucun garde-fou déclenché — aucune réponse ne plafonne ton profil sous ta capacité.</div>';
+  return '<div class="gf-list">' + det.triggered.map(c =>
+    `<div class="gf"><span class="gf-ic">🛑</span><div class="gf-b"><div class="gf-t">${GARDE_FOU_TITLE[c.raison]} <span class="gf-cap">plafond ${PROFILE_NAME_BY_LEVEL[c.max]}</span></div><div class="gf-x">${PROFILE_NOTES_Q[c.raison]}</div></div></div>`
+  ).join('') + '</div>';
+}
+
+const PROFILE_COLOR_BY_LEVEL = { 1: '#1E3A5F', 2: '#8B6520', 3: '#A4502A', 4: '#B7202E' };
+
 function quizShowResult() {
   const a = STATE.investor.quiz.answers;
   const det = quizDetermineProfile(a);
@@ -7682,60 +7663,77 @@ function quizShowResult() {
   const result = document.getElementById('qs-result');
   if (result) { result.hidden = false; result.classList.add('show'); }
 
-  setText('qsr-tagline', PROFILE_TAGLINES_Q[det.key] || '');
-  setText('pc-name', p.name);
-  setText('pc-mention', PROFILE_MENTIONS[det.key] || '');
-  setHTML('pc-keyphrase', buildWhy(det, a));
-
-  // Scores séparés + contrainte active
-  setText('pc-score-app', det.appetit + ' / 4');
-  setText('pc-score-cap', det.capacite + ' / 4');
-  setHTML('pc-constraint', constraintText(det));
-
-  // Chiffres rendement / risque
-  setText('pc-stat-return', p.return);
-  setText('pc-stat-vol', p.vol);
-  setText('pc-stat-drawdown', p.drawdown);
-  setText('pc-stat-sharpe', p.sharpe);
-
-  // Signature : 4 axes (Capacité, Appétit, Horizon, Conviction)
+  const color = PROFILE_COLOR_BY_LEVEL[det.final];
   const axes = computeProfileAxes(a);
-  ['capacite', 'appetit', 'horizon', 'conviction'].forEach(axis => {
-    const fill = document.getElementById('pc-axis-' + axis + '-fill');
-    const pct  = document.getElementById('pc-axis-' + axis + '-pct');
-    const note = document.getElementById('pc-axis-' + axis + '-note');
-    const v = axes[axis] || 0;
-    const score = Math.round(v / 25); // 0..4
-    if (fill) { fill.style.width = '0%'; requestAnimationFrame(() => { fill.style.width = v + '%'; }); }
-    if (pct)  pct.textContent = score + '/4';
-    if (note) note.textContent = axisComment(axis, v);
-  });
+  const shell = document.getElementById('pc-shell');
+  if (shell) {
+    shell.innerHTML = `
+      <div class="r2-verdict" style="--vcolor:${color}">
+        <div class="verdict-top">
+          <div><div class="vk">Ton profil investisseur</div><div class="vbadge">${p.name}</div></div>
+          <div class="vmention">${PROFILE_MENTIONS[det.key] || ''}</div>
+        </div>
+        <span class="vtag">Appétit ${det.appetit} / 4 · Capacité ${det.capacite} / 4</span>
+        <div class="why">${buildWhy(det, a)}</div>
+      </div>
 
-  // Stress-test (perte max = pire régime)
-  const stress = PROFILE_STRESSTEST[det.key];
-  if (stress) {
-    setText('pc-stresstest-event', stress.event);
-    setText('pc-stresstest-loss', '-' + stress.loss + ' %');
-    setText('pc-stresstest-recovery', stress.recovery + ' mois');
+      <div class="scoregrid">
+        <div class="r2-card">
+          <h3><span class="hn">2</span> Appétit vs Capacité</h3>
+          <p class="csub">On regarde les deux séparément, on retient le plus contraignant.</p>
+          <div class="scorebars">
+            ${pcrBar('Capacité — ce que tu peux', det.capacite, 'cap')}
+            ${pcrBar('Appétit — ce que tu supportes', det.appetit, 'app')}
+          </div>
+          <div class="constraint">${constraintText(det)}</div>
+        </div>
+        <div class="r2-card">
+          <h3>Ton profil en un coup d'œil</h3>
+          <p class="csub">Capacité · Appétit · Horizon · Conviction</p>
+          <div class="radar-wrap">
+            ${pcrRadar(det.capacite, det.appetit, +a.horizon || 0, +a.experience || 0)}
+            <div class="radar-legend">
+              <div>Capacité <b>${det.capacite}/4</b></div><div>Appétit <b>${det.appetit}/4</b></div>
+              <div>Horizon <b>${(+a.horizon || 0)}/4</b></div><div>Conviction <b>${(+a.experience || 0)}/4</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="r2-card r2-block">
+        <h3><span class="hn">3</span> Garde-fous</h3>
+        <p class="csub">Les réponses qui plafonnent le profil, en clair.</p>
+        ${pcrGardeFous(det)}
+      </div>
+
+      <div class="r2-card r2-block">
+        <h3><span class="hn">4</span> Rendement &amp; risque attendus</h3>
+        <p class="csub">Hypothèses prospectives, par matrice de covariance — pas une extrapolation du passé.</p>
+        <div class="riskgrid">
+          <div class="rstat"><div class="rk">Rendement / an</div><div class="rv">${p.return}</div></div>
+          <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${p.vol}</div></div>
+          <div class="rstat loss"><div class="rk">Perte max type</div><div class="rv">${p.drawdown}</div></div>
+          <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${p.sharpe}</div></div>
+        </div>
+        <div class="honesty">
+          <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Sharpe identique (~0,29) sur les 4 profils.</b> Même frontière efficiente : on ne « gagne » pas en montant en risque, on déplace seulement le curseur rendement/volatilité.</span></div>
+          <div class="hcard"><span class="hi">📉</span><span class="ht"><b>La perte max dépend du régime de crise.</b> Type 2008 (krach actions, les obligations amortissent) vs type 2022 (actions <em>et</em> obligations baissent, seul le fonds euro tient). Le chiffre affiché = <b>le pire des deux</b>.</span></div>
+        </div>
+        <p class="assum">Hypothèses : actions développées 7 % · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · corrélation actions-obligations +0,15.</p>
+      </div>
+
+      <div class="actions-bar">
+        <button class="cta-btn primary" type="button" onclick="navTo('i-sec3');">Voir mon portefeuille en détail →</button>
+        <button class="cta-btn outline" type="button" id="pcr-reset">Refaire le quiz</button>
+      </div>`;
+
+    // anime les barres après insertion
+    requestAnimationFrame(() => { /* segments déjà colorés via .on */ });
+    const rb = document.getElementById('pcr-reset');
+    if (rb) rb.addEventListener('click', quizReset);
   }
 
-  // Garde-fous déclenchés (liste en clair)
-  const gfEl = document.getElementById('pc-gardefous');
-  if (gfEl) {
-    if (det.triggered.length) {
-      gfEl.innerHTML = det.triggered.map(c =>
-        `<div class="pc-gf"><span class="pc-gf-ic">🛑</span><div class="pc-gf-b"><div class="pc-gf-t">${GARDE_FOU_TITLE[c.raison]} <span class="pc-gf-cap">plafond ${PROFILE_NAME_BY_LEVEL[c.max]}</span></div><div class="pc-gf-x">${PROFILE_NOTES_Q[c.raison]}</div></div></div>`
-      ).join('');
-    } else {
-      gfEl.innerHTML = '<div class="pc-gf-none">✓ Aucun garde-fou déclenché — aucune réponse ne plafonne ton profil sous ta capacité.</div>';
-    }
-  }
-
-  // Note legacy (désactivée, remplacée par la liste ci-dessus)
-  const noteEl = document.getElementById('qsr-note');
-  if (noteEl) noteEl.style.display = 'none';
-
-  // Synthèses externes
+  // Synthèses externes (autres sections du livre)
   setText('synth-invest-val', p.name);
   setText('synth-invest-sub', `${p.return}/an · vol ${p.vol}`);
   setText('passerelle-profile', p.name);
