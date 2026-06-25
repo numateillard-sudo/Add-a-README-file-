@@ -6050,7 +6050,7 @@ section[style*="padding:80px 0"] {
                 <span class="cs-time">5 min — pour les actifs US et ETF thématiques</span>
               </div>
               <h4 class="cs-title">Ouvre un CTO dans la même app</h4>
-              <p class="cs-body">Trade Republic → « Ouvrir un nouveau compte » → choisis <code>CTO</code>. Tu reçois un second IBAN dédié. Ensuite, même procédure que pour le PEA : virement → achats (<code>MSFT</code>, <code>NVDA</code>, <code>GLD</code> pour l’or, <code>ARTY</code> pour l’IA, etc., selon ton portefeuille) → DCA si tu veux automatiser.</p>
+              <p class="cs-body">Trade Republic → « Ouvrir un nouveau compte » → choisis <code>CTO</code>. Tu reçois un second IBAN dédié. Ensuite, même procédure que pour le PEA : virement → achats des actifs hors PEA de ton portefeuille — l’<strong>or</strong> (<code>IGLN</code>) et les <strong>obligations</strong> (<code>IEAG</code>) si tu les loges ici plutôt qu’en assurance-vie, et — seulement si tu as activé le <strong>satellite optionnel</strong> — tes titres vifs hors PEA (<code>TSMC</code>, <code>Microsoft</code>, <code>Mastercard</code>) → DCA si tu veux automatiser.</p>
             </div>
           </div>
 
@@ -7326,7 +7326,7 @@ let budgetSegsRef = [];
 
 const ASSETS = [
   // ====== MOTEUR ACTIONS — ETF cœur, 70/20/10 (Monde / Europe / Émergents) ======
-  { id: 'world',    cat: 'actions_monde',  name: 'ETF Monde — MSCI World', ticker: 'WPEA', desc: 'Amundi PEA Monde · ~1 400 grandes capitalisations des marchés développés', env: 'PEA', rate: 7.0, vol: 15 },
+  { id: 'world',    cat: 'actions_monde',  name: 'ETF Monde — MSCI World', ticker: 'DCAM', desc: 'Amundi PEA Monde · ~1 400 grandes capitalisations des marchés développés', env: 'PEA', rate: 7.0, vol: 15 },
   { id: 'europe',   cat: 'actions_europe', name: 'ETF Europe — Stoxx 600', ticker: 'MEUD', desc: 'Amundi PEA · 600 valeurs européennes · biais domestique assumé', env: 'PEA', rate: 7.0, vol: 16 },
   { id: 'emerging', cat: 'actions_em',     name: 'ETF Émergents — MSCI EM', ticker: 'PAEEM', desc: 'Amundi PEA synthétique · Chine, Inde, Taïwan, Corée, Brésil', env: 'PEA', rate: 8.0, vol: 20 },
   // ====== POCHE DÉFENSIVE ======
@@ -8439,11 +8439,11 @@ const CONTEXTUAL_TIPS = {
   'b-sec2': { icon: '🎯', label: 'À retenir',
               text: 'L\'<strong>épargne mensuelle</strong> est l\'arme long terme. Vise <em>20% du net</em> minimum. Le curseur Plaisir/Épargne te montre où tu en es.' },
   'i-sec1': { icon: '📚', label: 'Vocabulaire',
-              text: '<strong>Obligation</strong> : un prêt à un État ou à une entreprise qui te verse des intérêts à dates fixes, puis te rembourse à l\'échéance. <strong>Fonds euro</strong> : produit d\'assurance-vie au capital garanti à 100%, rendement modeste (~2,5%/an). Tous deux forment le <em>coussin défensif</em> du portefeuille.' },
+              text: '<strong>Obligation</strong> : un prêt à un État ou à une entreprise qui te verse des intérêts à dates fixes, puis te rembourse à l\'échéance. <strong>Fonds euro</strong> : produit d\'assurance-vie au capital garanti à 100%, rendement modeste (~2,75%/an). Tous deux forment le <em>coussin défensif</em> du portefeuille.' },
   'i-sec2': { icon: '⚠️', label: 'Erreur n°1',
               text: 'Les débutants <strong>surestiment leur sang-froid</strong>. Résultat : ils achètent en haut, vendent en bas, perdent capital ET temps. Réponds en imaginant ta <em>vraie</em> réaction, pas l\'idéale.' },
   'i-sec3': { icon: '📌', label: 'Astuce',
-              text: 'Le bouton <strong>"Tout déplier"</strong> ouvre tous les actifs d\'un coup. Pour passer commande chez ton courtier, note les <strong>tickers</strong> (ex. <em>WPEA</em> pour MSCI World).' },
+              text: 'Le bouton <strong>"Tout déplier"</strong> ouvre tous les actifs d\'un coup. Pour passer commande chez ton courtier, note les <strong>tickers</strong> (ex. <em>DCAM</em> pour MSCI World).' },
   'i-sec4': { icon: '🧭', label: 'Les 3 modes',
               text: '<strong>Guidé</strong> — les 4 profils d\'un coup, simulés sur 20 ans.<br><strong>Comparateur</strong> — 2 stratégies face à face, l\'écart en € sur 20 ans.<br><strong>Expert</strong> — ton plan complet : versement, horizon, leviers.' },
   'f-sec1': { icon: '💰', label: 'Optimisation',
@@ -10063,7 +10063,7 @@ function setupPlanStepper() {
     <span class="ct-label" id="ct-label">Astuce</span>
     <button class="ct-close" id="ct-close" type="button" aria-label="Fermer ce conseil">×</button>
   </div>
-  <div class="ct-body" id="ct-body">Le bouton <strong>"Tout déplier"</strong> ouvre tous les actifs d’un coup. Pour passer commande chez ton courtier, note les <strong>tickers</strong> (ex. <em>WPEA</em> pour MSCI World).</div>
+  <div class="ct-body" id="ct-body">Le bouton <strong>"Tout déplier"</strong> ouvre tous les actifs d’un coup. Pour passer commande chez ton courtier, note les <strong>tickers</strong> (ex. <em>DCAM</em> pour MSCI World).</div>
 </aside>
 
 </body></html>

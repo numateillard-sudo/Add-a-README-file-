@@ -1,6 +1,6 @@
-######## verify.js (rendu == recalcul moteur, tous états + F-006 dérivation) ########
+######## verify.js (rendu==moteur + F-006 dérivation + F-008/009 tickers) ########
 ================ VERIFICATION HARNESS ================
-PASS: 122   FAIL: 0
+PASS: 135   FAIL: 0
 ALL CHECKS GREEN ✓
 ======================================================
 
@@ -11,7 +11,7 @@ B. full interaction sweep: zero console errors ✓ (charts created: 15)
 ================ SMOKE TEST ================
 ALL SMOKE CHECKS GREEN ✓
 
-######## test-restore.js (persistance quiz au rechargement) ########
+######## test-restore.js (persistance quiz) ########
 
 --- Pass2 (reload) ---
 loadState() returned (restored?): true

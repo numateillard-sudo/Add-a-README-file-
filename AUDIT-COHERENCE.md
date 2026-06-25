@@ -3,7 +3,7 @@
 Fichier audité : `petit-livre-rouge-portefeuille.html` (10 052 lignes, application HTML autonome, dépendance unique Chart.js).
 Périmètre : **cohérence du fond, de bout en bout** (source de vérité → rendu, dans chaque état atteignable). Distinct de l'audit des chiffres (justesse fiscale/mathématique dans l'absolu) et du brief design.
 
-**Verdict** : la base est saine et, pour l'essentiel, **cohérente** — toutes les statistiques affichées (rendement / volatilité / drawdown / Sharpe) dérivent d'un **moteur unique** (`computeStats`) et le harnais le prouve dans les 4 profils. **6 écarts réels** identifiés ; **6 correctifs chirurgicaux appliqués** et **vérifiés par harnais** (F-001 enveloppe, F-005 grave/persistance, F-004 tip, F-012 init, **F-006 consolidation du planificateur sur le moteur**, F-008-partie tip `CW8→WPEA`). **Restent escaladés** car ils exigent une **décision produit + réécriture éditoriale** : la réconciliation `WPEA`↔`DCAM` (identité du produit MSCI World) et le **guide d'achat** (or `GLD` vs `IGLN`, titres `MSFT/NVDA/ARTY` d'un ancien modèle absent du portefeuille ETF). Un important **stock de code mort** (sous-systèmes d'anciennes versions) est inventorié — inerte, jamais affiché.
+**Verdict** : la base est saine et désormais **cohérente de bout en bout** — toutes les statistiques affichées (rendement / volatilité / drawdown / Sharpe) dérivent d'un **moteur unique** (`computeStats`), prouvé par harnais dans les 4 profils. **Les 6 écarts réels sont tous corrigés et vérifiés** : F-001 (enveloppe), F-005 (grave — persistance du quiz), F-004 (tip horizon), F-012 (init planificateur), **F-006** (consolidation du planificateur sur le moteur), **F-008/009/010** (tickers — MSCI World unifié sur **`DCAM`** *vérifié sur le web* = Amundi PEA Monde, or sur `IGLN`, guide d'achat réécrit sur le portefeuille réel). Restent uniquement : un **stock de code mort** (sous-systèmes d'anciennes versions, **inerte, jamais affiché**) inventorié pour une passe de nettoyage dédiée, et des micro-points de copie documentés.
 
 > **Harnais : 122 assertions vertes / 0 échec** (rendu == recalcul moteur, 4 profils × 3 vues, **+ planificateur dérivé du moteur : médiane Monte-Carlo ≈ projection géométrique guidée à ±8 %**) · **sweep interactif : 0 erreur console** · **persistance : OK après correctif**.
 
@@ -36,7 +36,7 @@ PROFILE_PROBA[s.profile] (= moteur : arith/vol) ──▶ updatePlannerView (Mon
 ASSETS[].env ──▶ envCls (7235) + computeEnvelopeSplit (7244) ──▶ pastilles enveloppe   ◀── F-001 (corrigé)
 ```
 
-**Données à sources multiples signalées** : (a) stats par profil — **moteur** (live), littéraux `PROFILES` (écrasés, cohérents) et `PROFILE_PROBA` (planificateur) **désormais tous dérivés du moteur** (F-006 corrigé) ; (b) allocations — `PRESETS` (live) vs `PROFILE_ALLOCATION_Q` (mort) ; (c) tickers — `ASSETS` vs prose du guide d'achat (**F-008/009/010, escaladés**).
+**Données à sources multiples signalées** : (a) stats par profil — **moteur** (live), littéraux `PROFILES` (écrasés, cohérents) et `PROFILE_PROBA` (planificateur) **désormais tous dérivés du moteur** (F-006 corrigé) ; (b) allocations — `PRESETS` (live) vs `PROFILE_ALLOCATION_Q` (mort) ; (c) tickers — `ASSETS` vs prose du guide d'achat : **unifiés sur `ASSETS`** (F-008/009/010 résolus, `DCAM`/`IGLN` web-vérifiés).
 
 ---
 
@@ -71,15 +71,15 @@ Légende : ✓ vérifié cohérent · **F-n** écart (voir §3) · — sans obje
 | **F-004** | tip `i-sec4` 8446 | contradiction-inter-sections | Tip « Comparateur … sur **25 ans** » ; or l'outil utilise **20 ans** (STATE + slider + sortie concordent) | **Oui** (panneau d'astuce) : claim faux sur le comportement de l'outil | Tip → « sur **20 ans** » (alignement de l'unique source divergente) | Oui — texte du tip corrigé | Moyenne | Non |
 | **F-012** | planificateur `initPlannerWiring` 9944 / hint 6797 | ordre-init | Au chargement, objectif actif = « retraite » mais le hint statique affichait le texte « FIRE » (25× dépenses) | **Oui** (mineur) : sous-titre d'objectif incohérent avec le bouton actif | `initPlannerWiring` appelle `applyGoalType(goalType)` → hint cohérent | Oui — hint = texte « retraite » au chargement | Moyenne | Non |
 | **F-006** | `PROFILE_PROBA` 9546 vs moteur | **source-de-vérité-redondante** + contradiction-inter-sections | Rate/vol du **planificateur** ≠ moteur (ex. dynamique **7,6 %** vs **5,4 %** ; off. 8,6 % vs 5,7 %) | **Oui** : pour un même profil, la carte annonçait ~5,4 %/an mais le planificateur projetait à 7,6 %/an | **`PROFILE_PROBA` dérivé du moteur** : `rate = PROFILE_STATS.arith`, `vol = PROFILE_STATS.vol` (source redondante supprimée) | **Oui** — probabilités/trajectoires recalées sur le moteur (baisse) ; médiane MC ≈ projection guidée (prouvé) | Haute | Non (résolu) |
-| **F-008** | `ASSETS.world` 7327 (`WPEA`) vs guide 6026 (`DCAM`+ISIN) vs tip 8444/10050 (`CW8`) | contradiction-inter-sections | **3 tickers différents** pour l'ETF MSCI World recommandé | **Oui** : confusion à l'achat (le lecteur cherche un ticker introuvable dans son portefeuille) | **Partiel** : tip `CW8 → WPEA` (CW8 = version **CTO**, non-PEA, contredisait `env:'PEA'` ; aligné sur le ticker rendu). Reste `WPEA`↔`DCAM` (identité produit) | Oui (tip) | Haute | **Partiel** — `WPEA`↔`DCAM` escaladé |
-| **F-009** | `ASSETS.gold` 7334 (`IGLN`) vs guide 6053 / placeholder 5923 (`GLD`) | contradiction-inter-sections | 2 tickers pour l'or | Oui : idem achat | **AUCUN** | — | Haute | **OUI** |
-| **F-010** | guide d'achat étape 6, 6053 | contradiction-inter-sections / stale | « Achète MSFT, NVDA, GLD, ARTY » = titres d'un **ancien modèle** ; le portefeuille moteur est 100 % ETF (NVDA/ARTY n'existent nulle part ; Microsoft seulement en satellite optionnel) | **Oui** : on demande d'acheter des actifs absents du portefeuille rendu | **AUCUN** (réécriture de copie) | — | Haute | **OUI** |
+| **F-008** | `ASSETS.world` 7327 vs guide 6026 vs tip | contradiction-inter-sections | **3 tickers** pour l'ETF MSCI World (`WPEA`/`DCAM`/`CW8`) ; `ASSETS` en tension interne (ticker `WPEA`=iShares, desc « Amundi PEA Monde »=`DCAM`) | **Oui** : confusion à l'achat | **RÉSOLU** : unifié sur **`DCAM`** (Amundi PEA Monde, ISIN FR001400U5Q4 — **vérifié web** : matche la desc + le guide). `ASSETS.ticker WPEA→DCAM` + tips→DCAM ; guide déjà DCAM | Oui — `WPEA`/`CW8` éliminés (0 occ. visible) | Haute (ticker web-vérifié) | Non (résolu) |
+| **F-009** | `ASSETS.gold` 7334 (`IGLN`) vs guide 6053 (`GLD`) | contradiction-inter-sections | 2 tickers pour l'or | Oui : idem achat | **RÉSOLU** : guide d'achat `GLD → IGLN` (aligné sur `ASSETS`, source unique) | Oui | Haute | Non (résolu) |
+| **F-010** | guide d'achat étape 6, 6053 | contradiction-inter-sections / stale | « Achète MSFT, NVDA, GLD, ARTY » = titres d'un **ancien modèle** absents du portefeuille ETF | **Oui** : on demandait d'acheter des actifs absents du portefeuille | **RÉSOLU** : réécrit sur les **actifs réels hors PEA** — or `IGLN`, obligations `IEAG`, et (si satellite activé) titres vifs `TSMC`/`Microsoft`/`Mastercard` | Oui — guide d'achat = portefeuille réel | Haute | Non (résolu) |
 | **F-002** | i-sec3/i-sec4 placeholders | code-mort / placeholder-stale | Modèle abandonné « Tech & Innovation 36/47 % », actions individuelles, légende donut 39/23/15/15/8, macro 77/15/8, split 45/40/8/7, `i-g-rate 9,8 %`, table projection 50 472 €… | **Aucun** : tout est dans des conteneurs `display:none` **écrasés** par le rendu JS avant affichage (`.portfolio-content` ne reçoit `.show` qu'après réécriture) | Aucun (documenté) | Non | Haute | Recommandé (nettoyage) |
 | **F-003** | `updateExpertOverview` 8853-59 | clé-mal-appariée (dans code mort) | Macro hint testant `'tech_us'/'diversifies_us'/'diversification'` (clés inexistantes) → actions = seul `world`, sécurité sans fonds €, or toujours 0 | **Aucun** : `#i-expert-hint-text` **n'existe plus** (builder expert supprimé) → fonction no-op | Aucun (bug **latent** en code mort) | Non | Haute | Recommandé (avec F-011) |
 | **F-007** | `notion-card[data-notion]` 5006+, 6085+ | convention/clé | Valeurs `data-notion` désalignées du contenu (clés décalées, doublons) | **Aucun** : `investorToggleNotion` n'utilise `[data-notion]` que comme sélecteur (valeur jamais lue) | Aucun (documenté) | Non | Haute | Optionnel |
 | **F-011** | tout le fichier | **code-mort / dérive-de-câblage** | Sous-systèmes d'anciennes versions orphelins (cf. §8) | **Aucun** (tout est gardé `if(!el)`) | Aucun (inventaire fourni) | Non | Haute | Recommandé (passe dédiée) |
 
-Constats mineurs (copie / escalade légère) : « **1 500 entreprises** » (notions L5065/5080) vs `ASSETS.world` « **~1 400** » ; tip i-sec1 « fonds euro **~2,5 %**/an » vs canonique **2,75 %**. Non corrigés (copie).
+Constats mineurs : tip i-sec1 « fonds euro **~2,5 %**/an » → **corrigé en ~2,75 %** (valeur canonique). « **1 500 entreprises** » (notions L5065/5080) vs `ASSETS.world` « **~1 400** » : **laissé** — approximation pédagogique récurrente, les deux étant des ordres de grandeur valides du MSCI World (ne pas sur-éditer la prose).
 
 ---
 
@@ -121,10 +121,24 @@ Constats mineurs (copie / escalade légère) : « **1 500 entreprises** » (noti
 +   PROFILE_PROBA[k].rate = PROFILE_STATS[k].arith / 100;   // drift = rendement arithmétique du moteur
 +   PROFILE_PROBA[k].vol  = PROFILE_STATS[k].vol   / 100; });
 ```
-**F-008 (partie sans ambiguïté) — tip ticker MSCI World** (×2 : tip JS + aside statique)
+**F-008/009 — ETF Monde & or unifiés sur la source `ASSETS`** (ticker MSCI World web-vérifié = Amundi PEA Monde / `DCAM`)
 ```diff
-- ... (ex. <em>CW8</em> pour MSCI World).      // CW8 = version CTO/Lux, non-PEA
-+ ... (ex. <em>WPEA</em> pour MSCI World).     // = ticker rendu dans le portefeuille (env:'PEA')
+- { id: 'world', ... ticker: 'WPEA', desc: 'Amundi PEA Monde · ...' }   // ticker iShares ≠ desc Amundi
++ { id: 'world', ... ticker: 'DCAM', desc: 'Amundi PEA Monde · ...' }   // DCAM = Amundi PEA Monde (FR001400U5Q4)
+- ... (ex. <em>CW8</em> pour MSCI World).      // CW8 = version CTO/Lux, non-PEA   (×2 : tip JS + aside)
++ ... (ex. <em>DCAM</em> pour MSCI World).
+```
+**F-010 — guide d'achat (étape 6, CTO) recalé sur le portefeuille réel**
+```diff
+- ... achats (MSFT, NVDA, GLD pour l'or, ARTY pour l'IA, etc., selon ton portefeuille) → DCA ...
++ ... achats des actifs hors PEA de ton portefeuille — l'or (IGLN) et les obligations (IEAG) si tu les
++     loges ici plutôt qu'en assurance-vie, et — seulement si tu as activé le satellite optionnel —
++     tes titres vifs hors PEA (TSMC, Microsoft, Mastercard) → DCA ...
+```
+**Mineur — astuce fonds euro**
+```diff
+- ... rendement modeste (~2,5%/an). ...
++ ... rendement modeste (~2,75%/an). ...   // = ASSETS.fonds_euro.rate = RF
 ```
 
 ---
@@ -136,21 +150,23 @@ Constats mineurs (copie / escalade légère) : « **1 500 entreprises** » (noti
 3. **Tip Simulation** : « Comparateur … 25 ans » → « 20 ans » (conforme à l'outil). *(F-004)*
 4. **Hint d'objectif du planificateur** au chargement : texte « FIRE » → texte « retraite » (= objectif actif). *(F-012)*
 5. **Probabilités & trajectoires du planificateur** (mode Expert) : recalées sur le moteur unique. Pour un même profil, le planificateur projette désormais comme la carte/le mode guidé (ex. dynamique : drift 6,08 %/an arith. ⇒ médiane ≈ 5,4 %/an géo., au lieu de 7,6 %/an). Les **probabilités baissent** (plus honnêtes, cohérentes) ; les leviers du planificateur servent justement à les améliorer. *(F-006)* — **suppression d'une source de vérité redondante**, pas un choix de valeur arbitraire : si l'on veut plus d'optimisme, relever les hypothèses **dans le moteur** (`ASSETS`), qui propagera partout.
-6. **Astuce « tickers »** (panneau flottant + aside par défaut) : « ex. **CW8** pour MSCI World » → « ex. **WPEA** » (CW8 = version **CTO/Lux non-PEA**, contredisait `env:'PEA'` ; aligné sur le ticker réellement rendu dans le portefeuille). *(F-008, partie sans ambiguïté)*
+6. **Ticker ETF Monde unifié sur `DCAM`** *(F-008/009)* : `ASSETS.world.ticker` `WPEA → DCAM` (le ticker contredisait sa propre desc « Amundi PEA Monde » ; `DCAM`/ISIN `FR001400U5Q4` = Amundi PEA Monde, **vérifié sur le web**), tips `CW8/WPEA → DCAM`, or du guide d'achat `GLD → IGLN`. Résultat : **un seul ticker partout** (portefeuille rendu, astuce, guide d'achat), **0 occurrence de `WPEA`/`CW8`** en prose visible.
+7. **Guide d'achat (étape 6 — CTO)** *(F-010)* : « achète MSFT, NVDA, GLD, ARTY » (titres d'un ancien modèle absent du portefeuille) → **réécrit sur les actifs réels hors PEA** : or `IGLN`, obligations `IEAG`, et — si le satellite optionnel est activé — titres vifs `TSMC`/`Microsoft`/`Mastercard`. Le guide pointe désormais exactement le portefeuille généré.
+8. **Astuce i-sec1 — fonds euro** : « rendement modeste (~2,5 %/an) » → **« ~2,75 %/an »** (valeur canonique du moteur : `ASSETS.fonds_euro.rate` = `RF` = 2,75).
 
-Aucune **valeur numérique voulue saisie en dur** ni **copie éditoriale** (voix / argumentaire) n'a été modifiée (F-006 = dérivation, pas saisie) — seules des **affirmations factuelles fausses des astuces** ont été corrigées (horizon comparateur, ticker MSCI World). Aucune classe/ID/`data-*` consommée par le JS n'a été cassée (répercussion vérifiée).
+Aucune **valeur numérique voulue du moteur** ni **argumentaire éditorial** n'a été altéré (F-006 = dérivation ; les tickers sont alignés sur la source `ASSETS`, web-vérifiée). Seules des **affirmations factuelles fausses** (astuces, guide d'achat) ont été corrigées vers la source de vérité. Aucune classe/ID/`data-*` consommée par le JS cassée (vérifié).
 
 ---
 
-## 6. Décisions escaladées (« quelle valeur est canonique » — à trancher par l'humain)
+## 6. Décisions tranchées au choix optimal (sur demande explicite « fais l'optimal ») — toutes appliquées
 
-> Je **détecte et consolide**, mais je **ne tranche pas** un jugement de valeur. Rien n'est propagé tant que non décidé.
+> Initialement escaladées (jugement « quelle valeur est canonique »). Sur autorisation explicite de finaliser, tranchées **vers la source de vérité `ASSETS` et les faits vérifiés sur le web**, jamais par invention.
 
-- **E-1 (F-006) — ✅ RÉSOLU (consolidation appliquée).** `PROFILE_PROBA` (planificateur) ne maintient plus une 2ᵉ copie divergente : `rate`/`vol` sont désormais **dérivés du moteur** (`PROFILE_STATS.arith` / `.vol`). C'était une **suppression de source redondante** (déliverable #6), pas un choix de valeur. *Reste un point « chiffres » à valider par toi : si tu voulais sciemment un planificateur plus optimiste, ce n'est plus possible via une copie cachée — il faut relever les hypothèses de rendement **dans le moteur** (`ASSETS`), ce qui les propagera de façon cohérente partout (cartes, guidé, comparateur, planificateur).*
-- **E-2 (F-008) — Ticker ETF MSCI World — partiellement traité.** ✅ Fait sans ambiguïté : le tip `CW8 → WPEA` (CW8 = version **CTO/Lux non-PEA**, donc objectivement faux dans un contexte `env:'PEA'`). ⏳ **Reste à trancher** : `WPEA` (ticker de `ASSETS`, iShares) **vs** `DCAM`+ISIN `FR001400U5Q4` (guide d'achat, = « Amundi PEA Monde », ce que dit aussi la *description* de `ASSETS`). `ASSETS.world` est donc en tension interne (ticker iShares + description Amundi). **Recommandation** : choisir le produit voulu, puis unifier `ASSETS.ticker` + guide d'achat dessus (et corriger la description si besoin). Je n'invente pas le ticker exact.
-- **E-3 (F-009) — Ticker or.** `IGLN` (ASSETS) vs `GLD` (guide/placeholder). **Recommandation** : unifier sur `IGLN`.
-- **E-4 (F-010) — Guide d'achat « MSFT/NVDA/ARTY ».** Titres d'un ancien modèle, absents du portefeuille ETF généré. **Recommandation** : réécrire l'étape 6 pour pointer les ETF réels (ou cadrer explicitement ces noms comme « satellite optionnel »). Relève de la **copie**.
-- **E-5 (mineur) — « 1 500 » vs « ~1 400 » entreprises** (MSCI World) et **fonds euro « ~2,5 % » vs 2,75 %**. **Recommandation** : aligner sur une valeur unique.
+- **D-1 (F-006) — ✅ Planificateur dérivé du moteur.** `PROFILE_PROBA.rate/vol` = `PROFILE_STATS.arith/vol`. Suppression de la 2ᵉ source. *(Note « chiffres » : pour un planificateur plus optimiste, relever les hypothèses **dans le moteur** `ASSETS`, qui propage partout — pas une copie cachée.)*
+- **D-2 (F-008) — ✅ MSCI World unifié sur `DCAM`.** **Vérifié sur le web** : `DCAM` / ISIN `FR001400U5Q4` = *Amundi PEA Monde (MSCI World)*, exactement ce que dit la **description** de `ASSETS` et le guide d'achat ; `WPEA` (IE0002XZSHO1) est un **autre** produit (iShares). Le ticker `ASSETS.world` (`WPEA`, iShares) contredisait donc sa propre description Amundi. Choix optimal = le produit décrit (Amundi) : `ASSETS.ticker WPEA→DCAM`, tips `CW8/WPEA→DCAM`. **0 occurrence visible de `WPEA`/`CW8`.**
+- **D-3 (F-009) — ✅ Or unifié sur `IGLN`.** Guide d'achat `GLD → IGLN` (aligné sur `ASSETS`, qui est cohérent en interne).
+- **D-4 (F-010) — ✅ Guide d'achat recalé sur le portefeuille réel.** Étape 6 (CTO) réécrite : or `IGLN`, obligations `IEAG`, et — si le satellite optionnel est actif — titres vifs hors PEA `TSMC`/`Microsoft`/`Mastercard` (env `CTO` dans `SATELLITE`). Plus aucun titre fantôme.
+- **D-5 (mineur) — ✅/partiel.** Fonds euro tip `~2,5 % → ~2,75 %` (valeur canonique). Laissé tel quel : « **1 500** » vs « ~1 400 » entreprises (MSCI World) — approximation pédagogique récurrente ; non chassé pour ne pas sur-éditer la prose (les deux sont des ordres de grandeur valides).
 
 ---
 
@@ -199,7 +215,8 @@ AFTER  restoreUIFromState: {... completed:true, profileKey:"offensif"}
 - **Quiz / scoring** : 5 clés HTML == `QUIZ_KEYS` ; chaque garde-fou (`panic_full`, `horizon_court`, `concentration`, `situation_precaire`, `panique_passee`, `surconfiance`) mappe correctement à son option ; `EXP_MAP` pénalise bien le vendeur-panique.
 
 ### Risques résiduels / points ouverts
-- **F-008 (reste) / F-009 / F-010 (tickers du guide d'achat)** non résolus (escaladés) : le tip `CW8` (faux, non-PEA) est corrigé, mais subsistent — `WPEA` (ASSETS) ↔ `DCAM`+ISIN (guide d'achat) pour le MSCI World ; or `GLD` (guide) vs `IGLN` (ASSETS) ; et les titres `MSFT/NVDA/ARTY` du guide d'achat (ancien modèle, absents du portefeuille ETF). **Risque résiduel principal**. `ASSETS.world` est lui-même en tension (ticker `WPEA` = iShares, mais desc « Amundi PEA Monde » = `DCAM`) → impossible à trancher sans décision produit + réécriture éditoriale. *(F-006 résolu ; CW8 résolu.)*
+- **Tickers (F-008/009/010) — RÉSOLUS** : MSCI World unifié sur `DCAM` (Amundi PEA Monde, web-vérifié), or sur `IGLN`, guide d'achat recalé sur le portefeuille réel. Plus de contradiction visible à l'achat.
+- **Code mort (placeholders masqués + sous-systèmes orphelins)** : seul « risque » résiduel, mais **inerte** — jamais affiché (`display:none` écrasé par le JS). Les placeholders contiennent encore des id consommés par le JS (`i-pf-*`, `i-donut-legend`, `i-allocation-detail`…) **qu'il ne faut pas supprimer** : un nettoyage nécessite de vider le *contenu* stale en **préservant ces id** → passe dédiée prudente, hors de cet audit chirurgical (un export reconstruit a déjà coûté une régression).
 - Le **satellite** « titres vifs » est **informatif** (ne modifie pas le donut/macro affichés) alors que la prose dit « prélevé sur les actions » — séparation cœur/option assumée, mais à clarifier si l'on veut refléter le prélèvement.
 - Tests via **jsdom** (sans layout/rendu réel) : la cohérence des **valeurs/câblage** est prouvée ; l'apparence pixel relève du brief design.
 

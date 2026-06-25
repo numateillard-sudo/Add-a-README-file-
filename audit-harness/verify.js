@@ -160,6 +160,19 @@ function driveProfile(key) {
   });
 })();
 
+// ── 6. Ticker consistency (F-008/009): single source ASSETS, no phantom tickers ──
+(() => {
+  const ASSETS = J('ASSETS');
+  const byId = Object.fromEntries(ASSETS.map(a => [a.id, a]));
+  check('world ticker == DCAM (Amundi PEA Monde, FR001400U5Q4)', byId.world.ticker === 'DCAM', byId.world.ticker);
+  check('gold ticker == IGLN', byId.gold.ticker === 'IGLN', byId.gold.ticker);
+  // rendered portfolio asset list must show the ASSETS tickers (not WPEA/GLD/etc.)
+  driveProfile('dynamique');
+  const alloc = (doc.getElementById('i-allocation-detail')||{}).innerHTML || '';
+  ['DCAM','MEUD','PAEEM','IEAG','IGLN'].forEach(t => check(`portfolio detail shows ${t}`, alloc.includes('>'+t+'<'), 'missing '+t));
+  ['WPEA','CW8','GLD','NVDA','ARTY'].forEach(t => check(`portfolio detail has NO phantom ${t}`, !alloc.includes('>'+t+'<'), 'found phantom '+t));
+})();
+
 // ── Summary ──
 console.log('================ VERIFICATION HARNESS ================');
 console.log('PASS: ' + PASS + '   FAIL: ' + FAIL);
