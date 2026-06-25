@@ -4891,6 +4891,61 @@ section[style*="padding:80px 0"] {
 .sat-more[open]>summary::before{content:"− "}
 .sat-more .sat-grid{margin-top:8px}
 </style>
+<style>
+/* ══════════ LÉGÈRETÉ — divulgation progressive (replis) ══════════
+   Strictement dans l'identité existante (palette/polices/composants).
+   Seule animation : la transition de hauteur du repli (fonctionnelle). */
+.lplr-fold { margin: 18px 0; }
+.lplr-fold-btn {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--paper); border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 15px 18px; cursor: pointer; text-align: left;
+  font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--ink);
+  box-shadow: var(--shadow-sm); transition: border-color .2s ease, background .2s ease;
+}
+.lplr-fold-btn:hover { border-color: var(--gold); background: var(--bg-deep); }
+.lplr-fold-btn:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+.lplr-fold.lplr-open > .lplr-fold-btn {
+  border-color: var(--gold);
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+}
+.lplr-fold-chevron { color: var(--gold-dark); font-size: 13px; flex-shrink: 0; width: 14px; text-align: center; }
+.lplr-fold-label { flex: 1; }
+.lplr-fold-hint {
+  font-family: var(--sans); font-weight: 600; font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); flex-shrink: 0;
+}
+.lplr-fold-region { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .34s cubic-bezier(.4,0,.2,1); }
+.lplr-fold.lplr-open > .lplr-fold-region { grid-template-rows: 1fr; }
+.lplr-fold-inner { overflow: hidden; min-height: 0; }
+/* le bloc replié garde son propre style ; petit espace sous le bouton, marge haute neutralisée */
+.lplr-fold-inner > * { margin-top: 8px; }
+
+/* Bouton « Tout déplier / replier » dans la stepper-bar */
+.lplr-allbtn {
+  margin-left: auto; align-self: center; white-space: nowrap;
+  font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted);
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 11px; cursor: pointer; transition: color .2s, border-color .2s, background .2s;
+}
+.lplr-allbtn:hover { color: var(--ink); border-color: var(--gold); background: var(--paper); }
+.lplr-allbtn:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+.stepper-bar .container-wide { display: flex; align-items: center; gap: 10px; }
+.stepper-bar .stepper { flex: 1; }
+
+/* Barre de progression de lecture (fine, sous la stepper-bar) */
+.lplr-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: transparent; pointer-events: none; }
+.lplr-progress-fill { height: 100%; width: 0; background: var(--gold-dark); transition: width .1s linear; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lplr-fold-region { transition: none; }
+  .lplr-progress-fill { transition: none; }
+}
+@media (max-width: 760px) {
+  .lplr-allbtn { padding: 5px 9px; font-size: 11px; }
+  .lplr-fold-btn { font-size: 15px; padding: 13px 15px; }
+}
+</style>
 </head>
 <body>
 
@@ -5968,7 +6023,7 @@ section[style*="padding:80px 0"] {
       </div>
 
       <!-- Concrètement -->
-      <div class="concrete-box-rich">
+      <div class="concrete-box-rich" data-lplr-fold="Le pas-à-pas concret pour passer à l’action — 7 étapes" data-lplr-key="concret">
         <div class="concrete-head">
           <div class="concrete-num">→</div>
           <strong>Concrètement, comment je fais ? (à dérouler tranquillement un samedi matin)</strong>
@@ -6071,7 +6126,7 @@ section[style*="padding:80px 0"] {
       </div>
 
       <!-- FAQ — questions qu'on n'ose pas poser -->
-      <div class="faq-block">
+      <div class="faq-block" data-lplr-fold="Les questions qu’on n’ose pas poser" data-lplr-key="faq">
         <div class="faq-head">
           <div class="faq-num">?</div>
           <div class="faq-head-text">
@@ -6697,7 +6752,7 @@ section[style*="padding:80px 0"] {
           <span><i style="background:#8B3030"></i>Pessimiste</span>
           <span><i class="dashed"></i>Capital versé</span>
         </div>
-        <aside class="book-note">
+        <aside class="book-note" data-lplr-fold="Une nuance sur le scénario pessimiste" data-lplr-key="note-nuance">
           <p><span class="bn-mark">Une nuance.</span>Les vraies crises — 2008, COVID, 2022 — sortent du modèle statistique : le scénario pessimiste affiché n’est <em>pas</em> le pire qui puisse arriver, juste un mauvais cas <em>probable</em>. Et quand ça craque, tout baisse en même temps — actions, obligations, immobilier — la diversification protège moins qu’on ne le croit à court terme. Cette fourchette est un guide raisonnable sur 25 ans ; sur 3, c’est de la devinette.</p>
         </aside>
       </div>
@@ -7089,7 +7144,7 @@ section[style*="padding:80px 0"] {
 
         <div class="chart-canvas-wrap" style="height: 320px;"><canvas id="i-chart-compare"></canvas></div>
 
-        <aside class="book-note">
+        <aside class="book-note" data-lplr-fold="À propos du « meilleur » rendement" data-lplr-key="note-meilleur">
           <p><span class="bn-mark">À propos du « meilleur ».</span>Le rendement moyen ne vaut rien si tu vends en panique. Voir son portefeuille passer de 100 000 € à 55 000 € en six mois — ça arrive (2008, mars 2020) — pousse la moitié des investisseurs à vendre au plus bas, transformant une baisse temporaire en perte définitive. Une stratégie modeste que tu tiens 25 ans bat <em>toujours</em> une stratégie théoriquement meilleure que tu lâches au bout de 18 mois.</p>
         </aside>
 
@@ -9884,4 +9939,119 @@ function setupPlanStepper() {
   <div class="ct-body" id="ct-body">Le bouton <strong>"Tout déplier"</strong> ouvre tous les actifs d’un coup. Pour passer commande chez ton courtier, note les <strong>tickers</strong> (ex. <em>DCAM</em> pour MSCI World).</div>
 </aside>
 
+<script>
+/* ════════════════════════════════════════════════════════════════════════════
+   LÉGÈRETÉ — divulgation progressive (replis) + navigation/progression
+   Additif et autonome : n'altère aucun contenu (les blocs sont PLIÉS, jamais
+   retirés du DOM). Persistance via le STATE existant (STATE.investor.folds),
+   donc cohérente avec STORAGE_KEY / schemaVersion. 1re visite = compact.
+   ════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  // ── Persistance : réutilise le STATE/saveState existants (aucun nouveau schéma) ──
+  function foldStore() {
+    // STATE est un `const` global (binding lexical), PAS une propriété de window → accès direct.
+    try { if (typeof STATE !== 'undefined' && STATE.investor) { STATE.investor.folds = STATE.investor.folds || {}; return STATE.investor.folds; } } catch (e) {}
+    return null;
+  }
+  function persist() { try { if (typeof saveState === 'function') saveState(); } catch (e) {} }
+  function readFold(key) { var s = foldStore(); return (s && key in s) ? !!s[key] : null; }
+  function writeFold(key, val, doPersist) { var s = foldStore(); if (s) { s[key] = val; if (doPersist) persist(); } }
+
+  // ── (Re)dimensionne les charts contenus dans un conteneur qu'on vient d'ouvrir ──
+  function resizeChartsIn(el) {
+    if (!(window.Chart && Chart.getChart)) return;
+    el.querySelectorAll('canvas').forEach(function (c) {
+      var ch = Chart.getChart(c);
+      if (ch) { try { setTimeout(function () { ch.resize(); }, 60); } catch (e) {} }
+    });
+  }
+
+  function setOpen(fold, open) {
+    fold.classList.toggle('lplr-open', open);
+    var btn = fold.querySelector('.lplr-fold-btn');
+    if (!btn) return;
+    btn.setAttribute('aria-expanded', String(open));
+    var chev = btn.querySelector('.lplr-fold-chevron'); if (chev) chev.textContent = open ? '▾' : '▸';
+    var hint = btn.querySelector('.lplr-fold-hint'); if (hint) hint.textContent = open ? 'Replier' : 'Déplier';
+  }
+
+  var folds = [];
+  function buildFold(target, idx) {
+    var label = target.getAttribute('data-lplr-fold') || 'Détail';
+    var key = target.getAttribute('data-lplr-key') || ('f' + idx);
+    var fold = document.createElement('section');
+    fold.className = 'lplr-fold'; fold.dataset.lplrKeyState = key;
+    var regionId = 'lplr-region-' + key;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'lplr-fold-btn';
+    btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', regionId);
+    btn.innerHTML = '<span class="lplr-fold-chevron" aria-hidden="true">▸</span>'
+      + '<span class="lplr-fold-label"></span>'
+      + '<span class="lplr-fold-hint" aria-hidden="true">Déplier</span>';
+    btn.querySelector('.lplr-fold-label').textContent = label;
+    var region = document.createElement('div'); region.className = 'lplr-fold-region'; region.id = regionId;
+    var inner = document.createElement('div'); inner.className = 'lplr-fold-inner';
+    // Insère le repli là où était la cible, puis déplace la cible DANS le repli (contenu conservé).
+    target.parentNode.insertBefore(fold, target);
+    fold.appendChild(btn); fold.appendChild(region); region.appendChild(inner); inner.appendChild(target);
+    target.removeAttribute('data-lplr-fold');
+    var saved = readFold(key);
+    setOpen(fold, saved != null ? saved : false); // 1re visite = replié
+    btn.addEventListener('click', function () {
+      var now = !fold.classList.contains('lplr-open');
+      setOpen(fold, now); writeFold(key, now, true);
+      if (now) resizeChartsIn(inner);
+    });
+    folds.push(fold);
+  }
+
+  function initFolds() {
+    [].slice.call(document.querySelectorAll('[data-lplr-fold]')).forEach(buildFold);
+  }
+
+  // ── Bouton « Tout déplier / replier » + barre de progression dans la stepper ──
+  function initStepperExtras() {
+    var bar = document.querySelector('.stepper-bar');
+    var wrap = bar && bar.querySelector('.container-wide');
+    if (wrap) {
+      var allBtn = document.createElement('button');
+      allBtn.type = 'button'; allBtn.className = 'lplr-allbtn';
+      allBtn.setAttribute('aria-label', 'Tout déplier ou tout replier');
+      allBtn.textContent = '⇕ Tout déplier';
+      var allOpen = false;
+      allBtn.addEventListener('click', function () {
+        allOpen = !allOpen;
+        folds.forEach(function (f) {
+          setOpen(f, allOpen);
+          writeFold(f.dataset.lplrKeyState, allOpen, false);
+          if (allOpen) resizeChartsIn(f.querySelector('.lplr-fold-inner'));
+        });
+        persist();
+        allBtn.textContent = allOpen ? '⇕ Tout replier' : '⇕ Tout déplier';
+      });
+      wrap.appendChild(allBtn);
+    }
+    if (bar) {
+      var prog = document.createElement('div'); prog.className = 'lplr-progress';
+      prog.innerHTML = '<div class="lplr-progress-fill"></div>';
+      bar.appendChild(prog);
+      var fill = prog.firstChild;
+      var upd = function () {
+        var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+        fill.style.width = (max > 0 ? Math.min(100, Math.max(0, window.scrollY / max * 100)) : 0).toFixed(1) + '%';
+      };
+      window.addEventListener('scroll', upd, { passive: true });
+      window.addEventListener('resize', upd, { passive: true });
+      upd();
+    }
+  }
+
+  function boot() { try { initFolds(); initStepperExtras(); } catch (e) { /* ne jamais casser la page */ } }
+  // Après l'init de l'app (setTimeout 0 => tick suivant), DOM prêt.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 0); });
+  else setTimeout(boot, 0);
+})();
+</script>
 </body></html>

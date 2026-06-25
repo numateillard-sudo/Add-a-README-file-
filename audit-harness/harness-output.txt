@@ -1,22 +1,18 @@
 ######## verify.js ########
-================ VERIFICATION HARNESS ================
 PASS: 135   FAIL: 0
 ALL CHECKS GREEN ✓
 ======================================================
 
 ######## smoke.js ########
-A. legacy migration still resets old format ✓
-B. full interaction sweep: zero console errors ✓ (charts created: 15)
-
-================ SMOKE TEST ================
 ALL SMOKE CHECKS GREEN ✓
 
 ######## render-behavior.js ########
-
 RENDER BEHAVIOR: 8 PASS / 0 FAIL ✓
 
-######## dead-code.js (après nettoyage Tier A) ########
-=== Top-level const(SCREAMING)/function declared but NEVER referenced elsewhere ===
+######## render-folds.js (légèreté) ########
+RENDER FOLDS: 16 PASS / 0 FAIL ✓
+
+######## dead-code.js ########
   none
 
 (total module-level names scanned: 100)
