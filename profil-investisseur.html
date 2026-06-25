@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil investisseur — Le Petit Livre Rouge</title>
+<meta name="description" content="Profil investisseur : 5 questions, un diagnostic honnête (capacité vs appétit), et le portefeuille recommandé parmi 4 — Prudent, Équilibré, Dynamique, Offensif.">
+<meta name="theme-color" content="#F5F1E8">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23B7202E'/%3E%3Ctext x='50' y='70' font-family='Georgia,serif' font-style='italic' font-size='52' font-weight='700' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#F5F1E8; --bg-section:#EFEAE0; --bg-deep:#E8DFC9;
+  --paper:#FFFFFF; --paper-soft:#FDFBF6;
+  --beige-hi:#F3E4C7; --beige-deep:#E8D2A6;
+  --gold:#B8893B; --gold-dark:#8B6520; --gold-pale:#F5E5C2;
+  --ink:#1A1612; --ink-soft:#3D352A; --muted:#8A7E6B; --muted-light:#B8AC95;
+  --border:#E5DDC8; --border-soft:#EDE5D2;
+  --green-bg:#D9E8C9; --green-text:#4A6B1F; --green-deep:#3A5418;
+  --blue-bg:#D6E2F0; --blue-text:#2C4D7A; --blue-deep:#1E3A5F;
+  --yellow-bg:#F2E2A8; --yellow-text:#7A5A15;
+  --red-bg:#F0D6D6; --red-text:#8B3030; --red-book:#B7202E; --red-book-deep:#8C1622;
+  --clay:#A4502A; --clay-bg:#F1DDD0;
+  --shadow-sm:0 1px 3px rgba(26,22,18,.05);
+  --shadow-md:0 4px 16px rgba(26,22,18,.08);
+  --shadow-lg:0 16px 44px rgba(26,22,18,.12);
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans); background:var(--bg); color:var(--ink);
+  font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+h1,h2,h3,h4{font-family:var(--serif); font-weight:700; line-height:1.18; letter-spacing:-.01em}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+::selection{background:var(--gold-pale); color:var(--ink)}
+
+.wrap{max-width:960px; margin:0 auto; padding:28px 22px 96px; min-height:100vh; display:flex; flex-direction:column}
+.masthead{display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1.5px solid var(--ink); margin-bottom:30px}
+.logo{width:34px; height:34px; border-radius:8px; background:var(--red-book); color:#fff; display:grid; place-items:center;
+  font-family:var(--serif); font-style:italic; font-weight:700; font-size:22px; flex:none}
+.brand{font-family:var(--serif); font-size:15px; font-weight:600; letter-spacing:.01em}
+.brand b{color:var(--red-book)}
+.brand span{display:block; font-family:var(--sans); font-size:12px; font-weight:500; color:var(--muted); letter-spacing:.04em; text-transform:uppercase}
+
+/* screens */
+.screen{display:none; animation:fade .35s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+/* buttons */
+.btn{font-family:var(--sans); font-size:15px; font-weight:600; border:1.5px solid var(--border); background:var(--paper);
+  color:var(--ink); border-radius:11px; padding:13px 22px; cursor:pointer; transition:all .16s ease; text-decoration:none; display:inline-flex; align-items:center; gap:9px}
+.btn:hover{border-color:var(--gold); background:var(--paper-soft)}
+.btn:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+.btn-primary{background:var(--red-book); border-color:var(--red-book); color:#fff}
+.btn-primary:hover{background:var(--red-book-deep); border-color:var(--red-book-deep)}
+.btn-ghost{background:transparent; border-color:transparent; color:var(--muted); padding:10px 14px}
+.btn-ghost:hover{background:var(--bg-section); color:var(--ink); border-color:transparent}
+
+/* INTRO */
+.intro{max-width:640px; margin:24px auto 0; text-align:center}
+.eyebrow{font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-dark); font-weight:700; margin-bottom:14px}
+.hero-title{font-size:clamp(30px,5.5vw,46px); line-height:1.06; margin-bottom:18px}
+.hero-title em{font-style:italic; color:var(--red-book)}
+.hero-sub{font-size:17px; color:var(--ink-soft); max-width:54ch; margin:0 auto 14px}
+.hero-note{font-size:14px; color:var(--muted); max-width:50ch; margin:0 auto 30px}
+.intro .btn-primary{font-size:16px; padding:15px 30px}
+.resume-card{margin:0 auto 24px; max-width:520px; background:var(--paper); border:1.5px solid var(--border); border-radius:14px;
+  padding:18px 20px; box-shadow:var(--shadow-sm); text-align:left; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.resume-card .rc-txt{flex:1; min-width:200px}
+.resume-card .rc-k{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700}
+.resume-card .rc-v{font-family:var(--serif); font-size:20px; font-weight:700}
+.resume-card .rc-d{font-size:12.5px; color:var(--muted)}
+.threecol{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:30px auto 0; max-width:600px; text-align:left}
+.tc{background:var(--paper-soft); border:1px solid var(--border-soft); border-radius:12px; padding:15px 16px}
+.tc b{font-family:var(--serif); font-size:15px; display:block; margin-bottom:3px}
+.tc p{font-size:13px; color:var(--muted); line-height:1.5}
+@media(max-width:620px){.threecol{grid-template-columns:1fr}}
+
+/* QUESTION */
+.qwrap{max-width:680px; margin:8px auto 0}
+.qprogress{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+.qcount{font-size:13px; font-weight:700; color:var(--gold-dark); letter-spacing:.04em}
+.qbar{height:6px; background:var(--bg-deep); border-radius:99px; overflow:hidden; margin-bottom:34px}
+.qbar-fill{height:100%; background:var(--red-book); border-radius:99px; transition:width .35s cubic-bezier(.4,0,.2,1)}
+.qnum{font-family:var(--mono); font-size:13px; color:var(--gold-dark); font-weight:600; margin-bottom:10px; display:block}
+.qtitle{font-size:clamp(23px,3.6vw,31px); line-height:1.2; margin-bottom:26px}
+.opts{display:flex; flex-direction:column; gap:12px; margin-bottom:30px}
+.opt{display:flex; align-items:center; gap:15px; width:100%; text-align:left; background:var(--paper); border:2px solid var(--border);
+  border-radius:13px; padding:16px 18px; cursor:pointer; font-family:var(--sans); font-size:16px; color:var(--ink); transition:all .14s ease}
+.opt:hover{border-color:var(--gold); background:var(--paper-soft); transform:translateX(2px)}
+.opt:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+.opt.selected{border-color:var(--red-book); background:linear-gradient(0deg,rgba(183,32,46,.05),rgba(183,32,46,.05)),var(--paper); box-shadow:var(--shadow-sm)}
+.opt-key{width:30px; height:30px; flex:none; border-radius:8px; background:var(--bg-section); color:var(--gold-dark);
+  font-family:var(--mono); font-weight:700; font-size:14px; display:grid; place-items:center; transition:all .14s ease}
+.opt.selected .opt-key{background:var(--red-book); color:#fff}
+.opt-label{flex:1; line-height:1.4}
+.qnav{display:flex; align-items:center; justify-content:space-between}
+.khint{font-size:12.5px; color:var(--muted-light)}
+.khint kbd{font-family:var(--mono); font-size:11px; background:var(--paper); border:1px solid var(--border); border-bottom-width:2px;
+  border-radius:5px; padding:1px 6px; color:var(--ink-soft); margin:0 1px}
+@media(max-width:560px){.khint{display:none}}
+
+/* RESULT */
+.result{max-width:880px; margin:0 auto}
+.verdict{background:var(--paper); border:1.5px solid var(--border); border-radius:18px; padding:28px 30px; box-shadow:var(--shadow-md);
+  margin-bottom:18px; position:relative; overflow:hidden}
+.verdict::before{content:""; position:absolute; inset:0 auto 0 0; width:6px; background:var(--vcolor,var(--gold))}
+.verdict-top{display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap}
+.verdict .vk{font-size:12.5px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); font-weight:700; margin-bottom:6px}
+.verdict .vbadge{font-family:var(--serif); font-size:clamp(32px,5vw,46px); font-weight:800; color:var(--vcolor,var(--gold-dark)); line-height:1}
+.verdict .vtag{display:inline-block; margin-top:10px; font-size:13px; font-weight:600; color:var(--ink-soft); background:var(--bg-section);
+  border-radius:99px; padding:5px 14px}
+.why{margin-top:18px; padding-top:18px; border-top:1px dashed var(--border); font-family:var(--serif); font-size:18px;
+  line-height:1.5; color:var(--ink); font-style:italic}
+.why::before{content:"« "; color:var(--gold)}
+.why::after{content:" »"; color:var(--gold)}
+
+.scoregrid{display:grid; grid-template-columns:1.1fr .9fr; gap:18px; margin-bottom:18px}
+@media(max-width:680px){.scoregrid{grid-template-columns:1fr}}
+.card{background:var(--paper); border:1.5px solid var(--border); border-radius:16px; padding:22px 24px; box-shadow:var(--shadow-sm)}
+.card h3{font-size:18px; margin-bottom:4px; display:flex; align-items:center; gap:9px}
+.card h3 .hn{font-family:var(--mono); font-size:11px; color:var(--gold-dark); border:1px solid var(--gold); border-radius:5px;
+  padding:1px 6px; font-weight:600}
+.card .csub{font-size:13px; color:var(--muted); margin-bottom:16px}
+
+.scorebars{display:flex; flex-direction:column; gap:13px}
+.sb{}
+.sb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
+.sb-label{font-size:14px; font-weight:600}
+.sb-val{font-family:var(--mono); font-size:13.5px; font-weight:700; color:var(--ink-soft)}
+.sb-track{height:11px; background:var(--bg-deep); border-radius:99px; overflow:hidden; display:flex; gap:3px; padding:2px}
+.sb-seg{flex:1; border-radius:99px; background:var(--border)}
+.sb-seg.on{background:var(--gold)}
+.sb.cap .sb-seg.on{background:var(--blue-text)}
+.sb.app .sb-seg.on{background:var(--clay)}
+.constraint{margin-top:16px; font-size:13.5px; color:var(--ink-soft); background:var(--beige-hi); border-radius:10px; padding:11px 14px; line-height:1.45}
+
+.radar-wrap{display:flex; flex-direction:column; align-items:center; gap:10px}
+.radar-wrap svg{max-width:230px; width:100%}
+.radar-legend{display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; font-size:12.5px; width:100%}
+.radar-legend div{display:flex; justify-content:space-between; color:var(--ink-soft)}
+.radar-legend b{font-family:var(--mono); color:var(--ink)}
+
+/* garde-fous */
+.gf-list{display:flex; flex-direction:column; gap:11px}
+.gf{display:flex; gap:13px; align-items:flex-start; background:var(--red-bg); border:1px solid #E8C4C4; border-radius:12px; padding:13px 16px}
+.gf .gf-ic{font-size:18px; line-height:1.3; flex:none}
+.gf .gf-b{flex:1}
+.gf .gf-t{font-weight:700; font-size:14.5px; color:var(--red-text); margin-bottom:2px; display:flex; gap:8px; align-items:baseline; flex-wrap:wrap}
+.gf .gf-cap{font-family:var(--mono); font-size:11px; font-weight:700; background:var(--red-book); color:#fff; border-radius:5px; padding:1px 6px}
+.gf .gf-x{font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+.gf-none{font-size:14px; color:var(--green-text); background:var(--green-bg); border:1px solid #C6DBB0; border-radius:12px; padding:13px 16px; font-weight:600}
+
+/* allocation table */
+.alloc{width:100%; border-collapse:collapse; font-size:14px}
+.alloc th,.alloc td{padding:10px 8px; text-align:left; border-bottom:1px solid var(--border-soft)}
+.alloc th{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700}
+.alloc td.num{font-family:var(--mono); font-weight:600; text-align:right; white-space:nowrap}
+.alloc .ligne{font-weight:500}
+.alloc .ticker{display:block; font-size:11.5px; color:var(--muted); font-family:var(--mono); margin-top:2px}
+.env{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border-radius:5px; padding:1px 6px; letter-spacing:.02em}
+.env.pea{background:var(--blue-bg); color:var(--blue-deep)}
+.env.av{background:var(--green-bg); color:var(--green-deep)}
+.env.cto{background:var(--beige-deep); color:var(--gold-dark)}
+.alloc tr.tot td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700; padding-top:12px}
+.alloc tr.tot.act td{color:var(--clay)}
+.alloc tr.tot.def td{color:var(--blue-text)}
+.alloc-note{font-size:12.5px; color:var(--muted); margin-top:12px; line-height:1.5}
+.alloc-note b{color:var(--ink-soft)}
+.bar-row{display:flex; height:14px; border-radius:7px; overflow:hidden; margin:16px 0 6px; border:1px solid var(--border)}
+.bar-row .seg{height:100%}
+.bar-leg{display:flex; gap:16px; font-size:12px; color:var(--muted); flex-wrap:wrap}
+.bar-leg span{display:flex; align-items:center; gap:5px}
+.bar-leg i{width:10px; height:10px; border-radius:3px; display:inline-block}
+
+/* risk sheet */
+.riskgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+@media(max-width:620px){.riskgrid{grid-template-columns:1fr 1fr}}
+.rstat{background:var(--paper-soft); border:1px solid var(--border-soft); border-radius:12px; padding:14px}
+.rstat .rk{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; margin-bottom:5px}
+.rstat .rv{font-family:var(--serif); font-size:25px; font-weight:800; color:var(--ink)}
+.rstat.loss .rv{color:var(--red-text)}
+.honesty{display:flex; flex-direction:column; gap:11px; margin-top:18px}
+.hcard{display:flex; gap:12px; align-items:flex-start; background:var(--bg-section); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; padding:12px 15px}
+.hcard .hi{font-size:16px; flex:none}
+.hcard .ht{font-size:13.5px; line-height:1.5; color:var(--ink-soft)}
+.hcard .ht b{color:var(--ink)}
+.assum{font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.5; padding-top:12px; border-top:1px dashed var(--border)}
+
+/* satellite */
+.sat-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px}
+.sat-w{font-family:var(--mono); font-weight:700; font-size:14px; background:var(--clay-bg); color:var(--clay); border-radius:7px; padding:3px 10px}
+.sat-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px}
+@media(max-width:680px){.sat-grid{grid-template-columns:1fr}}
+.sat-card{border:1px solid var(--border); border-radius:13px; padding:15px 16px; background:var(--paper-soft)}
+.sat-card .sc-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
+.sat-card .sc-name{font-family:var(--serif); font-size:17px; font-weight:700; display:flex; align-items:center; gap:7px}
+.sat-card .sc-meta{display:flex; gap:6px; align-items:center}
+.sat-card .sc-w{font-family:var(--mono); font-size:12px; font-weight:700; color:var(--clay)}
+.sat-card .row{font-size:12.5px; line-height:1.5; margin-top:6px; color:var(--ink-soft)}
+.sat-card .row .lab{font-weight:700; color:var(--muted); text-transform:uppercase; font-size:10.5px; letter-spacing:.05em; display:block}
+.sat-warn{margin-top:16px; display:flex; flex-direction:column; gap:9px}
+.sat-warn .w{display:flex; gap:10px; font-size:13px; line-height:1.5; align-items:flex-start; background:var(--yellow-bg); border-radius:10px; padding:10px 13px; color:var(--yellow-text)}
+.sat-warn .w b{color:#5C4410}
+
+.actions-bar{display:flex; gap:12px; justify-content:center; margin-top:30px; flex-wrap:wrap}
+.disclaimer{font-size:12px; color:var(--muted-light); text-align:center; max-width:60ch; margin:26px auto 0; line-height:1.5}
+
+.section-label{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--gold-dark); font-weight:700; margin:26px 0 12px}
+
+@media print{
+  .btn,.qnav,.actions-bar,.khint,.masthead .brand span{display:none!important}
+  body{background:#fff}
+  .card,.verdict{box-shadow:none; border-color:#ccc; break-inside:avoid}
+  .screen{display:block!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="logo">L</div>
+    <div class="brand"><b>Le Petit Livre Rouge</b> de l'investisseur
+      <span>Profil &amp; portefeuille</span>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- INTRO -->
+    <section class="screen" id="screen-intro">
+      <div class="intro">
+        <div class="eyebrow">Diagnostic en 5 questions</div>
+        <h1 class="hero-title">Quel investisseur <em>es-tu vraiment</em> ?</h1>
+        <p class="hero-sub">Cinq questions, deux minutes. On sépare ce que tu <b>peux</b> te permettre de ce que tu es <b>prêt</b> à supporter — et on retient le plus prudent des deux.</p>
+        <p class="hero-note">Pas de flatterie : si tu te crois Offensif mais que ton horizon dit non, on te le dira. À la sortie : ton profil, ton portefeuille ligne à ligne, le rendement et le risque attendus.</p>
+        <div id="resumeSlot"></div>
+        <button class="btn btn-primary" id="startBtn">Commencer le test →</button>
+        <div class="threecol">
+          <div class="tc"><b>Honnête</b><p>Le pire réflexe plafonne le profil. Un vendeur-paniqué reste Prudent.</p></div>
+          <div class="tc"><b>Concret</b><p>Une vraie question : −30 %, 10 000 € qui deviennent 7 000 €. Tu fais quoi ?</p></div>
+          <div class="tc"><b>Actionnable</b><p>Allocation exacte, enveloppes (PEA/AV/CTO), rendement &amp; perte max.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTION -->
+    <section class="screen" id="screen-question">
+      <div class="qwrap">
+        <div class="qprogress"><span class="qcount" id="qcount">Question 1 / 5</span></div>
+        <div class="qbar"><div class="qbar-fill" id="qbarFill" style="width:20%"></div></div>
+        <span class="qnum" id="qnum">01</span>
+        <h2 class="qtitle" id="qtitle"></h2>
+        <div class="opts" id="opts" role="radiogroup" aria-labelledby="qtitle"></div>
+        <div class="qnav">
+          <button class="btn btn-ghost" id="backBtn">← Retour</button>
+          <span class="khint"><kbd>↑</kbd><kbd>↓</kbd> choisir · <kbd>1</kbd>–<kbd>4</kbd> direct · <kbd>↵</kbd> valider · <kbd>←</kbd> retour</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="screen" id="screen-result">
+      <div class="result" id="resultBody"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════════
+   DONNÉES
+   ════════════════════════════════════════════════════════════════════ */
+const STORAGE_KEY = "plr-profil-investisseur-v1";
+const PROFILE_KEYS = ["Prudent","Équilibré","Dynamique","Offensif"]; // index 0..3 (= final-1)
+const PROFILE_COLOR = ["var(--blue-text)","var(--gold-dark)","var(--clay)","var(--red-book)"];
+
+const QUESTIONS = [
+  { key:"horizon", num:"01",
+    title:"Cet argent, dans combien de temps tu risques d'en avoir besoin ?",
+    opts:[
+      "Moins de 5 ans, ou je ne sais pas",
+      "5 à 8 ans",
+      "8 à 15 ans",
+      "Plus de 15 ans / je n'y touche pas",
+    ]},
+  { key:"tolerance", num:"02",
+    title:"Ton portefeuille perd 30 % en quelques semaines. 10 000 € deviennent 7 000 €. Tu fais quoi ?",
+    opts:[
+      "Je vends tout, je ne peux pas dormir",
+      "J'allège, je sécurise une partie",
+      "Je ne touche à rien, j'attends que ça remonte",
+      "J'en rachète — pour moi c'est les soldes",
+    ]},
+  { key:"poids", num:"03",
+    title:"Cet argent représente quelle part de ce que tu as ? Et as-tu un matelas de sécurité à côté (3 à 6 mois de dépenses) ?",
+    opts:[
+      "Presque tout, et pas de matelas",
+      "Une grosse part, matelas léger",
+      "Une part raisonnable, matelas en place",
+      "Une petite part, matelas confortable",
+    ]},
+  { key:"experience", num:"04",
+    title:"Les marchés, tu connais comment ?",
+    opts:[
+      "Débutant, je découvre",
+      "J'ai déjà investi… et j'ai vendu en panique pendant une baisse",
+      "J'ai déjà investi et je suis resté serein dans une baisse",
+      "Expérimenté, j'ai traversé plusieurs krachs sans broncher",
+    ]},
+  { key:"situation", num:"05",
+    title:"Ta situation financière — revenus, emploi — tu la sens comment ?",
+    opts:[
+      "Précaire / très variable, je ne sais pas de quoi demain sera fait",
+      "Correcte mais sans filet : un imprévu et ça tangue",
+      "Stable : revenus réguliers, emploi solide",
+      "Très solide : plusieurs sources, un coup dur ne menace pas cet argent",
+    ]},
+];
+
+const GARDE_FOUS = {
+  panic_full:        { max:1, court:"tu vendrais tout à −30 %",
+    texte:"Tu as indiqué que tu vendrais tout en cas de −30 %. Quelle que soit ta capacité, on plafonne à Prudent : le vrai risque, c'est de vendre au pire moment." },
+  horizon_court:     { max:2, court:"ton horizon est trop court",
+    texte:"Tu peux avoir besoin de cet argent dans moins de 5 ans. C'est trop court pour encaisser un krach : pas plus qu'Équilibré." },
+  concentration:     { max:2, court:"tu n'as ni marge ni matelas",
+    texte:"Cet argent est presque tout ce que tu as, sans matelas de sécurité. On limite à Équilibré tant qu'il n'y a pas de coussin à côté." },
+  situation_precaire:{ max:2, court:"ta situation est trop précaire",
+    texte:"Tes revenus sont instables. Pas plus qu'Équilibré : un coup dur ne doit pas te forcer à vendre au mauvais moment." },
+  panique_passee:    { max:2, court:"tu as déjà vendu en panique",
+    texte:"Tu as déjà vendu en panique pendant une baisse. Le comportement passé est le meilleur prédicteur : on reste à Équilibré au plus." },
+  surconfiance:      { max:3, court:"tu débutes et te crois invincible",
+    texte:"Débutant mais prêt à racheter dans un krach : facile à dire sur le papier. On plafonne à Dynamique, le temps de vivre une vraie baisse." },
+};
+
+// Allocation en % du total (sections G). vals = [Prudent, Équilibré, Dynamique, Offensif]
+const ALLOC_ROWS = [
+  { label:"ETF Monde — MSCI World",          env:"PEA", ticker:"Amundi PEA Monde / WPEA (ou IWDA hors PEA)", vals:[17.5,35.0,52.5,61.6], kind:"act" },
+  { label:"ETF Europe — Stoxx 600",          env:"PEA", ticker:"MEUD",  vals:[5.0,10.0,15.0,17.6], kind:"act" },
+  { label:"ETF Émergents — MSCI EM synth.",  env:"PEA", ticker:"PAEEM", vals:[2.5,5.0,7.5,8.8],    kind:"act" },
+  { label:"Fonds euro",                      env:"AV",  ticker:"celui de ton contrat", vals:[50,25,12,4], kind:"def" },
+  { label:"Obligations € agrégées",          env:"AV/CTO", ticker:"IEAG", vals:[22,20,10,6], kind:"def", noteIdx:0, note:"courtes" },
+  { label:"Or physique (ETC)",               env:"CTO/AV", ticker:"IGLN", vals:[3,5,3,2],   kind:"def" },
+];
+const TOT_ACTIONS  = [25,50,75,88];
+const TOT_DEFENSIF = [75,50,25,12];
+
+// Satellite (section H) — 6 % en Dynamique, 10 % en Offensif, équipondéré, ≤2 %/ligne
+const SAT_WEIGHT = { 2:6, 3:10 }; // index final-1 : 2=Dynamique, 3=Offensif
+const SATELLITE = [
+  { name:"ASML", flag:"🇳🇱", env:"PEA",
+    these:"Monopole de la lithographie EUV — le goulot unique de toute puce avancée.",
+    risque:"Cyclique ; contrôles export Chine ; concentration clients.",
+    valo:"Chère : P/E ~55-66 (fwd ~43), +121 % sur 1 an, haut de sa fourchette 10 ans → étaler l'entrée (12-18 mois)." },
+  { name:"TSMC", flag:"🇹🇼", env:"CTO",
+    these:"~70 % de la fonderie mondiale ; fabrique les puces de tout le monde.",
+    risque:"Taïwan (risque binaire, potentiellement catastrophique).",
+    valo:"La moins chère (~28×) ; décote géopolitique." },
+  { name:"Microsoft", flag:"🇺🇸", env:"CTO",
+    these:"La franchise méga-cap la plus durable ; IA additive, pas cannibale.",
+    risque:"Valorisation ; capex IA si le ROI déçoit.",
+    valo:"Raisonnable (~23×)." },
+  { name:"Mastercard", flag:"🇺🇸", env:"CTO",
+    these:"Duopole-péage sur le passage au sans-cash ; cross-border + services à valeur ajoutée.",
+    risque:"A2A / rails instantanés (le risque le plus crédible : part Visa/MC en Inde 43 %→21 % en 6 ans) → à pondérer petit.",
+    valo:"~29× (premium normal)." },
+  { name:"Hermès", flag:"🇫🇷", env:"PEA",
+    these:"Rareté organisée = pouvoir de prix, résistant aux récessions.",
+    risque:"Valorisation ; cyclicité du luxe ; succession.",
+    valo:"Dé-ratée −33 % sur 1 an (fwd ~34×) → meilleur point d'entrée qu'avant." },
+  { name:"Schneider Electric", flag:"🇫🇷", env:"PEA",
+    these:"Péage sur l'électrification / l'alimentation des datacenters (« l'IA a besoin d'énergie »).",
+    risque:"Cyclique (construction / industrie).",
+    valo:"Chère (fwd ~26×, +33 % sur 1 an, thème déjà dans le prix) → étaler l'entrée." },
+];
+const SAT_WARNINGS = [
+  { t:"ASML &amp; Schneider sont chers", x:"étale ton entrée sur 12-18 mois plutôt que tout d'un coup." },
+  { t:"Mastercard fait face à la disruption", x:"paiements A2A / instantanés — pondère petit, garde les yeux ouverts." },
+  { t:"TSMC porte le risque Taïwan", x:"binaire et potentiellement catastrophique — à assumer en connaissance de cause." },
+];
+
+// Fiches rendement / risque (section I) — index final-1
+const RISK = [
+  { rendement:"3,9 %",  vol:"4,0 %",  perte:"−10 %", sharpe:"0,29" },
+  { rendement:"5,1 %",  vol:"8,0 %",  perte:"−24 %", sharpe:"0,29" },
+  { rendement:"6,1 %",  vol:"11,6 %", perte:"−39 %", sharpe:"0,29" },
+  { rendement:"6,6 %",  vol:"13,6 %", perte:"−46 %", sharpe:"0,29" },
+];
+
+/* ════════════════════════════════════════════════════════════════════
+   MOTEUR DE SCORING (section E — reproduit à l'identique, vérifié)
+   ════════════════════════════════════════════════════════════════════ */
+function computeProfile(ans){
+  const { horizon, tolerance, poids, experience, situation } = ans;
+
+  // 1) APPÉTIT = tolérance (dominante) + expérience
+  const EXP_MAP = { 1:2, 2:1, 3:3, 4:4 };
+  const exp_lvl = EXP_MAP[experience];
+  const appetit = Math.round(0.65 * tolerance + 0.35 * exp_lvl);
+
+  // 2) CAPACITÉ = moyenne horizon + poids + situation
+  const capacite = Math.round((horizon + poids + situation) / 3);
+
+  // 3) PROFIL DE BASE = MIN des deux
+  const base = Math.min(appetit, capacite);
+
+  // 4) GARDE-FOUS DURS
+  const caps = [];
+  if (tolerance === 1)                    caps.push({ max:1, raison:"panic_full" });
+  if (horizon === 1)                      caps.push({ max:2, raison:"horizon_court" });
+  if (poids === 1)                        caps.push({ max:2, raison:"concentration" });
+  if (situation === 1)                    caps.push({ max:2, raison:"situation_precaire" });
+  if (experience === 2)                   caps.push({ max:2, raison:"panique_passee" });
+  if (experience === 1 && tolerance === 4) caps.push({ max:3, raison:"surconfiance" });
+
+  const final = Math.min(base, ...caps.map(c => c.max));
+
+  // garde-fous "déclenchés" (à afficher) = ceux qui descendent sous la capacité objective
+  const triggered = caps.filter(c => c.max < capacite).sort((a,b) => a.max - b.max);
+
+  return { appetit, capacite, base, final, caps, triggered };
+}
+
+function lowestCapacityFactor(ans){
+  const f = [
+    { v:ans.horizon,   t:"ton horizon" },
+    { v:ans.poids,     t:"le poids de cet argent dans ton patrimoine" },
+    { v:ans.situation, t:"ta situation financière" },
+  ];
+  const m = Math.min(...f.map(x => x.v));
+  const hit = f.filter(x => x.v === m).map(x => x.t);
+  if (hit.length === 1) return hit[0];
+  if (hit.length === 2) return hit[0] + " et " + hit[1];
+  return hit[0] + ", " + hit[1] + " et " + hit[2];
+}
+
+function buildWhy(r, ans){
+  const fp  = PROFILE_KEYS[r.final-1];
+  const capP = PROFILE_KEYS[r.capacite-1];
+  const appP = PROFILE_KEYS[r.appetit-1];
+
+  // Un garde-fou a-t-il abaissé le profil SOUS le MIN appétit/capacité ?
+  const binding = r.caps.filter(c => c.max < r.base).sort((a,b) => a.max - b.max)[0];
+  if (binding){
+    return `Ta capacité dit ${capP}, mais ${GARDE_FOUS[binding.raison].court} : on plafonne à ${fp}.`;
+  }
+  if (r.appetit < r.capacite){
+    const extra = r.triggered.length ? ` — ${GARDE_FOUS[r.triggered[0].raison].court}` : "";
+    return `Beau dossier, ta capacité permettrait ${capP}, mais c'est ton appétit qui commande${extra} : on s'en tient à ${fp}.`;
+  }
+  if (r.capacite < r.appetit){
+    return `Tu te sens ${appP}, mais ${lowestCapacityFactor(ans)} te place en ${capP} : on s'aligne sur ta capacité, ${fp}.`;
+  }
+  return `Appétit et capacité pointent tous les deux vers ${fp} : profil cohérent, rien à brider.`;
+}
+
+function constraintText(r){
+  if (r.appetit < r.capacite)
+    return "<b>C'est ton appétit qui te limite.</b> Tu pourrais te le permettre, mais tu ne le supporterais pas — et c'est le supportable qui prime.";
+  if (r.capacite < r.appetit)
+    return "<b>C'est ta capacité qui te limite.</b> L'envie de risque est là, mais ta situation ne suit pas (encore).";
+  return "<b>Appétit et capacité sont alignés.</b> Ce que tu peux et ce que tu supportes pointent au même endroit.";
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ÉTAT + PERSISTANCE
+   ════════════════════════════════════════════════════════════════════ */
+let answers = {};      // {horizon,tolerance,...}
+let current = 0;       // index question courante
+let focusIdx = 0;      // option focalisée au clavier
+
+function save(result){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      answers, result, date:new Date().toISOString()
+    }));
+  }catch(e){/* localStorage indisponible : on continue sans persistance */}
+}
+function load(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
+  catch(e){ return null; }
+}
+function clearSaved(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   NAVIGATION ÉCRANS
+   ════════════════════════════════════════════════════════════════════ */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function startTest(){
+  answers = {};
+  current = 0;
+  renderQuestion();
+  show("screen-question");
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ÉCRAN QUESTION
+   ════════════════════════════════════════════════════════════════════ */
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById("qcount").textContent = `Question ${current+1} / ${QUESTIONS.length}`;
+  document.getElementById("qbarFill").style.width = ((current+1)/QUESTIONS.length*100) + "%";
+  document.getElementById("qnum").textContent = q.num;
+  document.getElementById("qtitle").textContent = q.title;
+
+  const chosen = answers[q.key];                 // 1..4 ou undefined
+  focusIdx = chosen ? chosen-1 : 0;
+
+  const opts = document.getElementById("opts");
+  opts.innerHTML = "";
+  q.opts.forEach((label, i) => {
+    const b = document.createElement("button");
+    b.className = "opt" + (chosen === i+1 ? " selected" : "");
+    b.setAttribute("role","radio");
+    b.setAttribute("aria-checked", chosen === i+1 ? "true" : "false");
+    b.tabIndex = (i === focusIdx) ? 0 : -1;
+    b.innerHTML = `<span class="opt-key">${i+1}</span><span class="opt-label">${label}</span>`;
+    b.addEventListener("click", () => choose(i+1, true));
+    opts.appendChild(b);
+  });
+
+  document.getElementById("backBtn").style.visibility = current === 0 ? "hidden" : "visible";
+  focusOption(focusIdx);
+}
+
+function focusOption(i){
+  const list = document.querySelectorAll("#opts .opt");
+  if (!list.length) return;
+  focusIdx = Math.max(0, Math.min(list.length-1, i));
+  list.forEach((el, idx) => el.tabIndex = idx === focusIdx ? 0 : -1);
+  list[focusIdx].focus();
+}
+
+function choose(value, advance){
+  const q = QUESTIONS[current];
+  answers[q.key] = value;
+  // reflet visuel
+  document.querySelectorAll("#opts .opt").forEach((el, idx) => {
+    const on = idx === value-1;
+    el.classList.toggle("selected", on);
+    el.setAttribute("aria-checked", on ? "true" : "false");
+  });
+  if (advance){
+    setTimeout(() => {
+      if (current < QUESTIONS.length-1){ current++; renderQuestion(); }
+      else { finish(); }
+    }, 160);
+  }
+}
+
+function goBack(){
+  if (current > 0){ current--; renderQuestion(); }
+  else { show("screen-intro"); }
+}
+
+/* clavier sur l'écran question */
+function onQuestionKey(e){
+  if (!document.getElementById("screen-question").classList.contains("active")) return;
+  const k = e.key;
+  if (k === "ArrowDown" || k === "ArrowRight"){ e.preventDefault(); focusOption(focusIdx+1); }
+  else if (k === "ArrowUp"){ e.preventDefault(); focusOption(focusIdx-1); }
+  else if (k === "ArrowLeft" || k === "Backspace"){ e.preventDefault(); goBack(); }
+  else if (k === "Enter" || k === " "){ e.preventDefault(); choose(focusIdx+1, true); }
+  else if (["1","2","3","4"].includes(k)){ e.preventDefault(); focusIdx = +k-1; choose(+k, true); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   FIN DU TEST → RÉSULTAT
+   ════════════════════════════════════════════════════════════════════ */
+function finish(){
+  const r = computeProfile(answers);
+  save(r);
+  renderResult(r, answers);
+  show("screen-result");
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ÉCRAN RÉSULTAT (restitution conseiller — section J)
+   ════════════════════════════════════════════════════════════════════ */
+function fmt(v){ return String(v).replace(".", ","); }
+
+function radarSVG(cap, app, hor, conv){
+  // axes : haut = Capacité, droite = Appétit, bas = Horizon, gauche = Conviction
+  const c = 100, R = 78;
+  const pt = (val, ax) => {
+    const r = (val/4)*R;
+    if (ax === "top")    return [c, c-r];
+    if (ax === "right")  return [c+r, c];
+    if (ax === "bottom") return [c, c+r];
+    return [c-r, c]; // left
+  };
+  const poly = [pt(cap,"top"), pt(app,"right"), pt(hor,"bottom"), pt(conv,"left")]
+                 .map(p => p.map(n => n.toFixed(1)).join(",")).join(" ");
+  let rings = "";
+  for (let g=1; g<=4; g++){
+    const r = (g/4)*R;
+    rings += `<polygon points="${c},${c-r} ${c+r},${c} ${c},${c+r} ${c-r},${c}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+  }
+  const axes = `
+    <line x1="${c}" y1="${c-R}" x2="${c}" y2="${c+R}" stroke="var(--border)" stroke-width="1"/>
+    <line x1="${c-R}" y1="${c}" x2="${c+R}" y2="${c}" stroke="var(--border)" stroke-width="1"/>`;
+  return `<svg viewBox="0 0 200 210" role="img" aria-label="Profil sur 4 axes">
+    ${rings}${axes}
+    <polygon points="${poly}" fill="rgba(183,32,46,.14)" stroke="var(--red-book)" stroke-width="2"/>
+    ${[pt(cap,"top"),pt(app,"right"),pt(hor,"bottom"),pt(conv,"left")].map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="var(--red-book)"/>`).join("")}
+    <text x="${c}" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-soft)">Capacité</text>
+    <text x="195" y="${c+4}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink-soft)">Appétit</text>
+    <text x="${c}" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-soft)">Horizon</text>
+    <text x="5" y="${c+4}" text-anchor="start" font-size="11" font-weight="700" fill="var(--ink-soft)">Conviction</text>
+  </svg>`;
+}
+
+function scoreBar(label, val, cls){
+  let segs = "";
+  for (let i=1;i<=4;i++) segs += `<span class="sb-seg ${i<=val?"on":""}"></span>`;
+  return `<div class="sb ${cls}">
+    <div class="sb-head"><span class="sb-label">${label}</span><span class="sb-val">${val} / 4</span></div>
+    <div class="sb-track">${segs}</div></div>`;
+}
+
+function allocTable(idx){
+  let rows = "";
+  ALLOC_ROWS.forEach(row => {
+    const envClass = row.env.toLowerCase().includes("pea") ? "pea"
+                   : row.env.toLowerCase().startsWith("av") ? "av" : "cto";
+    let v = fmt(row.vals[idx]) + " %";
+    if (row.note !== undefined && row.noteIdx === idx) v += ` <span style="color:var(--muted);font-size:11px">(${row.note})</span>`;
+    rows += `<tr>
+      <td class="ligne">${row.label}<span class="ticker">${row.ticker}</span></td>
+      <td><span class="env ${envClass}">${row.env}</span></td>
+      <td class="num">${v}</td>
+    </tr>`;
+  });
+  return `<table class="alloc">
+    <thead><tr><th>Ligne</th><th>Enveloppe</th><th style="text-align:right">Poids</th></tr></thead>
+    <tbody>${rows}
+      <tr class="tot act"><td>Total actions</td><td></td><td class="num">${TOT_ACTIONS[idx]} %</td></tr>
+      <tr class="tot def"><td>Total défensif (fonds €/oblig/or)</td><td></td><td class="num">${TOT_DEFENSIF[idx]} %</td></tr>
+    </tbody></table>`;
+}
+
+function allocBar(idx){
+  const a = TOT_ACTIONS[idx], d = TOT_DEFENSIF[idx];
+  return `<div class="bar-row">
+      <div class="seg" style="width:${a}%;background:var(--clay)"></div>
+      <div class="seg" style="width:${d}%;background:var(--blue-text)"></div>
+    </div>
+    <div class="bar-leg">
+      <span><i style="background:var(--clay)"></i> Actions ${a} %</span>
+      <span><i style="background:var(--blue-text)"></i> Défensif ${d} %</span>
+      <span style="margin-left:auto">Moteur actions : Monde 70 / Europe 20 / Émergents 10</span>
+    </div>`;
+}
+
+function satelliteCard(idx){
+  const w = SAT_WEIGHT[idx];
+  if (!w) return "";
+  const per = w / SATELLITE.length;            // équipondéré
+  const perTxt = fmt((Math.round(per*100)/100)) + " %";
+  let cards = "";
+  SATELLITE.forEach(s => {
+    cards += `<div class="sat-card">
+      <div class="sc-top">
+        <span class="sc-name">${s.flag} ${s.name}</span>
+        <span class="sc-meta"><span class="env ${s.env==='PEA'?'pea':'cto'}">${s.env}</span><span class="sc-w">${perTxt}</span></span>
+      </div>
+      <div class="row"><span class="lab">La thèse (le péage)</span>${s.these}</div>
+      <div class="row"><span class="lab">Le risque (15 ans)</span>${s.risque}</div>
+      <div class="row"><span class="lab">Valorisation (juin 2026)</span>${s.valo}</div>
+    </div>`;
+  });
+  let warns = "";
+  SAT_WARNINGS.forEach(x => warns += `<div class="w">⚠️ <span><b>${x.t}</b> — ${x.x}</span></div>`);
+  return `<div class="card" style="margin-bottom:18px">
+    <div class="sat-head">
+      <h3><span class="hn">6</span> Satellite titres vifs</h3>
+      <span class="sat-w">${w} % du total · ${perTxt}/ligne</span>
+    </div>
+    <p class="csub">Supplément de conviction <b>plafonné</b>, pas le cœur. <b>Prélevé sur le moteur actions</b> (pas ajouté par-dessus), au prorata des blocs : les noms européens sur la poche Europe (PEA), les noms hors UE sur Monde/Émergents (CTO). Équipondéré, <b>≤ 2 %/ligne</b>, rééquilibrage annuel. Même en se trompant sur 2 noms, le plafond limite les dégâts.</p>
+    <div class="sat-grid">${cards}</div>
+    <div class="sat-warn">${warns}</div>
+  </div>`;
+}
+
+function gardeFousBlock(r){
+  if (!r.triggered.length){
+    return `<div class="gf-none">✓ Aucun garde-fou déclenché — aucune réponse ne plafonne ton profil sous ta capacité.</div>`;
+  }
+  let items = "";
+  r.triggered.forEach(c => {
+    const g = GARDE_FOUS[c.raison];
+    items += `<div class="gf">
+      <span class="gf-ic">🛑</span>
+      <div class="gf-b">
+        <div class="gf-t">${g.court.charAt(0).toUpperCase()+g.court.slice(1)} <span class="gf-cap">plafond ${PROFILE_KEYS[g.max-1]}</span></div>
+        <div class="gf-x">${g.texte}</div>
+      </div></div>`;
+  });
+  return `<div class="gf-list">${items}</div>`;
+}
+
+function renderResult(r, ans){
+  const idx = r.final - 1;
+  const profile = PROFILE_KEYS[idx];
+  const color = PROFILE_COLOR[idx];
+  const risk = RISK[idx];
+
+  const el = document.getElementById("resultBody");
+  el.innerHTML = `
+    <!-- 1 + 7 : Profil + pourquoi -->
+    <div class="verdict" style="--vcolor:${color}">
+      <div class="verdict-top">
+        <div>
+          <div class="vk">Profil retenu</div>
+          <div class="vbadge">${profile}</div>
+          <span class="vtag">Appétit ${r.appetit}/4 · Capacité ${r.capacite}/4</span>
+        </div>
+      </div>
+      <div class="why">${buildWhy(r, ans)}</div>
+    </div>
+
+    <!-- 2 : scores séparés + visuel -->
+    <div class="scoregrid">
+      <div class="card">
+        <h3><span class="hn">2</span> Appétit vs Capacité</h3>
+        <p class="csub">On regarde les deux séparément, on retient le plus contraignant.</p>
+        <div class="scorebars">
+          ${scoreBar("Capacité — ce que tu peux", r.capacite, "cap")}
+          ${scoreBar("Appétit — ce que tu supportes", r.appetit, "app")}
+        </div>
+        <div class="constraint">${constraintText(r)}</div>
+      </div>
+      <div class="card">
+        <h3>Ton profil en un coup d'œil</h3>
+        <p class="csub">Capacité · Appétit · Horizon · Conviction</p>
+        <div class="radar-wrap">
+          ${radarSVG(r.capacite, r.appetit, ans.horizon, ans.experience)}
+          <div class="radar-legend">
+            <div>Capacité <b>${r.capacite}/4</b></div>
+            <div>Appétit <b>${r.appetit}/4</b></div>
+            <div>Horizon <b>${ans.horizon}/4</b></div>
+            <div>Conviction <b>${ans.experience}/4</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 : garde-fous -->
+    <div class="card" style="margin-bottom:18px">
+      <h3><span class="hn">3</span> Garde-fous</h3>
+      <p class="csub">Les réponses qui plafonnent le profil, en clair.</p>
+      ${gardeFousBlock(r)}
+    </div>
+
+    <!-- 4 : portefeuille -->
+    <div class="card" style="margin-bottom:18px">
+      <h3><span class="hn">4</span> Ton portefeuille recommandé</h3>
+      <p class="csub">Trois enveloppes en parallèle. <b>PEA</b> plafonné à 150 000 € de versements.</p>
+      ${allocBar(idx)}
+      ${allocTable(idx)}
+      <p class="alloc-note"><b>Zéro high yield</b> sur tous les profils. ${idx===0?"Prudent dé-risqué : obligations <b>courtes</b>, or réduit. ":""}Tickers donnés à titre d'exemple — vérifie le code exact au moment de l'achat ; le fonds euro est celui de ton contrat.</p>
+    </div>
+
+    <!-- 6 : satellite (Dynamique / Offensif) -->
+    ${satelliteCard(idx)}
+
+    <!-- 5 : rendement / risque -->
+    <div class="card" style="margin-bottom:18px">
+      <h3><span class="hn">5</span> Rendement &amp; risque attendus</h3>
+      <p class="csub">Hypothèses prospectives, par matrice de covariance — pas une extrapolation du passé.</p>
+      <div class="riskgrid">
+        <div class="rstat"><div class="rk">Rendement / an</div><div class="rv">${risk.rendement}</div></div>
+        <div class="rstat"><div class="rk">Volatilité</div><div class="rv">${risk.vol}</div></div>
+        <div class="rstat loss"><div class="rk">Perte max type</div><div class="rv">${risk.perte}</div></div>
+        <div class="rstat"><div class="rk">Sharpe</div><div class="rv">${risk.sharpe}</div></div>
+      </div>
+      <div class="honesty">
+        <div class="hcard"><span class="hi">⚖️</span><span class="ht"><b>Sharpe identique (~0,29) sur les 4 profils.</b> L'échelle est sur une même frontière efficiente : on ne « gagne » pas en montant en risque, on déplace seulement le curseur rendement/volatilité.</span></div>
+        <div class="hcard"><span class="hi">📉</span><span class="ht"><b>La perte max dépend du régime de crise.</b> Type 2008 (krach actions, les obligations amortissent) vs type 2022 (actions <i>et</i> obligations baissent, seul le fonds euro tient). Le chiffre affiché = <b>le pire des deux</b>. Ne sous-estime pas le drawdown.</span></div>
+      </div>
+      <p class="assum">Hypothèses : actions développées 7 % · émergents 8 % · fonds euro 2,75 % · obligations 3,2 % · or 3,5 % · corrélation actions-obligations +0,15.</p>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn" onclick="window.print()">Imprimer / PDF</button>
+      <button class="btn btn-primary" id="restartBtn">↻ Refaire le test</button>
+    </div>
+    <p class="disclaimer">Outil pédagogique d'aide à la décision. Aucune recommandation personnalisée au sens réglementaire, aucun conseil en investissement. Les performances passées et les hypothèses prospectives ne préjugent pas des résultats futurs.</p>
+  `;
+
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    clearSaved();
+    startTest();
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ÉCRAN INTRO (reprise si profil sauvegardé)
+   ════════════════════════════════════════════════════════════════════ */
+function renderResume(saved){
+  const slot = document.getElementById("resumeSlot");
+  if (!saved || !saved.result){ slot.innerHTML = ""; return; }
+  const p = PROFILE_KEYS[saved.result.final-1];
+  let d = "";
+  try{ d = new Date(saved.date).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}); }catch(e){}
+  slot.innerHTML = `<div class="resume-card">
+    <div class="rc-txt">
+      <div class="rc-k">Ton dernier profil</div>
+      <div class="rc-v">${p}</div>
+      <div class="rc-d">${d?("calculé le "+d):""}</div>
+    </div>
+    <button class="btn" id="seeBtn">Revoir →</button>
+  </div>`;
+  document.getElementById("seeBtn").addEventListener("click", () => {
+    answers = saved.answers || {};
+    renderResult(saved.result, answers);
+    show("screen-result");
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════════════════ */
+document.getElementById("startBtn").addEventListener("click", startTest);
+document.getElementById("backBtn").addEventListener("click", goBack);
+document.addEventListener("keydown", onQuestionKey);
+
+(function init(){
+  const saved = load();
+  if (saved && saved.result){
+    renderResume(saved);
+    answers = saved.answers || {};
+    renderResult(saved.result, answers);
+    show("screen-result");          // au rechargement, on garde le profil (critère 9)
+  } else {
+    show("screen-intro");
+  }
+})();
+</script>
+</body>
+</html>
