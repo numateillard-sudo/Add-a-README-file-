@@ -7189,16 +7189,6 @@ function loadState() {
   }
 }
 
-// ── Feature 1 : réinitialisation totale (bouton discret dans le footer) ──
-function resetAllData() {
-  if (!confirm('Tout réinitialiser ?\n\nTon budget et ton profil seront effacés définitivement. Le document repartira comme une première visite.')) return;
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
-  } catch(e) { /* silence */ }
-  location.reload();
-}
-
 // ── Feature 1 : toast discret "Bon retour" (auto-disparition à 5 s) ──
 function showWelcomeBack() {
   const el = document.getElementById('lplr-welcome-toast');
@@ -7229,7 +7219,6 @@ function fmtS(n) {
   return fmt(n);
 }
 function pct(n)  { return Math.round(n) + '%'; }
-function pctF(n) { return (Math.round(n*10)/10).toFixed(1).replace('.',',') + '%'; }
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 // Map env string to CSS pill class (PEA=green, CTO=blue, AV=gold, CTO/AV=mixed)
 // Convention canonique = 'CTO/AV'. On accepte aussi 'AV/CTO' par robustesse, pour
@@ -7298,25 +7287,7 @@ document.addEventListener('click', e => {
   t.firstChild && (t.firstChild.textContent = details.classList.contains('open') ? '▾ Détail : quel actif va où' : '▸ Détail : quel actif va où');
 });
 function setHTML(id, v) { const el = document.getElementById(id); if (el) el.innerHTML = v; }
-function getSum(cls) {
-  return Array.from(document.querySelectorAll('.'+cls))
-    .reduce((s, el) => s + (parseFloat(el.value) || 0), 0);
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   ███████  MODULE BUDGET (Chapitre I)  ███████
-   ════════════════════════════════════════════════════════════════════════════ */
-
-const SEG = {
-  fixed:  { label:'Charges fixes',     desc:'Loyer, abonnements, assurances', color:'#B7202E' },
-  var:    { label:'Dépenses variables', desc:'Alimentation, transport, santé', color:'#D97B2A' },
-  debt:   { label:'Dettes & emprunts',  desc:'Mensualités de remboursement',   color:'#C4940A' },
-  fun:    { label:'Plaisir & loisirs',  desc:'Restaurants, sorties, voyages',  color:'#4A6FA5' },
-  invest: { label:'Épargne & invest.',  desc:'Livret A, ETF, assurance-vie',   color:'#2D7D46' }
-};
-
-let budgetDonut = null;
-let budgetSegsRef = [];
+// (Module Budget retiré : ce document est le seul chapitre « Portefeuille ».)
 
 </script>
 <script>
@@ -7408,49 +7379,6 @@ let investorDonut = null;
 //  Plus de jauge spectrum, plus de STOPs : caps internes dans le scoring.
 // ═══════════════════════════════════════════════════════════════════════
 
-const QUIZ_KEYS = ['horizon', 'tolerance', 'poids', 'experience', 'situation'];
-
-const PROFILE_TAGLINES_Q = {
-  prudent:   "Préserver d'abord. Croissance modérée, sommeil tranquille.",
-  equilibre: "Croissance saine, baisses tempérées. Le juste milieu.",
-  dynamique: "Croissance long terme avec garde-fous. Patience récompensée.",
-  offensif:  "Rendement maximum, secousses assumées. Pour les ventres solides."
-};
-
-// ─── Phrase comportementale (le mirror moment, en une ligne)
-const PROFILE_KEYPHRASES = {
-  prudent:   "Tu es le type qui dort tranquille — et c'est ta force.",
-  equilibre: "Tu es le type qui veut faire fructifier sans devenir trader.",
-  dynamique: "Tu es le type qui vise 15-20 ans, mais qui vérifie son app trop souvent.",
-  offensif:  "Tu es le type qui a accepté les secousses contre le rendement composé."
-};
-
-// ─── Signature : 3 axes calculés EN LIVE à partir des réponses individuelles du quiz (Feature 2) ───
-// Remplace l'ancien PROFILE_AXES (valeurs cosmétiques hardcodées par profil, désormais supprimé).
-// Les axes sont une LECTURE des réponses — ils ne touchent pas à quizDetermineProfile().
-function clamp100(v) { return Math.max(0, Math.min(100, Math.round(v))); }
-
-// answers = { horizon, tolerance, poids, experience } (valeurs 1..4)
-function computeProfileAxes(answers) {
-  const tol = +answers.tolerance, exp = +answers.experience, hor = +answers.horizon, poids = +answers.poids, situ = +answers.situation;
-  const EXP_MAP = { 1: 2, 2: 1, 3: 3, 4: 4 };
-  const appetit = Math.round(0.65 * tol + 0.35 * (EXP_MAP[exp] || 2));
-  const capacite = Math.round((hor + poids + situ) / 3);
-  return {
-    capacite:   clamp100(capacite / 4 * 100),
-    appetit:    clamp100(appetit / 4 * 100),
-    horizon:    clamp100((hor || 0) / 4 * 100),
-    conviction: clamp100((exp || 0) / 4 * 100)
-  };
-}
-
-// Mini-commentaire interprétatif affiché sous chaque barre.
-function axisComment(axis, v) {
-  if (axis === 'capacite') { if (v >= 75) return 'Ta situation peut encaisser le risque.'; if (v >= 50) return 'Une capacité correcte, sans excès.'; return 'Capacité limitée : horizon, poids ou situation te bride.'; }
-  if (axis === 'appetit')  { if (v >= 75) return 'Tu encaisses les chutes sans broncher.'; if (v >= 50) return 'Tu tiens, mais une grosse claque te testerait.'; return 'Tu sais que tu vendrais en panique — on en tient compte.'; }
-  if (axis === 'horizon')  { if (v >= 75) return 'Le temps joue clairement pour toi.'; if (v >= 50) return 'Un horizon correct pour lisser les à-coups.'; return 'Horizon court : la Bourse devient un pari.'; }
-  if (v >= 75) return 'Tu as déjà traversé des baisses sans lâcher.'; if (v >= 50) return 'Une expérience réelle des marchés.'; return 'Débutant : prudence le temps de te faire la main.';
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 //  MOTEUR QUANTITATIF — une seule source de vérité.
@@ -7504,14 +7432,6 @@ const PROFILE_MENTIONS = {
   offensif:  "Minorité — du courage et un coussin d'urgence solide"
 };
 
-const PROFILE_NOTES_Q = {
-  panic_full:         "Tu as dit que tu vendrais tout à −30 %. Quelle que soit ta capacité, on plafonne à Prudent : le vrai risque, c'est de vendre au pire moment.",
-  horizon_court:      "Horizon court (moins de 5 ans) : trop court pour encaisser un krach. Pas plus qu'Équilibré.",
-  concentration:      "Cet argent est presque tout ce que tu as, sans matelas. On limite à Équilibré tant qu'il n'y a pas de coussin à côté.",
-  situation_precaire: "Situation financière précaire : pas plus qu'Équilibré, un coup dur ne doit pas te forcer à vendre au mauvais moment.",
-  panique_passee:     "Tu as déjà vendu en panique dans une baisse. Le comportement passé est le meilleur prédicteur : on reste à Équilibré au plus.",
-  surconfiance:       "Débutant mais prêt à racheter dans un krach : facile à dire sur le papier. On plafonne à Dynamique, le temps de vivre une vraie baisse."
-};
 const GARDE_FOU_SHORT = {
   panic_full: "tu vendrais tout à −30 %",
   horizon_court: "ton horizon est trop court",
@@ -7520,30 +7440,12 @@ const GARDE_FOU_SHORT = {
   panique_passee: "tu as déjà vendu en panique",
   surconfiance: "tu débutes et te crois invincible"
 };
-const GARDE_FOU_TITLE = {
-  panic_full: "Tu vendrais tout à −30 %",
-  horizon_court: "Horizon court (< 5 ans)",
-  concentration: "Tout dedans, pas de matelas",
-  situation_precaire: "Situation précaire",
-  panique_passee: "Déjà vendu en panique",
-  surconfiance: "Débutant très sûr de lui"
-};
-
-const PROFILE_ALLOCATION_Q = {
-  prudent:   { actions: 25, bonds: 72, gold: 3 },
-  equilibre: { actions: 50, bonds: 45, gold: 5 },
-  dynamique: { actions: 75, bonds: 22, gold: 3 },
-  offensif:  { actions: 88, bonds: 10, gold: 2 }
-};
-
-const PROFILE_RATE_Q = {}; // dérivé du moteur (rempli avec PROFILE_STATS ci-dessous)
 
 // Statistiques par profil — DÉRIVÉES du moteur (source unique de vérité).
 const PROFILE_STATS = {};
 ['prudent','equilibre','dynamique','offensif'].forEach(k => {
   const s = computeStats(PRESETS[k]);
   PROFILE_STATS[k] = { rate: s.geo, arith: s.arith, vol: s.vol, drawdown: s.drawdown, sharpe: s.sharpe };
-  PROFILE_RATE_Q[k] = s.geo / 100;
 });
 // Propage les chiffres calculés vers les libellés affichés (PROFILES) et le stress-test.
 (function(){
@@ -7715,73 +7617,6 @@ function pcrBar(label, val, cls) {
   let segs = '';
   for (let i = 1; i <= 4; i++) segs += `<span class="sb-seg ${i <= val ? 'on' : ''}"></span>`;
   return `<div class="sb ${cls}"><div class="sb-head"><span class="sb-label">${label}</span><span class="sb-val">${val} / 4</span></div><div class="sb-track">${segs}</div></div>`;
-}
-// ─── Carte « Pour aller plus loin » : ce qui te bride + le levier vers le palier au-dessus ───
-const LEVER_BRAKE = {
-  panic_full:         "tu vendrais tout en cas de −30 %",
-  horizon_court:      "ton horizon est court (moins de 5 ans)",
-  concentration:      "cet argent est presque tout ce que tu as, sans matelas",
-  situation_precaire: "ta situation financière est encore fragile",
-  panique_passee:     "tu as déjà vendu en panique dans une baisse",
-  surconfiance:       "tu débutes — facile de se croire solide avant la première vraie baisse"
-};
-const LEVER_RELAX = {
-  panic_full:         "t'entraîner à ne pas vendre quand ça chute (c'est LE réflexe qui coûte cher)",
-  horizon_court:      "pouvoir laisser cet argent plus longtemps — 8 ans et plus",
-  concentration:      "te constituer un matelas de sécurité (3 à 6 mois de dépenses) à côté",
-  situation_precaire: "stabiliser tes revenus ou ton emploi",
-  panique_passee:     "traverser la prochaine baisse sans vendre — l'expérience jouera pour toi",
-  surconfiance:       "vivre une vraie baisse en gardant ton sang-froid (le plafond saute ensuite)"
-};
-const LEVER_CAP_BRAKE = {
-  horizon:   "ton horizon est un peu court pour viser plus haut",
-  poids:     "cet argent pèse lourd dans ton patrimoine",
-  situation: "ta situation financière gagnerait à être plus solide"
-};
-const LEVER_CAP_RELAX = {
-  horizon:   "allonger ton horizon — laisser cet argent travailler plus longtemps",
-  poids:     "alléger le poids de cet argent, ou te bâtir un matelas à côté",
-  situation: "consolider ta situation (revenus, emploi, épargne de précaution)"
-};
-function lowestCapKey(a) {
-  const f = [['horizon', +a.horizon], ['poids', +a.poids], ['situation', +a.situation]];
-  f.sort((x, y) => x[1] - y[1]);
-  return f[0][0];
-}
-function cap1(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-function buildLever(det, a) {
-  let body;
-  if (det.final >= 4) {
-    body = `<div class="lever-line max"><span class="lever-ic">🏔️</span><div><b>Tu es déjà au maximum (Offensif).</b><span class="lever-sub">Rien ne te bride : ce profil colle à ta situation et à ton tempérament. Le vrai travail, désormais, c'est de tenir le cap quand ça baisse.</span></div></div>`;
-  } else {
-    const next = PROFILE_NAME_BY_LEVEL[det.final + 1];
-    const bindGf = det.caps.find(c => c.max === det.final);
-    let brake, lever;
-    if (bindGf) {
-      brake = LEVER_BRAKE[bindGf.raison]; lever = LEVER_RELAX[bindGf.raison];
-    } else {
-      const capBinds = det.capacite === det.final, appBinds = det.appetit === det.final;
-      if (appBinds && !capBinds) {
-        brake = "c'est ton appétit qui plafonne — ce que tu te sens de supporter";
-        lever = "gagner en sérénité face aux baisses : avec l'expérience, et en te prouvant que tu tiens sans vendre";
-      } else if (capBinds && !appBinds) {
-        const k = lowestCapKey(a); brake = LEVER_CAP_BRAKE[k]; lever = LEVER_CAP_RELAX[k];
-      } else {
-        brake = "appétit et capacité sont pile au même niveau";
-        lever = "renforcer les deux à la fois : un horizon et un matelas plus solides, et plus d'aisance dans les baisses";
-      }
-    }
-    body = `<div class="lever-line"><span class="lever-ic">🔒</span><div><span class="lever-k">Ce qui te bride</span>${cap1(brake)}.</div></div>
-            <div class="lever-line up"><span class="lever-ic">↗</span><div><span class="lever-k">Pour viser ${next}</span>${cap1(lever)}.</div></div>`;
-  }
-  if (det.triggered.length) {
-    body += `<details class="lever-more"><summary>Pourquoi ce plafond ?</summary>` +
-      det.triggered.map(c =>
-        `<div class="gf"><span class="gf-ic">🛑</span><div class="gf-b"><div class="gf-t">${GARDE_FOU_TITLE[c.raison]} <span class="gf-cap">plafond ${PROFILE_NAME_BY_LEVEL[c.max]}</span></div><div class="gf-x">${PROFILE_NOTES_Q[c.raison]}</div></div></div>`
-      ).join('') + `</details>`;
-  }
-  return body;
 }
 
 const PROFILE_COLOR_BY_LEVEL = { 1: '#1E3A5F', 2: '#8B6520', 3: '#A4502A', 4: '#B7202E' };
@@ -7972,11 +7807,6 @@ function quizInit() {
   quizUpdateProgress();
 }
 
-// ─── Alias backward-compat ───
-function investorComputeProfile() { /* no-op : la logique est dans quizAnswer/quizShowResult */ }
-function quizUpdateMeter() { /* no-op : jauge supprimée */ }
-function quizComputeMeterScore() { return 0.5; /* legacy no-op */ }
-function quizShowStop(_) { /* no-op : remplacé par caps internes */ }
 
 function updatePortfolioProjection() {
   if (!STATE.investor.profile) return;
@@ -9034,22 +8864,6 @@ function switchMode(mode) {
     if (mode === 'compare' && compareChart) compareChart.resize();
   }, 50);
   saveState();
-}
-
-function resetQuiz() {
-  if (!confirm("Refaire le quiz ? Tes réponses seront effacées.")) return;
-  quizReset();
-}
-
-function investorAnswerQuestion(qKey, val) {
-  STATE.investor.answers[qKey] = val;
-  const q = document.querySelector(`.question[data-question="${qKey}"]`);
-  q.querySelectorAll('.opt').forEach(o => o.classList.toggle('selected', +o.dataset.val === val));
-  q.classList.add('answered');
-  const count = Object.keys(STATE.investor.answers).length;
-  setText('i-progress-count', count);
-  document.getElementById('i-progress-bar').style.width = (count/5*100) + '%';
-  investorComputeProfile();
 }
 
 function investorToggleNotion(card) {
