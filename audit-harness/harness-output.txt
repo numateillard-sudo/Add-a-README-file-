@@ -1,16 +1,27 @@
 ######## verify.js ########
+================ VERIFICATION HARNESS ================
 PASS: 135   FAIL: 0
 ALL CHECKS GREEN ✓
 ======================================================
 
 ######## smoke.js ########
-ALL SMOKE CHECKS GREEN ✓
+ALL SMOKE CHECKS GREEN ✓  (charts créés: 15, 0 erreur console)
 
 ######## render-behavior.js ########
 RENDER BEHAVIOR: 8 PASS / 0 FAIL ✓
 
-######## render-folds.js (légèreté) ########
-RENDER FOLDS: 16 PASS / 0 FAIL ✓
+######## render-folds.js (légèreté — niveau section) ########
+RENDER FOLDS (sections): 20 PASS / 0 FAIL ✓
+
+######## measure-height.js (preuve avant/après, viewport 1180×900) ########
+1er chargement (aucun profil) :
+  • DÉFAUT  (sections repliées) : 2608 px  (2.9 écrans)
+  • DÉPLOYÉ (tout ouvert)       : 5565 px  (6.2 écrans)
+  → repli = −53 % de hauteur
+Profil complété (allocation révélée) :
+  • DÉFAUT  (sections repliées) : 3836 px  (4.3 écrans)
+  • DÉPLOYÉ (tout ouvert)       : 11852 px  (13.2 écrans)
+  → repli = −68 % de hauteur
 
 ######## dead-code.js ########
   none

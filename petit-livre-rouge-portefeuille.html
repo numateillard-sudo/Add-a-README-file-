@@ -4921,6 +4921,21 @@ section[style*="padding:80px 0"] {
 /* le bloc replié garde son propre style ; petit espace sous le bouton, marge haute neutralisée */
 .lplr-fold-inner > * { margin-top: 8px; }
 
+/* ── Repli au niveau SECTION : affordance principale de lecture ──
+   Plus marqué que les replis de bloc (liseré doré, taille), reste dans l'identité. */
+.lplr-fold.lplr-section { margin: 6px 0 30px; }
+.lplr-section-btn {
+  border-width: 1.5px; border-left: 4px solid var(--gold-dark);
+  background: var(--bg-section); padding: 18px 22px; font-size: 17px; border-radius: 12px; gap: 14px;
+}
+.lplr-section-btn:hover { background: var(--paper); border-color: var(--gold); border-left-color: var(--gold); }
+.lplr-fold.lplr-section.lplr-open > .lplr-section-btn {
+  border-color: var(--gold); border-left-color: var(--gold-dark);
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+}
+.lplr-section-btn .lplr-fold-chevron { font-size: 15px; }
+.lplr-section-btn .lplr-fold-hint { color: var(--gold-dark); }
+
 /* Bouton « Tout déplier / replier » dans la stepper-bar */
 .lplr-allbtn {
   margin-left: auto; align-self: center; white-space: nowrap;
@@ -4944,6 +4959,7 @@ section[style*="padding:80px 0"] {
 @media (max-width: 760px) {
   .lplr-allbtn { padding: 5px 9px; font-size: 11px; }
   .lplr-fold-btn { font-size: 15px; padding: 13px 15px; }
+  .lplr-section-btn { font-size: 16px; padding: 15px 16px; }
 }
 </style>
 </head>
@@ -5048,7 +5064,7 @@ section[style*="padding:80px 0"] {
 </section>
 
 <!-- ══ I-SEC 1 : LES BASES ══ -->
-<section id="i-sec1">
+<section id="i-sec1" data-lplr-section="Lire les 6 notions" data-lplr-key="sec-notions">
   <div class="container">
     <div class="section-head reveal visible">
       <p class="section-eyebrow">Étape 1</p>
@@ -5159,7 +5175,7 @@ section[style*="padding:80px 0"] {
 </section>
 
 <!-- ══ ENVELOPPES FISCALES (entre Chap II et Chap III) ══ -->
-<section class="envelopes-section">
+<section class="envelopes-section" data-lplr-section="Comparer les 3 enveloppes (PEA · CTO · Assurance-vie)" data-lplr-key="sec-fisc">
   <div class="container">
     <div class="envelopes-intro">
       <h3 class="envelopes-intro-title">Où mettre ton argent — <em>les 3 enveloppes fiscales</em></h3>
@@ -5270,7 +5286,7 @@ section[style*="padding:80px 0"] {
 </section>
 
 <!-- ══ I-SEC 2 : PROFIL (step-by-step + jauge live) ══ -->
-<section id="i-sec2" style="background:var(--bg-section);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+<section id="i-sec2" data-lplr-section="Répondre aux 5 questions" data-lplr-key="sec-profil" style="background:var(--bg-section);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="container">
     <div class="section-head reveal visible">
       <p class="section-eyebrow">Étape 2</p>
@@ -5506,7 +5522,7 @@ section[style*="padding:80px 0"] {
 </section>
 
 <!-- ══ I-SEC 3 : PORTEFEUILLE ══ -->
-<section id="i-sec3">
+<section id="i-sec3" data-lplr-section="Voir le détail de mon portefeuille" data-lplr-key="sec-alloc">
   <div class="container">
     <div class="section-head reveal visible">
       <p class="section-eyebrow">Étape 3</p>
@@ -6236,7 +6252,7 @@ section[style*="padding:80px 0"] {
 </section>
 
 <!-- ══ I-SEC 4 : SIMULATION ══ -->
-<section id="i-sec4" style="background:var(--bg-section);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+<section id="i-sec4" data-lplr-section="Ouvrir le simulateur" data-lplr-key="sec-simu" style="background:var(--bg-section);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="container">
     <div class="section-head reveal visible">
       <p class="section-eyebrow">Étape 4</p>
@@ -9978,14 +9994,14 @@ function setupPlanStepper() {
   }
 
   var folds = [];
-  function buildFold(target, idx) {
-    var label = target.getAttribute('data-lplr-fold') || 'Détail';
-    var key = target.getAttribute('data-lplr-key') || ('f' + idx);
-    var fold = document.createElement('section');
-    fold.className = 'lplr-fold'; fold.dataset.lplrKeyState = key;
+
+  // Fabrique la coquille d'un repli (bouton + région animée + inner). Ne déplace rien.
+  function makeShell(label, key, extraClass) {
+    var fold = document.createElement('div');
+    fold.className = 'lplr-fold' + (extraClass ? ' ' + extraClass : ''); fold.dataset.lplrKeyState = key;
     var regionId = 'lplr-region-' + key;
     var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'lplr-fold-btn';
+    btn.type = 'button'; btn.className = 'lplr-fold-btn' + (extraClass ? ' ' + extraClass + '-btn' : '');
     btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', regionId);
     btn.innerHTML = '<span class="lplr-fold-chevron" aria-hidden="true">▸</span>'
       + '<span class="lplr-fold-label"></span>'
@@ -9993,22 +10009,69 @@ function setupPlanStepper() {
     btn.querySelector('.lplr-fold-label').textContent = label;
     var region = document.createElement('div'); region.className = 'lplr-fold-region'; region.id = regionId;
     var inner = document.createElement('div'); inner.className = 'lplr-fold-inner';
-    // Insère le repli là où était la cible, puis déplace la cible DANS le repli (contenu conservé).
-    target.parentNode.insertBefore(fold, target);
-    fold.appendChild(btn); fold.appendChild(region); region.appendChild(inner); inner.appendChild(target);
-    target.removeAttribute('data-lplr-fold');
+    fold.appendChild(btn); fold.appendChild(region); region.appendChild(inner);
+    return { fold: fold, btn: btn, inner: inner };
+  }
+  function wireShell(s, key) {
     var saved = readFold(key);
-    setOpen(fold, saved != null ? saved : false); // 1re visite = replié
-    btn.addEventListener('click', function () {
-      var now = !fold.classList.contains('lplr-open');
-      setOpen(fold, now); writeFold(key, now, true);
-      if (now) resizeChartsIn(inner);
+    setOpen(s.fold, saved != null ? saved : false); // 1re visite = replié
+    s.btn.addEventListener('click', function () {
+      var now = !s.fold.classList.contains('lplr-open');
+      setOpen(s.fold, now); writeFold(key, now, true);
+      if (now) resizeChartsIn(s.inner);
     });
-    folds.push(fold);
+    folds.push(s.fold);
+  }
+
+  // ── Repli d'un BLOC unique (concret/FAQ/notes) ──
+  function buildFold(target, idx) {
+    var label = target.getAttribute('data-lplr-fold') || 'Détail';
+    var key = target.getAttribute('data-lplr-key') || ('f' + idx);
+    var s = makeShell(label, key);
+    target.parentNode.insertBefore(s.fold, target);
+    s.inner.appendChild(target);
+    target.removeAttribute('data-lplr-fold');
+    wireShell(s, key);
+  }
+
+  // ── Repli au niveau SECTION : on garde la TÊTE (titre + intro), on replie tout le corps ──
+  function buildSectionFold(section, idx) {
+    var label = section.getAttribute('data-lplr-section') || 'Cette section';
+    var key = section.getAttribute('data-lplr-key') || ('sec' + idx);
+    var container = section.querySelector(':scope > .container') || section;
+    var head = container.querySelector(':scope > .section-head, :scope > .envelopes-intro') || container.firstElementChild;
+    if (!head) return;
+    var bodyEls = []; var n = head.nextElementSibling;
+    while (n) { bodyEls.push(n); n = n.nextElementSibling; }
+    if (!bodyEls.length) return;
+    var s = makeShell(label, key, 'lplr-section');
+    s.fold._lplrSection = section;
+    head.insertAdjacentElement('afterend', s.fold);
+    bodyEls.forEach(function (el) { s.inner.appendChild(el); });
+    wireShell(s, key);
+  }
+
+  function openSectionFor(id) {
+    var el = document.getElementById(id); if (!el) return;
+    folds.forEach(function (f) {
+      if (f.classList.contains('lplr-section') && f._lplrSection &&
+          (f._lplrSection === el || f._lplrSection.contains(el)) && !f.classList.contains('lplr-open')) {
+        setOpen(f, true); writeFold(f.dataset.lplrKeyState, true, true);
+        resizeChartsIn(f.querySelector('.lplr-fold-inner'));
+      }
+    });
   }
 
   function initFolds() {
+    // 1) sections d'abord (le corps, incl. les blocs marqués, passe DANS le repli de section)
+    [].slice.call(document.querySelectorAll('[data-lplr-section]')).forEach(buildSectionFold);
+    // 2) puis les blocs (concret/FAQ/notes) → repli imbriqué
     [].slice.call(document.querySelectorAll('[data-lplr-fold]')).forEach(buildFold);
+    // 3) navTo : cliquer une étape DÉPLIE la section cible puis scrolle
+    try {
+      var _navTo = window.navTo;
+      window.navTo = function (id) { try { openSectionFor(id); } catch (e) {} return (typeof _navTo === 'function') ? _navTo(id) : undefined; };
+    } catch (e) {}
   }
 
   // ── Bouton « Tout déplier / replier » + barre de progression dans la stepper ──

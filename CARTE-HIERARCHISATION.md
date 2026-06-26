@@ -1,36 +1,41 @@
-# Carte de hiérarchisation — « Légèreté » (divulgation progressive)
+# Carte de hiérarchisation — « Légèreté » (divulgation progressive, **niveau section**)
 
-> Principe : *essentiel = reste ouvert* · *détail = se replie* (jamais supprimé, juste plié).
-> Niveau « Moyen » : scroll éditorial continu conservé ; chaque section montre une surface compacte, le détail se tire à la demande.
-> **Constat clé** : le document était **déjà très replié** (cartes Notions, FAQ, accordéons d'allocation, `<details>`, quiz pas-à-pas, stepper). La lourdeur résiduelle venait des **rares blocs encore toujours ouverts**. Ce sont eux qu'on plie.
+> Principe : *ouverture de section = reste ouverte* · *corps de section = se replie* (jamais supprimé, juste plié).
+> **Correctif** : la 1ʳᵉ tentative ne repliait que quelques blocs de l'Allocation → le ressenti de lecture n'avait pas bougé. On replie désormais **le corps entier de chaque grande section de lecture**, par défaut. Résultat visé : une **pile compacte de têtes de section** à l'arrivée.
 
-## Par section
+## Règle mécanique appliquée (identique pour les 6 zones)
 
-| Section | RESTE OUVERT (essentiel / résumé) | SE REPLIE (détail) | Déjà replié avant ? |
-|---|---|---|---|
-| **Header / Hero / Synthèse** | tout (promesse, navigation) | — | — |
-| **Couverture Chap II** | tout (les 4 étapes) | — | — |
-| **#i-sec1 Notions** | titres des 6 `notion-card` (+ taglines) | corps de chaque notion | ✅ oui (`.notion-card.open`) — inchangé |
-| **Enveloppes (Fiscalité)** | les 3 cartes PEA/CTO/AV (titre + atouts clés + courtiers) | — (déjà compactes) | compactes |
-| **#i-sec2 Profil** | baromètre, quiz (1 question à la fois), carte-résultat (verdict, appétit/capacité, radar, rendement & risque) | « C'est quoi, ces chiffres ? » | ✅ oui (quiz pas-à-pas + `<details>`) — inchangé |
-| **#i-sec3 Allocation** | entête (nom, stats), macro-bandeau, bandeau enveloppes, **donut + légende**, détail d'allocation (accordéon), table de projection | **« Le pas-à-pas concret » (7 étapes)** → **NOUVEAU repli** · **« Les questions qu'on n'ose pas poser » (FAQ)** → **NOUVEAU repli** | partiellement (accordéon alloc, FAQ cards) |
-| **#i-sec4 Simulation** | sélecteur de mode, contrôles + résultats + **graphique** du mode actif | **2 `book-note`** (« Une nuance… », « À propos du meilleur ») → **NOUVEAU repli** | partiellement |
-| **Bilan / plan d'action** | = le pas-à-pas concret (replié, ci-dessus) | idem | — |
+Pour chaque section : on **garde visible son ouverture existante** — eyebrow + titre + intro (`.section-head` / `.envelopes-intro`). On **replie tout le reste du corps déjà présent** dans un dépliable **fermé par défaut**. Rien n'est réécrit ni retiré : le contenu est *déplacé* dans la région repliable (toujours dans le DOM).
 
-## Nouveaux replis posés (4)
-1. `concrete-box-rich` (i-sec3) → **« Le pas-à-pas concret pour passer à l'action — 7 étapes »** (replié par défaut)
-2. `faq-block` (i-sec3) → **« Les questions qu'on n'ose pas poser »** (replié)
-3. `book-note` guidé (i-sec4) → **« Une nuance sur le scénario pessimiste »** (replié)
-4. `book-note` comparateur (i-sec4) → **« À propos du « meilleur » rendement »** (replié)
+## Les 6 zones repliées au niveau section (toutes obligatoires)
 
-## Ce qui RESTE OUVERT par principe (jamais replié)
-- Tous les **chiffres clés** (entêtes, stats de profil, macro, projection).
-- La **carte-résultat** du profil et l'**allocation active** (donut + répartition) — les graphiques restent visibles (zéro bug de taille nulle).
-- Les contrôles interactifs (quiz, sliders, sélecteurs de mode/stratégie).
+| # | Section | Reste visible (ouverture) | Se replie (corps) | Clé |
+|---|---|---|---|---|
+| 1 | **#i-sec1 Notions** | Étape 1 · « Les notions essentielles » + intro | **les 6 `notion-card`** (le plus gros gain) | `sec-notions` |
+| 2 | **Enveloppes (Fiscalité)** | « Où mettre ton argent » + intro | les 3 cartes PEA · CTO · Assurance-vie | `sec-fisc` |
+| 3 | **#i-sec2 Profil** | Étape 2 · « Ton profil en cinq questions » + intro | baromètre + quiz + carte-résultat (radar, verdict…) | `sec-profil` |
+| 4 | **#i-sec3 Allocation** | Étape 3 · « Mon portefeuille personnalisé » + intro | macro, enveloppes, **donut**, accordéon d'alloc, projection, **pas-à-pas (7 étapes)**, **FAQ** | `sec-alloc` |
+| 5 | **#i-sec4 Simulation** | Étape 4 · « Simule la croissance… » + intro | sélecteur de mode, contrôles, **3 graphiques**, 2 `book-note` | `sec-simu` |
+| 6 | **Bilan / plan d'action** | = pas-à-pas concret (dans #i-sec3, replié ci-dessus) | idem | (via `sec-alloc`) |
 
-## Affordance
-- 1ʳᵉ visite = **tout compact** (replié). Bouton **« ⇕ Tout déplier / replier »** dans la stepper.
-- Les replis déjà existants (Notions, FAQ cards, accordéons) gardent leur comportement (inchangés).
+> Les 4 replis de **bloc** posés à la tentative précédente (pas-à-pas, FAQ, 2 `book-note`) restent en place : ils sont désormais **imbriqués** dans le repli de leur section (double repli — encore plus compact une fois la section ouverte).
+
+## Ce qui RESTE ouvert par principe (jamais replié)
+- **Header / Hero / Synthèse** et les **couvertures de chapitre** : navigation et promesse, on n'y touche pas.
+- Les **têtes** des 6 sections (eyebrow + titre + intro) : le lecteur garde la carte mentale du document.
+- La **stepper-bar** (navigation par sauts + scroll-spy) et la barre de progression.
+
+## Affordance & navigation
+- 1ʳᵉ visite = **tout replié** → pile de têtes de section. Chaque tête est suivie d'un **bouton de section** in-identité (liseré doré, libellé « Lire les 6 notions », « Répondre aux 5 questions », …).
+- Contrôle global **« ⇕ Tout déplier / Tout replier »** dans la stepper-bar — porte sur **tout le document** (sections + blocs), pas seulement l'allocation.
+- **Cliquer une étape** de la stepper (ou tout lien `navTo`) **déplie la section cible puis scrolle** — l'entrée par le questionnaire (« Refaire le quiz ») ouvre et scrolle l'étape Profil.
+- **Scroll-spy** conservé : l'étape active suit la section visible (calcul par `offsetTop`, robuste au repli).
+- Accordéon d'allocation (`alloc-merged-card`) **fermé par défaut** (les cartes rendues portent `collapsed`).
+
+## Mesure (preuve de l'allègement)
+À contenu identique, repli vs déployé :
+- **1er chargement (aucun profil)** : **2 608 px** vs 5 565 px → **−53 %**.
+- **Profil complété (allocation révélée)** : **3 836 px** vs 11 852 px → **−68 %**.
 
 ## Révisable
-Cette carte est faite pour être ajustée : déplacer un bloc « ouvert↔replié » = ajouter/retirer `data-lplr-fold` sur l'élément (le composant fait le reste). Aucun contenu n'est touché.
+Déplacer une zone « ouverte ↔ repliée » = ajouter/retirer `data-lplr-section="Libellé"` + `data-lplr-key="clé"` sur la `<section>` (le composant fait le reste). Aucun contenu n'est touché.

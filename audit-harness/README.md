@@ -19,7 +19,9 @@ node dump-engine.js      # dump des valeurs moteur (vérité terrain)
 
 # Comportement en vrai navigateur (Chromium pré-installé sous PLAYWRIGHT_BROWSERS_PATH) :
 npm install playwright-core
-node render-behavior.js  # 1er chargement = quiz · quiz complété = profil rendu · rechargement = retour au quiz  → 8/8
+node render-behavior.js  # entrée compacte · quiz complété = profil rendu · rechargement = retour au quiz  → 8/8
+node render-folds.js     # repli NIVEAU SECTION : compacité, accessibilité, navTo, charts, scroll-spy, persistance  → 20/20
+node measure-height.js   # preuve avant/après : hauteur repliée vs déployée (−53 % / −68 %)
 ```
 
 Surcharger la cible : `LPLR_FILE=/chemin/vers/fichier.html node verify.js`.
@@ -34,7 +36,9 @@ Surcharger la cible : `LPLR_FILE=/chemin/vers/fichier.html node verify.js`.
 | `struct-scan.js` | balayage structurel |
 | `dead-code.js` | déclarations inutilisées |
 | `dump-engine.js` | dump vérité terrain du moteur |
-| `render-behavior.js` | **rendu réel Chromium** : entrée par le questionnaire + flux quiz→profil→rechargement |
+| `render-behavior.js` | **rendu réel Chromium** : entrée compacte + flux quiz→profil→rechargement |
+| `render-folds.js` | **rendu réel Chromium** : repli niveau section (compacité, a11y, navTo, charts, scroll-spy, persistance) |
+| `measure-height.js` | **rendu réel Chromium** : mesure de hauteur repliée vs déployée (preuve d'allègement) |
 | `harness-output.txt` | sortie de référence (après correctifs) |
 
 > jsdom n'exécute pas de *layout* : le harnais prouve la cohérence des **valeurs et du câblage**, pas l'apparence pixel (ressort du brief design).
