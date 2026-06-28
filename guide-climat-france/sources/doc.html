@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: A4;
+    margin: 12mm 13mm 10mm 13mm;
+  }
+  * { box-sizing: border-box; }
+  html { -weasy-hyphens: auto; }
+  body {
+    font-family: "DejaVu Sans", sans-serif;
+    color: #1d2733;
+    font-size: 9.7pt;
+    line-height: 1.4;
+    margin: 0;
+  }
+  figure, .box, .keep, .fig-side { break-inside: avoid; }
+  .break { break-before: page; margin-top: 0 !important; padding-top: 0 !important; }
+  h1 {
+    font-size: 19.5pt;
+    line-height: 1.05;
+    margin: 0 0 1.4mm 0;
+    color: #0d2b45;
+    letter-spacing: -0.2px;
+  }
+  .accent { color: #b2182b; }
+  .subtitle {
+    font-size: 9.3pt;
+    color: #5a6b7b;
+    margin: 0 0 3mm 0;
+  }
+  .rule { height: 2.4px; background: linear-gradient(90deg,#2166ac,#f4d06a,#d6604d,#b2182b); border-radius: 2px; margin-bottom: 3mm;}
+  h2 {
+    font-size: 11.1pt;
+    color: #0d2b45;
+    margin: 3.6mm 0 1.5mm 0;
+    padding-bottom: 0.7mm;
+    border-bottom: 1px solid #d7dee5;
+  }
+  h2 .num {
+    display: inline-block;
+    background: #0d2b45; color: #fff;
+    width: 5.4mm; height: 5.4mm; line-height: 5.4mm;
+    text-align: center; border-radius: 50%;
+    font-size: 8.5pt; margin-right: 1.6mm;
+    position: relative; top: -0.6mm;
+  }
+  p { margin: 0 0 1.6mm 0; }
+  strong { color: #0d2b45; }
+  .hot { color: #b2182b; font-weight: bold; }
+  .cold { color: #2166ac; font-weight: bold; }
+
+  .box {
+    background: #eef4fb;
+    border-left: 3.5px solid #2166ac;
+    padding: 1.9mm 3mm;
+    border-radius: 2px;
+    margin-bottom: 1mm;
+  }
+  .box .lbl { font-size: 8.2pt; text-transform: uppercase; letter-spacing: .6px; color:#2166ac; font-weight:bold;}
+  .twocol { display: flex; gap: 4mm; }
+  .twocol > div { flex: 1; }
+
+  figure { margin: 1mm 0 0.5mm 0; }
+  figure img { width: 100%; display:block; }
+  figcaption { font-size: 7.3pt; color: #6b7886; margin-top: 0.6mm; line-height:1.25; }
+
+  .fig-side { display:flex; gap: 4mm; align-items: stretch; }
+  .fig-side .txt { flex: 1.32; }
+  .fig-side .img { flex: 1; }
+
+  ul { margin: 0.4mm 0 1.6mm 0; padding-left: 4.4mm; }
+  li { margin-bottom: 1.1mm; }
+
+  .keep {
+    background: #0d2b45; color: #eef4fb;
+    border-radius: 3px; padding: 6mm 5.5mm; margin-top: 9mm;
+  }
+  .keep h2 { color:#fff; border:none; margin:0 0 3.6mm 0; font-size:13pt;}
+  .keep ol { margin:0; padding-left: 5.2mm; }
+  .keep li { margin-bottom: 3.4mm; font-size: 10.4pt; }
+  .keep b { color:#ffd9a0; }
+
+  footer {
+    margin-top: 2.4mm;
+    border-top: 1px solid #d7dee5;
+    padding-top: 1.3mm;
+    font-size: 6.9pt; color: #74818e; line-height: 1.3;
+  }
+  .tag { font-size:7.2pt; font-weight:bold; padding: 0.2mm 1.4mm; border-radius:2px; vertical-align: middle;}
+  .obs { background:#d9ead3; color:#2c5d1f;}
+  .proj { background:#fde2cf; color:#a3461a;}
+</style>
+</head>
+<body>
+
+  <h1>Climat &amp; météo en France : <span class="accent">ce qui a changé</span></h1>
+  <p class="subtitle">Petit guide pour comprendre l'essentiel — France métropolitaine · données observées et trajectoire à 2100</p>
+  <div class="rule"></div>
+
+  <div class="box">
+    <span class="lbl">Le malentendu n°1 à lever d'abord</span>
+    <p style="margin:1mm 0 0 0;"><strong>Météo ≠ climat.</strong> La <strong>météo</strong>, c'est le temps qu'il fait, qui change d'un jour à l'autre — averse, coup de froid, canicule. Le <strong>climat</strong>, c'est la <strong>statistique de ce temps sur environ 30 ans</strong> (norme de l'Organisation météorologique mondiale). Conséquence : <strong>une vague de froid ponctuelle ne contredit pas le réchauffement</strong>, exactement comme une journée fraîche en plein été ne dit rien de la saison. On juge le climat sur la durée, pas sur une journée.</p>
+  </div>
+
+  <h2><span class="num">1</span>La tendance de fond : il fait plus chaud, et de plus en plus vite</h2>
+  <p>Depuis le début du XX<sup>e</sup> siècle, la température moyenne en France métropolitaine a augmenté d'environ <span class="hot">+1,7 °C</span> (Météo-France). C'est <strong>plus que la moyenne mondiale</strong> (de l'ordre de +1,2 °C) : comme tout le continent, la France se réchauffe <strong>environ deux fois plus vite que la planète</strong> — l'Europe est le continent qui se réchauffe le plus rapidement (Copernicus). Et le rythme <strong>s'accélère</strong> : la décennie 2015-2024 dépasse de <span class="hot">+2,2 °C</span> le début du siècle. La courbe ci-dessous, construite à partir de mesures réelles, le montre d'un coup d'œil.</p>
+
+  <figure>
+    <img src="fig_temp.svg" alt="Écart de température annuelle en France depuis 1900">
+    <figcaption><strong>Température en France métropolitaine, 1900–2020.</strong> Chaque barre = l'écart d'une année à la moyenne 1961–1990 (bleu = plus froid, rouge = plus chaud). La courbe sombre lisse les variations sur 11 ans pour révéler la tendance. Source : Berkeley Earth (moyennes nationales annuelles), réf. 1961–1990.</figcaption>
+  </figure>
+
+  <h2><span class="num">2</span>Des signes concrets, chiffrés et déjà là <span class="tag obs">OBSERVÉ</span></h2>
+  <div class="fig-side">
+    <div class="txt">
+      <ul>
+        <li><strong>Années records :</strong> <span class="hot">2022 est l'année la plus chaude</span> depuis 1900, avec 14,5 °C de moyenne. La quasi-totalité des années les plus chaudes jamais mesurées sont postérieures à 2000.</li>
+        <li><strong>Canicules plus fréquentes :</strong> on compte <strong>52 vagues de chaleur depuis 1947, dont les deux tiers après 2000</strong>. Le nombre de jours concernés a explosé (graphique).</li>
+        <li><strong>Nuits chaudes en hausse :</strong> les <strong>nuits tropicales</strong> (température qui ne descend pas sous 20 °C) se multiplient, surtout dans le Sud et les villes.</li>
+        <li><strong>Gel en recul :</strong> les <strong>jours de gel</strong> deviennent moins nombreux presque partout.</li>
+        <li><strong>Sols plus secs :</strong> les <strong>sécheresses des sols</strong> sont plus fréquentes et plus intenses, même quand il pleut autant sur l'année.</li>
+      </ul>
+    </div>
+    <div class="img">
+      <figure>
+        <img src="fig_canicules.svg" alt="Jours de vague de chaleur par an">
+        <figcaption><strong>Vagues de chaleur : +5×.</strong> Jours par an en moyenne. Source : Météo-France (indicateur thermique national).</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <h2 class="break" style="margin-top:5mm !important;"><span class="num">3</span>L'eau : pas plus de pluie, mais autrement répartie <span class="tag obs">OBSERVÉ</span></h2>
+  <p>Côté précipitations, le message est plus nuancé — et, honnêtement, <strong>plus incertain que pour la température</strong>. Le cumul de pluie <strong>sur l'année et à l'échelle du pays reste à peu près stable</strong>, mais il se <strong>redistribue</strong> : hivers souvent plus arrosés, étés plus secs, et <strong>épisodes intenses renforcés</strong> (pluies méditerranéennes, inondations) alternant avec des <strong>sécheresses plus longues</strong>. Autrement dit : autant d'eau au total, mais qui tombe de façon plus brutale et plus inégale.</p>
+
+  <h2 style="margin-top:8mm;"><span class="num">4</span>Où va-t-on ? Le cap retenu pour s'y préparer <span class="tag proj">PROJETÉ — SCÉNARIO</span></h2>
+  <p>Pour planifier l'adaptation, la France a adopté une <strong>trajectoire de référence (TRACC)</strong> : se préparer à <span class="hot">+4 °C en métropole à l'horizon 2100</span> (et de l'ordre de +2,7 °C dès 2050), ce qui correspond à un monde à +3 °C. <strong>Ce n'est pas une prévision certaine</strong> : c'est un <strong>scénario de planification</strong> prudent, inscrit dans le plan national d'adaptation (PNACC-3), pour dimensionner dès aujourd'hui villes, agriculture et réseaux. Le futur réel dépendra des émissions mondiales à venir.</p>
+
+  <div class="keep">
+    <h2>À retenir — en 3 phrases</h2>
+    <ol>
+      <li>La <b>météo</b> change chaque jour ; le <b>climat</b>, lui, s'est durablement réchauffé : <b>+1,7 °C en France depuis 1900</b>, et plus vite que la moyenne mondiale.</li>
+      <li>Les preuves sont <b>concrètes et mesurées</b> : canicules bien plus fréquentes, nuits chaudes en hausse, gel en recul, sols plus secs.</li>
+      <li>La France se prépare officiellement à <b>+4 °C en 2100</b> (scénario d'adaptation) ; la pluie, elle, reste la grande inconnue.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <strong>Sources (vérifiées) :</strong> Météo-France — indicateur thermique national, bilans climatiques 2022 &amp; 2024, suivi des vagues de chaleur depuis 1947 · Berkeley Earth — séries de température nationales (courbe, réf. 1961–1990, CC-BY-NC) · Copernicus / C3S (Europe, continent au réchauffement le plus rapide) · GIEC, 6<sup>e</sup> rapport (repère mondial) · ecologie.gouv.fr — Trajectoire de réchauffement de référence (TRACC) / PNACC-3.
+    &nbsp;|&nbsp; <span class="tag obs">OBSERVÉ</span> = mesuré, haute confiance &nbsp; <span class="tag proj">PROJETÉ</span> = dépend du scénario d'émissions.
+  </footer>
+
+</body>
+</html>
