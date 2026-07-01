@@ -539,20 +539,20 @@
 
   var edges = [
     // Agents → institutions
-    { from:"menages",    to:"etat",   label:"IR, TVA",       side:"r", curve:0 },
-    { from:"menages",    to:"secu",   label:"CSG, cotis.",   side:"r", curve:30 },
-    { from:"entreprises",to:"etat",   label:"IS, TVA",       side:"r", curve:-30 },
-    { from:"entreprises",to:"secu",   label:"Cotis. pat.",   side:"r", curve:0 },
+    { from:"menages",    to:"etat",   label:"IR, TVA",       side:"r", curve:0,  lx:248, ly:82 },
+    { from:"menages",    to:"secu",   label:"CSG, cotis.",   side:"r", curve:30, lx:256, ly:172 },
+    { from:"entreprises",to:"etat",   label:"IS, TVA",       side:"r", curve:-30, lx:243, ly:140 },
+    { from:"entreprises",to:"secu",   label:"Cotis. pat.",   side:"r", curve:0,  lx:248, ly:214 },
     // État → Sécu (subvention d'équilibre) et → Collectivités (dotations)
-    { from:"etat",       to:"secu",   label:"Subv. équilibre", side:"v", curve:0 },
-    { from:"etat",       to:"local",  label:"Dotations",     side:"v", curve:0 },
+    { from:"etat",       to:"secu",   label:"Subv. équilibre", side:"v", curve:0, lx:405, ly:186 },
+    { from:"etat",       to:"local",  label:"Dotations",     side:"v", curve:0,  lx:252, ly:300 },
     // Institutions → sorties
-    { from:"etat",       to:"services", label:"Services publics", side:"r", curve:0 },
-    { from:"secu",       to:"presta",   label:"Prestations",      side:"r", curve:0 },
-    { from:"local",      to:"servloc",  label:"Services locaux",  side:"r", curve:0 },
+    { from:"etat",       to:"services", label:"Services publics", side:"r", curve:0, lx:558, ly:94 },
+    { from:"secu",       to:"presta",   label:"Prestations",      side:"r", curve:0, lx:540, ly:236 },
+    { from:"local",      to:"servloc",  label:"Services locaux",  side:"r", curve:0, lx:540, ly:372 },
     // État ↔ Marchés (emprunt + service de la dette pointillé)
-    { from:"marches",    to:"etat",   label:"Emprunt OAT",   side:"lcurve", curve:0 },
-    { from:"etat",       to:"marches",label:"Intérêts + remb.", side:"dash", curve:0, dash:true }
+    { from:"marches",    to:"etat",   label:"Emprunt OAT",   side:"lcurve", curve:0, lx:250, ly:360 },
+    { from:"etat",       to:"marches",label:"Intérêts + remb.", side:"dash", curve:0, dash:true, lx:588, ly:462 }
   ];
 
   function anchor(n, where){
@@ -584,11 +584,11 @@
         p2 = { x:b.x, y:b.y+b.h*0.75 };
         c1 = { x:a.x-120, y:a.y+a.h/2 };
         c2 = { x:b.x-160, y:b.y+b.h*0.75 };
-      } else if (e.side === 'dash'){ // etat -> marches, service de la dette
-        p1 = { x:a.x+a.w*0.35, y:a.y+a.h };
-        p2 = { x:b.x+b.w*0.35, y:b.y };
-        c1 = { x:a.x+a.w*0.35, y:(p1.y+p2.y)/2 - 10 };
-        c2 = { x:b.x+b.w*0.35, y:(p1.y+p2.y)/2 + 10 };
+      } else if (e.side === 'dash'){ // etat -> marches : service de la dette, corridor inter-colonnes
+        p1 = { x:a.x+a.w-20, y:a.y+a.h*0.85 };
+        p2 = { x:640, y:b.y };
+        c1 = { x:600, y:250 };
+        c2 = { x:600, y:430 };
       } else { // default: right of a -> left of b
         p1 = anchor(a,'right');
         p2 = anchor(b,'left');
@@ -613,13 +613,18 @@
       }
       gE.appendChild(path);
 
-      // label at midpoint of curve (approx via cubic at t=0.5)
-      var t=0.5, mt=1-t;
-      var lx = mt*mt*mt*p1.x + 3*mt*mt*t*c1.x + 3*mt*t*t*c2.x + t*t*t*p2.x;
-      var ly = mt*mt*mt*p1.y + 3*mt*mt*t*c1.y + 3*mt*t*t*c2.y + t*t*t*p2.y;
+      // label : position explicite (lx/ly) sinon milieu de la courbe (t=0.5)
+      var lx, ly;
+      if (typeof e.lx === 'number'){
+        lx = e.lx; ly = e.ly;
+      } else {
+        var t=0.5, mt=1-t;
+        lx = mt*mt*mt*p1.x + 3*mt*mt*t*c1.x + 3*mt*t*t*c2.x + t*t*t*p2.x;
+        ly = (mt*mt*mt*p1.y + 3*mt*mt*t*c1.y + 3*mt*t*t*c2.y + t*t*t*p2.y) - 4;
+      }
       var lbl = document.createElementNS(SVGNS,'text');
       lbl.setAttribute('x', lx);
-      lbl.setAttribute('y', ly - 4);
+      lbl.setAttribute('y', ly);
       lbl.setAttribute('text-anchor','middle');
       lbl.setAttribute('class','edge-label');
       if (e.dash) lbl.setAttribute('fill','#E7ECF5');
